@@ -1,0 +1,28 @@
+name: Upstream drift
+on:
+  schedule: [{ cron: "0 6 * * 1" }]
+  workflow_dispatch:
+permissions: { issues: write, contents: read }
+jobs:
+  latest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Unpin and update
+        run: |
+          sed -i 's/topcoat = "=\([0-9.]*\)"/topcoat = "\1"/' Cargo.toml
+          cargo update
+          cargo tree -p topcoat --depth 0 | tee /tmp/ver.txt
+      - id: build
+        run: cargo build --workspace && cargo test --workspace
+        continue-on-error: true
+      - if: steps.build.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const ver = require('fs').readFileSync('/tmp/ver.txt','utf8').trim();
+            await github.rest.issues.create({ ...context.repo,
+              title: `Topcoat drift: labs fail against ${ver}`,
+              labels: ['drift'],
+              body: `Weekly build against latest crates failed: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}` });

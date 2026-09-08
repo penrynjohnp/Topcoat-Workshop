@@ -1,0 +1,12 @@
+name: Lab problem
+description: A step didn't work as described
+labels: [lab]
+body:
+  - type: input
+    attributes: { label: Lab and step, placeholder: "Lab 05, Step 3" }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: What happened, description: Paste the error or describe what you saw }
+    validations: { required: true }
+  - type: input
+    attributes: { label: Versions, placeholder: "rustc 1.9x, topcoat 0.7.0, OS" }

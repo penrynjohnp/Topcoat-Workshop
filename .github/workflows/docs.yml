@@ -1,0 +1,17 @@
+name: Docs
+on:
+  push: { branches: [main], paths: [docs/**, labs/**] }
+permissions: { contents: read, pages: write, id-token: write }
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    environment: { name: github-pages }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@v2
+        with: { tool: "mdbook,mdbook-linkcheck,mdbook-admonish,mdbook-mermaid" }
+      - run: mdbook-mermaid install docs && mdbook-admonish install docs
+      - run: mdbook build docs
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: docs/book/html }
+      - uses: actions/deploy-pages@v4

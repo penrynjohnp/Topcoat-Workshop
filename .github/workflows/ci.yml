@@ -1,0 +1,19 @@
+name: CI
+on:
+  push: { branches: [main] }
+  pull_request:
+jobs:
+  labs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with: { components: rustfmt, clippy }
+      - uses: Swatinem/rust-cache@v2
+      - name: Install topcoat-cli
+        run: cargo install topcoat-cli --version 0.7.0 --locked
+      - run: cargo fmt --all --check
+      - run: topcoat fmt --check
+      - run: cargo clippy --workspace -- -D warnings
+      - run: cargo build --workspace
+      - run: cargo test --workspace

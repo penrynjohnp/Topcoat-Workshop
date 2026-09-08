@@ -1,0 +1,8 @@
+/target
+**/target
+docs/book
+.azure/
+*.sqlite
+*.db
+.env
+.DS_Store

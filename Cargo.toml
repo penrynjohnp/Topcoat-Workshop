@@ -1,0 +1,16 @@
+[workspace]
+resolver = "2"
+members = [
+    "labs/lab-01-hello-topcoat/starter",
+    "labs/lab-01-hello-topcoat/solution",
+]
+
+# Single source of truth for versions — see COMPATIBILITY.md
+[workspace.dependencies]
+topcoat = "=0.7.0"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+
+[workspace.package]
+edition = "2024"
+license = "MIT"
+publish = false

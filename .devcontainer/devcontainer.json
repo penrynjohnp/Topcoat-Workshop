@@ -1,0 +1,16 @@
+{
+  "name": "Topcoat Workshop",
+  "image": "mcr.microsoft.com/devcontainers/rust:1-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+    "ghcr.io/azure/azure-dev/azd:0": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y sqlite3 && cargo install topcoat-cli --version 0.7.0 --locked && cargo install mdbook mdbook-admonish mdbook-mermaid --locked",
+  "forwardPorts": [3000, 8080],
+  "customizations": {
+    "vscode": {
+      "extensions": ["rust-lang.rust-analyzer", "tamasfe.even-better-toml", "GitHub.copilot", "ms-azuretools.vscode-bicep"]
+    }
+  }
+}

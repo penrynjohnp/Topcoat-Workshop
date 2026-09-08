@@ -1,0 +1,15 @@
+[book]
+title = "Topcoat Workshop"
+authors = ["John Plummer"]
+language = "en"
+src = "src"
+
+[preprocessor.admonish]
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+
+[output.html]
+git-repository-url = "https://github.com/penrynjohnp/Topcoat-Workshop"
+edit-url-template = "https://github.com/penrynjohnp/Topcoat-Workshop/edit/main/docs/{path}"
+
+[output.linkcheck]

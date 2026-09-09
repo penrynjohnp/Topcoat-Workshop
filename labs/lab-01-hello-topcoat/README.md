@@ -59,7 +59,7 @@ HOST=0.0.0.0 PORT=8080 topcoat dev
 - Run `topcoat fmt` after deliberately mangling the indentation inside `view!`.
 
 ## Troubleshooting
-- `topcoat: command not found` → `cargo install topcoat-cli --locked` and check `~/.cargo/bin` is on `PATH`.
+- `topcoat: command not found` → `cargo install topcoat-cli --version 0.7.0 --locked` and check `~/.cargo/bin` is on `PATH`.
 - Compile error mentioning a missing import → compare the `use topcoat::{...}` block against the solution; the facade crate re-exports through feature-gated modules.
 
 ## What's next

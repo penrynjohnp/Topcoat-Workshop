@@ -11,3 +11,11 @@ Topcoat is pre-1.0 and ships breaking changes. Every lab pins the versions below
 1. Bump versions in the workspace `Cargo.toml` (`[workspace.dependencies]`) and `scripts/setup.sh`.
 2. `cargo build --workspace && cargo test --workspace`.
 3. Fix breakages lab by lab; each fix PR adds a row here.
+
+## Docs toolchain
+
+The mdBook toolchain is pinned as a set in `.github/workflows/docs.yml` and `.devcontainer/devcontainer.json`. Bump all three together.
+
+| Tested | mdbook | mdbook-admonish | mdbook-mermaid | mdbook-linkcheck | Notes |
+|---|---|---|---|---|---|
+| 2026-09-09 | 0.4.52 | 1.20.0 | 0.15.0 | 0.7.7 | mdbook 0.5 changed the preprocessor JSON (null `[book]` fields, `items` replaces `sections`); admonish 1.20.0 cannot parse it. mermaid ≥ 0.16 requires mdbook 0.5. Move to 0.5 once admonish ships support; then unpin mermaid too. |

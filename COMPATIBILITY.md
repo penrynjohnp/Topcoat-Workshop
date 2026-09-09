@@ -4,7 +4,7 @@ Topcoat is pre-1.0 and ships breaking changes. Every lab pins the versions below
 
 | Tested | topcoat | topcoat-cli | toasty | Rust | Labs passing | Notes |
 |---|---|---|---|---|---|---|
-| 2026-09-09 | 0.7.0 | 0.7.0 | 0.10.0 | stable (1.98.0) | 01, 02, 03 | Lab 01 code from `getting_started.md` at tag `v0.7.0`. Note: `main` already differs (bare `Result` vs `Result<impl View>`); always read docs at the tag. CLI 0.7.0: no top-level `--version`, and `topcoat fmt` has no `--check` (CI formats then `git diff --exit-code`). Attribute render order is not guaranteed once an element takes a spread `Attributes`, so lab tests assert on the attribute set. |
+| 2026-09-09 | 0.7.0 | 0.7.0 | 0.10.0 | stable (1.98.0) | 01-04 | Lab 01 code from `getting_started.md` at tag `v0.7.0`. Note: `main` already differs (bare `Result` vs `Result<impl View>`); always read docs at the tag. CLI 0.7.0: no top-level `--version`, and `topcoat fmt` has no `--check` (CI formats then `git diff --exit-code`). Attribute render order is not guaranteed once an element takes a spread `Attributes`, so lab tests assert on the attribute set. |
 
 ## Upgrading
 

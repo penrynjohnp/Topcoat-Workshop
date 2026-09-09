@@ -7,12 +7,15 @@ members = [
     "labs/lab-02-view-macro/solution",
     "labs/lab-03-components/starter",
     "labs/lab-03-components/solution",
+    "labs/lab-04-routing/starter",
+    "labs/lab-04-routing/solution",
 ]
 
 # Single source of truth for versions — see COMPATIBILITY.md
 [workspace.dependencies]
 topcoat = "=0.7.0"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+serde = { version = "1", features = ["derive"] }
 
 [workspace.package]
 edition = "2024"

@@ -1,3 +1,3 @@
-# 04 Routing
+# Lab 04 — Manual routing, then module-based routing
 
-> Coming in a later phase — see [PLAN.md](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/PLAN.md).
+{{#include ../../../labs/lab-04-routing/README.md:3:}}

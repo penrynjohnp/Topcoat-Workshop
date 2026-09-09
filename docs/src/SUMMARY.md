@@ -8,6 +8,7 @@
 - [Request lifecycle](01-concepts/request-lifecycle.md)
 - [Views and markup](01-concepts/views-and-markup.md)
 - [Components and composition](01-concepts/components-and-composition.md)
+- [Routing and the request](01-concepts/routing-and-the-request.md)
 - [How $(...) reaches the browser](01-concepts/dual-expressions.md)
 - [Shards, procedures, live regions, htmx](01-concepts/reactivity-options.md)
 - [Locality of behaviour vs middleware](01-concepts/functions-not-middleware.md)

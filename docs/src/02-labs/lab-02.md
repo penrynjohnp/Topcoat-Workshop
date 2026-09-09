@@ -1,3 +1,3 @@
-# 02 The view! macro
+# Lab 02 — The view! macro
 
-> Coming in a later phase — see [PLAN.md](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/PLAN.md).
+{{#include ../../../labs/lab-02-view-macro/README.md:3:}}

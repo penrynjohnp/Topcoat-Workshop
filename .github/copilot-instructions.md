@@ -6,6 +6,9 @@ This repo is a learning workshop for Topcoat, not an application. Read `PLAN.md`
 - `labs/lab-NN-slug/README.md` follows the template in PLAN.md §4 exactly. `starter/` must always compile (TODOs marked `// TODO(lab-NN):`). `solution/` must have at least one integration test.
 - `docs/` is an mdBook. Code blocks in docs are `{{#include}}`d from `labs/*/solution` — never paste code into docs by hand.
 - `Cargo.toml` at the root is a workspace over every `starter/` and `solution/`. Use `[workspace.dependencies]` for `topcoat`, `topcoat-cli`, `toasty`, `tokio`; never pin a version inside a lab crate.
+- Every lab has a book page `docs/src/02-labs/lab-NN.md` containing only the title and
+  `{{#include ../../../labs/lab-NN-slug/README.md:3:}}`. Creating or renaming a lab
+  updates this page in the same commit.
 
 ## Topcoat facts to respect
 - Server-rendered. Never suggest browser storage, a client bundle, or a separate API layer for page data.

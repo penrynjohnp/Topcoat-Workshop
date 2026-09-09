@@ -882,6 +882,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "lab06-solution"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "tokio",
+ "topcoat",
+ "web-time",
+]
+
+[[package]]
+name = "lab06-starter"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "tokio",
+ "topcoat",
+ "web-time",
+]
+
+[[package]]
 name = "lettre"
 version = "0.11.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1554,6 +1574,7 @@ dependencies = [
  "topcoat-icon",
  "topcoat-icon-macro",
  "topcoat-mail",
+ "topcoat-mail-macro",
  "topcoat-router",
  "topcoat-router-macro",
  "topcoat-runtime",
@@ -1726,6 +1747,31 @@ dependencies = [
  "topcoat-core",
  "topcoat-router",
  "topcoat-view",
+]
+
+[[package]]
+name = "topcoat-mail-grammar"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b0c2004b4b56779d004d8470e8f6bd0402403bb7d9593ff0c58a8def45a2c75e"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+ "topcoat-core-grammar",
+ "topcoat-mail",
+ "topcoat-view-grammar",
+]
+
+[[package]]
+name = "topcoat-mail-macro"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0a0d9294011b4fcff68bf287ed05b2f83c2c6ecd1d43aa4b552f737393e2e0d9"
+dependencies = [
+ "quote",
+ "syn 2.0.119",
+ "topcoat-mail-grammar",
 ]
 
 [[package]]

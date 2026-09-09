@@ -11,13 +11,16 @@ members = [
     "labs/lab-04-routing/solution",
     "labs/lab-05-cx-memoize/starter",
     "labs/lab-05-cx-memoize/solution",
+    "labs/lab-06-auth-sessions-mail/starter",
+    "labs/lab-06-auth-sessions-mail/solution",
 ]
 
 # Single source of truth for versions — see COMPATIBILITY.md
 [workspace.dependencies]
-topcoat = "=0.7.0"
+topcoat = { version = "=0.7.0", features = ["mail"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 serde = { version = "1", features = ["derive"] }
+web-time = "1"
 
 [workspace.package]
 edition = "2024"

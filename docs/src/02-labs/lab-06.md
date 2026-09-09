@@ -1,3 +1,3 @@
-# 06 Cookies, sessions, mail
+# 06 Cookies, sessions, and functions—not middleware
 
-> Coming in a later phase — see [PLAN.md](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/PLAN.md).
+{{#include ../../../labs/lab-06-auth-sessions-mail/README.md:3:}}

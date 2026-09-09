@@ -8,3 +8,6 @@ publish.workspace = true
 [dependencies]
 topcoat.workspace = true
 tokio.workspace = true
+
+[dev-dependencies]
+tokio.workspace = true

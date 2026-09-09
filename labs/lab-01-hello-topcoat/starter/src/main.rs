@@ -1,3 +1,6 @@
+// `component` is unused until you write the `hello` component in step 4.
+#![allow(unused_imports)]
+
 use topcoat::{
     Result,
     router::{Router, RouterBuilderDiscoverExt, page},

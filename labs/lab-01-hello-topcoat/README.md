@@ -46,7 +46,7 @@ async fn hello(name: &str) -> Result<impl View> {
 }
 ```
 Then in `home`, replace the `<h1>` with `hello(name: "Topcoat")`. Components are invoked like functions, with named arguments, directly inside `view!`; `(name)` interpolates a Rust expression. Pages and components return `Result<impl View>` — the `Ok(...)` around `view!` is what lets a component bail out with an error (a 404, a redirect) instead of markup, which Lab 06 relies on.
-> ✅ **Checkpoint:** page shows **Hello, Topcoat!** Compare with `../solution/src/main.rs`.
+> ✅ **Checkpoint:** page shows **Hello, Topcoat!** Compare with `../solution/src/lib.rs`.
 
 ### Step 5 — Bind address
 ```bash

@@ -65,6 +65,35 @@ value, so clone it to use it twice.
 Pages, layouts, components, shards and procedures all have the request context in scope implicitly.
 In a plain function, name it first: `view! { cx => ... }`.
 
+## Components
+
+| You want | You write |
+|---|---|
+| Define one | `#[component] async fn card(slug: &str) -> Result<impl View>` |
+| Call one | `card(slug: "a1")` |
+| Pass children | `card(slug: "a1", <p>"note"</p>)` |
+| Accept children | `#[default] child: Child<'_>`, rendered as `(child)` |
+| Accept caller attributes | `#[default] attrs: Attributes`, spread as `<article (attrs)>` |
+| Merge caller classes | `class=(class!("card", attrs.remove("class")))` |
+| Optional prop | `#[default] tone: Tone` / `#[default(80)] max: usize` |
+| Convert on the way in | `#[into] label: String` |
+| Ask for the request context | `cx: &Cx` |
+| Two different `view!` returns, or recursion | `.boxed()` from `ViewExt` |
+
+`key` is reserved on component calls and cannot be a parameter name.
+
+A component owning the document, via child content:
+
+```rust
+{{#include ../../../labs/lab-03-components/solution/src/lib.rs:layout}}
+```
+
+A component that fetches what it renders, accepts caller attributes, and offers a child slot:
+
+```rust
+{{#include ../../../labs/lab-03-components/solution/src/lib.rs:berth_card}}
+```
+
 ## Gotchas
 
 - Bare words are Rust. Literal text needs quotes.
@@ -73,3 +102,5 @@ In a plain function, name it first: `view! { cx => ... }`.
 - `for berth in berths` moves the collection, exactly as it does in ordinary Rust.
 - `true` renders a present, empty attribute; `false` and `None` remove it.
 - Views are lazy: nothing renders until the view becomes a response or is interpolated into one.
+- Spreading an `Attributes` consumes it, and puts that element's attributes in a map — **render order
+  is then not guaranteed**. Assert on the attribute set, not on an exact string.

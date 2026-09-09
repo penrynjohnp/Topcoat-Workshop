@@ -1,3 +1,3 @@
-# 03 Components
+# Lab 03 — Components and composition
 
-> Coming in a later phase — see [PLAN.md](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/PLAN.md).
+{{#include ../../../labs/lab-03-components/README.md:3:}}

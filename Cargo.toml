@@ -3,6 +3,8 @@ resolver = "2"
 members = [
     "labs/lab-01-hello-topcoat/starter",
     "labs/lab-01-hello-topcoat/solution",
+    "labs/lab-02-view-macro/starter",
+    "labs/lab-02-view-macro/solution",
 ]
 
 # Single source of truth for versions — see COMPATIBILITY.md

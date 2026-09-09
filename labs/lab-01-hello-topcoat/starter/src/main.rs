@@ -6,7 +6,9 @@ use topcoat::{
 
 #[tokio::main]
 async fn main() {
-    topcoat::start(Router::builder().discover().build()).await.unwrap();
+    topcoat::start(Router::builder().discover().build())
+        .await
+        .unwrap();
 }
 
 #[page("/")]
@@ -15,8 +17,7 @@ async fn home() -> Result<impl View> {
         <!DOCTYPE html>
         <html>
             <head>
-                <title>"Hello world"</title>
-                // TODO(lab-01): add topcoat::dev::script() here so the page hot-reloads under `topcoat dev`
+                <title>"Hello world"</title> // TODO(lab-01): add topcoat::dev::script() here so the page hot-reloads under `topcoat dev`
             </head>
             <body>
                 // TODO(lab-01): replace this with the `hello` component, passing your name

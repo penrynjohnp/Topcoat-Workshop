@@ -6,7 +6,9 @@ use topcoat::{
 
 #[tokio::main]
 async fn main() {
-    topcoat::start(Router::builder().discover().build()).await.unwrap();
+    topcoat::start(Router::builder().discover().build())
+        .await
+        .unwrap();
 }
 
 #[page("/")]
@@ -18,9 +20,7 @@ async fn home() -> Result<impl View> {
                 <title>"Hello world"</title>
                 topcoat::dev::script()
             </head>
-            <body>
-                hello(name: "Topcoat")
-            </body>
+            <body>hello(name: "Topcoat")</body>
         </html>
     })
 }
@@ -28,6 +28,10 @@ async fn home() -> Result<impl View> {
 #[component]
 async fn hello(name: &str) -> Result<impl View> {
     Ok(view! {
-        <h1>"Hello, " (name) "!"</h1>
+        <h1>
+            "Hello, "
+            (name)
+            "!"
+        </h1>
     })
 }

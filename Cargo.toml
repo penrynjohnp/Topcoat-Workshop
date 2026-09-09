@@ -5,6 +5,8 @@ members = [
     "labs/lab-01-hello-topcoat/solution",
     "labs/lab-02-view-macro/starter",
     "labs/lab-02-view-macro/solution",
+    "labs/lab-03-components/starter",
+    "labs/lab-03-components/solution",
 ]
 
 # Single source of truth for versions — see COMPATIBILITY.md

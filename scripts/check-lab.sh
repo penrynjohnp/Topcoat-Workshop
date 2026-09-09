@@ -8,3 +8,11 @@ cargo build --manifest-path "$dir/starter/Cargo.toml"
 cargo build --manifest-path "$dir/solution/Cargo.toml"
 cargo test  --manifest-path "$dir/solution/Cargo.toml"
 cargo clippy --manifest-path "$dir/solution/Cargo.toml" -- -D warnings
+
+page="docs/src/02-labs/lab-${n}.md"
+if [ ! -f "$page" ] || ! grep -q '{{#include' "$page"; then
+  title=$(head -1 "$dir/README.md" | sed 's/^# //')
+  printf '# %s\n\n{{#include ../../../%s/README.md:3:}}\n' "$title" "$dir" > "$page"
+  echo "📝 wrote $page — remember to commit it"
+fi
+

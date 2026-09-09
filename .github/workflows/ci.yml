@@ -7,6 +7,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Every lab has a real book page
+        run: |
+          for d in labs/lab-*/; do
+            n=$(basename "$d" | cut -d- -f2)
+            p="docs/src/02-labs/lab-$n.md"
+            grep -q '{{#include' "$p" 2>/dev/null || { echo "::error::$p missing or still a stub"; exit 1; }
+          done
       - name: AGENTS.md and copilot-instructions.md must match
         run: diff -q AGENTS.md .github/copilot-instructions.md
       - uses: dtolnay/rust-toolchain@stable

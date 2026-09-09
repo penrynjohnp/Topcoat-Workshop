@@ -13,7 +13,10 @@ jobs:
       - name: Install topcoat-cli
         run: cargo install topcoat-cli --version 0.7.0 --locked
       - run: cargo fmt --all --check
-      - run: topcoat fmt --check
+      - name: topcoat fmt (no --check flag; fail if it changes anything)
+        run: |
+          topcoat fmt $(git ls-files 'labs/**/*.rs' 'slipway/**/*.rs')
+          git diff --exit-code -- '*.rs'
       - run: cargo clippy --workspace -- -D warnings
       - run: cargo build --workspace
       - run: cargo test --workspace

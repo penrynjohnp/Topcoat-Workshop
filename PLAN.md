@@ -166,7 +166,8 @@ Link to docs/01-concepts page. Two-paragraph summary inline so the lab stands al
 ## Steps
 ### Step 1 — ...
 Instruction. Code block with the exact change. Explanation of *why*.
-> ✅ **Checkpoint:** what you should see. Command to verify.
+> [!NOTE]
+> **Checkpoint:** what you should see. Command to verify.
 
 ### Step 2 — ...
 
@@ -190,7 +191,7 @@ Rules for lab quality:
 
 ## 5. Documentation strategy
 
-**Tooling:** mdBook, published to GitHub Pages by `docs.yml`. It's the Rust ecosystem's native doc format, learners already know the UI from *The Book*, and it's just markdown so Copilot and PRs work naturally. Add `mdbook-linkcheck` and `mdbook-admonish` (for the ✅/⚠️ callouts).
+**Tooling:** mdBook, published to GitHub Pages by `docs.yml`. It's the Rust ecosystem's native doc format, learners already know the UI from *The Book*, and it's just markdown so Copilot and PRs work naturally. Callouts use mdBook 0.5's built-in GitHub-style alerts (`> [!NOTE]`, `> [!WARNING]`), which render the same way on GitHub, so no callout plugin is needed. Add `mdbook-linkcheck2` for link checking.
 
 **Four doc types, kept deliberately separate** (Diátaxis):
 

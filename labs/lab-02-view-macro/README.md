@@ -37,7 +37,8 @@ that returns a `Vec<Berth>` literal. Everything is markup — no database, no re
 
 Note the shape of the markup: `<!DOCTYPE html>`, a real `<html>`/`<head>`/`<body>` tree, and every
 piece of literal text in quotes.
-> ✅ **Checkpoint:** http://127.0.0.1:3000 and http://127.0.0.1:3000/berths both render, with a nav
+> [!NOTE]
+> **Checkpoint:** http://127.0.0.1:3000 and http://127.0.0.1:3000/berths both render, with a nav
 > and a footer on each. The berth list shows a single hard-coded card.
 
 ### Step 2 — Interpolate the data
@@ -53,7 +54,8 @@ In `berth_list`, replace the hard-coded card's text and URL with expressions:
 (For now, add `let berth = &berths[0];` above the `view!` so it compiles; Step 3 removes it.)
 `(expr)` interpolates in child position *and* in attribute-value position — same syntax, and both
 escape their output, so a vessel called `Rock & Roll` renders safely without you thinking about it.
-> ✅ **Checkpoint:** the single card now reads "Berth A1", "8m", and links to `/berths/a1`.
+> [!NOTE]
+> **Checkpoint:** the single card now reads "Berth A1", "8m", and links to `/berths/a1`.
 
 ### Step 3 — Render the list with `for`
 Delete the `let berth = ...` line and wrap the `<li>` in a loop:
@@ -80,7 +82,8 @@ for (href, label) in NAV {
 
 Delete the `let _ = ...` lines the starter used to keep the unused arguments quiet. `for` in `view!`
 is Rust's `for`: `berths` is moved into the loop, so if you need it afterwards, iterate `&berths`.
-> ✅ **Checkpoint:** all four berths render, and the nav still shows Home and Berths.
+> [!NOTE]
+> **Checkpoint:** all four berths render, and the nav still shows Home and Berths.
 
 ### Step 4 — Choose markup with `if` and `match`
 Give `status_badge` a `match` over the status, so each variant picks its own label:
@@ -111,7 +114,8 @@ if berths.is_empty() {
     </ul>
 }
 ```
-> ✅ **Checkpoint:** A1 shows "Occupied by Lady Jane" and B7 shows "Maintenance". Temporarily change
+> [!NOTE]
+> **Checkpoint:** A1 shows "Occupied by Lady Jane" and B7 shows "Maintenance". Temporarily change
 > `berths()` to `vec![]` and the page reads "No berths yet." — then change it back.
 
 ### Step 5 — The conditional attribute
@@ -138,7 +142,8 @@ if href == current_path {
     data-current=""
 }
 ```
-> ✅ **Checkpoint:** view source on `/`. The Home link has `aria-current="page"` and the Berths link
+> [!NOTE]
+> **Checkpoint:** view source on `/`. The Home link has `aria-current="page"` and the Berths link
 > has no `aria-current` at all. On `/berths` it is the other way round.
 
 ### Step 6 — Class lists with `class!`
@@ -154,7 +159,8 @@ Do the same for the badges, giving each `match` arm its own modifier:
 `None`, an empty string, or one whose condition is false — contributes neither text nor a separator,
 so you never get the double spaces that string concatenation produces. If every entry is absent, the
 `class` attribute is dropped altogether.
-> ✅ **Checkpoint:** on `/`, the Home link's class is exactly `nav-link nav-link-active` and the
+> [!NOTE]
+> **Checkpoint:** on `/`, the Home link's class is exactly `nav-link nav-link-active` and the
 > Berths link's is exactly `nav-link` — no trailing space.
 
 ### Step 7 — Attribute sets with `attributes!`
@@ -172,7 +178,8 @@ The berth card needs a few `data-*` attributes. Build them as a value and spread
 value: ordinary Rust data you can build in a helper, insert into, pass through several layers, and
 finally spread into an element. Lab 03 uses this to forward caller-supplied attributes through a
 component.
-> ✅ **Checkpoint:** view source — each `<article>` carries `data-berth` and `data-length` with the
+> [!NOTE]
+> **Checkpoint:** view source — each `<article>` carries `data-berth` and `data-length` with the
 > right values.
 
 ### Step 8 — `topcoat fmt`
@@ -187,7 +194,8 @@ git diff
 `cargo fmt` leaves `view!` bodies alone — to rustfmt they are opaque token trees. `topcoat fmt` is
 the formatter that understands them, so run both. Note that CLI 0.7.0 has no `--check` flag, which
 is why CI formats and then runs `git diff --exit-code` (see `COMPATIBILITY.md`).
-> ✅ **Checkpoint:** `git diff` shows your markup restored to the canonical layout. Compare your file
+> [!NOTE]
+> **Checkpoint:** `git diff` shows your markup restored to the canonical layout. Compare your file
 > with `../solution/src/lib.rs`, then run `../../../scripts/check-lab.sh 02` for the full build,
 > test and lint.
 

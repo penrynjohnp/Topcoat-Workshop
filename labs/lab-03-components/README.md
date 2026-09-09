@@ -41,7 +41,8 @@ are. Two things are wrong with it, though:
 1. `home` and `berths_page` each carry their own copy of `<!DOCTYPE html>`, `<head>`, `<header>` and
    the calls to `site_nav`/`site_footer`. Adding a third page means copying it a third time.
 2. The berth card's `<article>` is trapped inside `berth_list`. Nothing else can show a berth.
-> ✅ **Checkpoint:** you can point at both problems in the file. `grep -c "<!DOCTYPE html>" src/main.rs`
+> [!NOTE]
+> **Checkpoint:** you can point at both problems in the file. `grep -c "<!DOCTYPE html>" src/main.rs`
 > prints `2`.
 
 ### Step 2 — A `layout` component with child content
@@ -90,7 +91,8 @@ async fn home() -> Result<impl View> {
 `#[default]` is what makes `child` optional; without it, every caller would have to pass children.
 Note that `current_path` is still a prop threaded through `layout` into `site_nav` — Lab 05 replaces
 that with a `cx: &Cx` parameter and `uri(cx).path()`.
-> ✅ **Checkpoint:** `grep -c "<!DOCTYPE html>" src/main.rs` now prints `1`, and both pages still
+> [!NOTE]
+> **Checkpoint:** `grep -c "<!DOCTYPE html>" src/main.rs` now prints `1`, and both pages still
 > render with nav and footer.
 
 ### Step 3 — Extract `berth_card`
@@ -112,7 +114,8 @@ async fn berth_card(berth: &Berth) -> Result<impl View> {
 ```
 
 `berth_list`'s loop body becomes `<li>berth_card(berth: &berth)</li>`.
-> ✅ **Checkpoint:** `/berths` looks exactly as it did before. Extracting a component is not supposed
+> [!NOTE]
+> **Checkpoint:** `/berths` looks exactly as it did before. Extracting a component is not supposed
 > to change the output.
 
 ### Step 4 — Let the card fetch its own berth
@@ -150,7 +153,8 @@ This is the locality-of-behaviour trade. The card now owns its query *and* its n
 any caller with a slug can render one. In exchange, a list of twenty berths performs twenty lookups —
 that is the N+1 you will meet properly in Lab 10, and `#[memoize]` in Lab 05 is how Topcoat takes the
 sting out of it.
-> ✅ **Checkpoint:** `berths_page` now reads `layout(title: "Berths", current_path: "/berths", berth_list())`
+> [!NOTE]
+> **Checkpoint:** `berths_page` now reads `layout(title: "Berths", current_path: "/berths", berth_list())`
 > — no data passed anywhere — and `/berths` is unchanged.
 
 ### Step 5 — A second page that reuses the card
@@ -167,7 +171,8 @@ async fn featured_berth_page() -> Result<impl View> {
 
 (Add `const FEATURED: &str = "a1";`, and call `berth_card(slug: FEATURED)` on the home page too. A
 real `/berths/{slug}` route needs path parameters, which is Lab 04.)
-> ✅ **Checkpoint:** view source on `/` and on `/berths/featured`. The `<article>` for berth A1 is the
+> [!NOTE]
+> **Checkpoint:** view source on `/` and on `/berths/featured`. The `<article>` for berth A1 is the
 > same markup on both — same classes, same `data-` attributes, same children. Run
 > `../../../scripts/check-lab.sh 03`; the solution's test asserts exactly this.
 
@@ -192,7 +197,8 @@ async fn berth_card(slug: &str, #[default] attrs: Attributes) -> Result<impl Vie
 Taking `class` out of the collection first and passing it to `class!` as an entry *merges* the
 caller's classes with the card's own — spreading it directly would replace `berth-card` instead. Call
 it from the detail page with `attrs: attributes! { class="berth-card-detail" data-detail="" }`.
-> ✅ **Checkpoint:** the detail card's class is `berth-card berth-card-detail` (in some order) and it
+> [!NOTE]
+> **Checkpoint:** the detail card's class is `berth-card berth-card-detail` (in some order) and it
 > carries `data-detail`; the cards on `/berths` carry neither.
 
 ### Step 7 — A slot on the card
@@ -216,7 +222,8 @@ berth_card(
     <p class="berth-note">"Ask at the office about long-stay rates."</p>
 )
 ```
-> ✅ **Checkpoint:** the note appears on that one card only. Every other card is untouched, and the
+> [!NOTE]
+> **Checkpoint:** the note appears on that one card only. Every other card is untouched, and the
 > Step 5 checkpoint still holds.
 
 ### Step 8 — Optional and converted props
@@ -230,7 +237,8 @@ Try the remaining parameter attributes on `berth_card`:
 
 Then try adding a parameter called `key` and read the compile error: `key:` is reserved on component
 calls for keying an invocation's identity.
-> ✅ **Checkpoint:** `cargo build` is clean, and you can explain when you would reach for each of the
+> [!NOTE]
+> **Checkpoint:** `cargo build` is clean, and you can explain when you would reach for each of the
 > three attributes. Compare with `../solution/src/lib.rs`.
 
 ## Stretch goals

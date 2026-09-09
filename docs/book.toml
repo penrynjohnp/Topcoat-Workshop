@@ -6,9 +6,6 @@ language = "en"
 text-direction = "ltr"
 src = "src"
 
-[preprocessor.admonish]
-command = "mdbook-admonish"
-assets_version = "3.1.0" # do not edit: managed by `mdbook-admonish install`
 [preprocessor.mermaid]
 command = "mdbook-mermaid"
 
@@ -16,7 +13,9 @@ command = "mdbook-mermaid"
 git-repository-url = "https://github.com/penrynjohnp/Topcoat-Workshop"
 edit-url-template = "https://github.com/penrynjohnp/Topcoat-Workshop/edit/main/docs/{path}"
 additional-js = ["mermaid.min.js", "mermaid-init.js"]
-additional-css = ["./mdbook-admonish.css"]
 
-[output.linkcheck]
+# Callouts use mdBook 0.5's built-in GitHub-style alerts (`> [!NOTE]`), so no
+# admonish preprocessor is needed.
+
+[output.linkcheck2]
 optional = true   # installed in CI; local builds work without it

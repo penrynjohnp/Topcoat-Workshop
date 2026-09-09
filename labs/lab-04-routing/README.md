@@ -48,7 +48,8 @@ fn router() -> Router {
 (Keep this first version simple; Step 5 adds the router-level layout and Step 6 replaces the manual
 entries with module discovery.) Manual registration is useful when integrating legacy routes or when
 you want registration order and ownership to be obvious.
-> ✅ **Checkpoint:** `/`, `/berths`, and `/berths/featured` still render. The router has no `.discover()`
+> [!NOTE]
+> **Checkpoint:** `/`, `/berths`, and `/berths/featured` still render. The router has no `.discover()`
 > call and every page appears in the builder by name.
 
 ### Step 2 — Put request data in `Cx`
@@ -65,7 +66,8 @@ async fn request_info(cx: &Cx) -> Result<impl View> {
 
 `Cx` is request-scoped, not global application state. Lab 05 goes deeper into app context and
 memoization; here it is simply how a handler reads values selected by the router.
-> ✅ **Checkpoint:** `/request-info` prints `/request-info`. Remove the temporary page after verifying
+> [!NOTE]
+> **Checkpoint:** `/request-info` prints `/request-info`. Remove the temporary page after verifying
 > it, or leave it while completing the lab.
 
 ### Step 3 — Add `/berths/{id}`
@@ -87,7 +89,8 @@ For the final module form, the path string disappears. The file `app/berths/id.r
 module: `path_param!(id)` turns its segment into `{id}`, so its `#[page]` serves `/berths/{id}`. The
 parameter is a decoded `&str`, which fits Slipway's existing slugs (`a1`, `b7`). It is deliberately
 not a function argument; handler arguments are reserved for `Cx` and body extractors.
-> ✅ **Checkpoint:** `/berths/a1` returns the A1 card and contains `Lady Jane`. `/berths/a%201` is
+> [!NOTE]
+> **Checkpoint:** `/berths/a1` returns the A1 card and contains `Lady Jane`. `/berths/a%201` is
 > decoded before lookup. `/berths/does-not-exist` returns 404 instead of panicking.
 
 ### Step 4 — Add the JSON health route
@@ -107,7 +110,8 @@ async fn health() -> Result<Json<Health>> {
 Under the module router, `app/api/health.rs` derives `GET /api/health`. `Json<T>` is explicit: a
 plain string would be a text response, while `Json` serializes the value and sets
 `Content-Type: application/json`.
-> ✅ **Checkpoint:** `curl -i http://127.0.0.1:3000/api/health` shows `200`,
+> [!NOTE]
+> **Checkpoint:** `curl -i http://127.0.0.1:3000/api/health` shows `200`,
 > `content-type: application/json`, and `{"status":"ok"}`.
 
 ### Step 5 — Replace the component shell with a router layout
@@ -132,7 +136,8 @@ async fn root_layout(cx: &Cx, slot: Slot<'_>) -> Result<impl View> {
 Put the layout in `app/_marketing.rs`. The leading underscore makes it a group: it contributes no URL
 segment but still scopes the layout to its descendants. The page body moves into `(slot)`, and the
 existing `site_nav`, `berth_card` and `site_footer` components remain reusable inside pages.
-> ✅ **Checkpoint:** `/`, `/berths`, and `/berths/a1` all have one shared document shell, while the
+> [!NOTE]
+> **Checkpoint:** `/`, `/berths`, and `/berths/a1` all have one shared document shell, while the
 > page-specific content remains different.
 
 ### Step 6 — Switch to `module_router!`
@@ -163,7 +168,8 @@ src/
 
 `_marketing` is omitted from served URLs; `berths` contributes `/berths`; `id` becomes `{id}` because
 of `path_param!(id)`; `api/health` contributes `/api/health`. Function names do not determine URLs.
-> ✅ **Checkpoint:** remove all manual `.page(...)`, `.layout(...)` and `.route(...)` calls from the
+> [!NOTE]
+> **Checkpoint:** remove all manual `.page(...)`, `.layout(...)` and `.route(...)` calls from the
 > final router. `cargo test -p lab04-solution` still finds every route.
 
 ### Step 7 — Test the route table, not just the markup
@@ -177,7 +183,8 @@ cargo test -p lab04-solution --test pages
 
 Read the test output and connect each assertion to a route: the slug page, unknown slug, and JSON
 health response. This is the checkpoint for the complete module tree.
-> ✅ **Checkpoint:** the integration test covers `/berths/{id}` and `GET /api/health`, and all tests pass
+> [!NOTE]
+> **Checkpoint:** the integration test covers `/berths/{id}` and `GET /api/health`, and all tests pass
 > with no manual route registration in the test.
 
 ## Stretch goals

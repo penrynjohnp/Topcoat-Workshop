@@ -17,47 +17,51 @@ Memoization is the next step: when multiple components need the same data during
 Start from the Lab 04 solution. Give the app a single `AppState` value that tracks a load counter and is shared for the lifetime of the router:
 
 ```rust
-{{#include ../../../labs/lab-05-cx-memoize/solution/src/shared.rs:app-state}}
+{{#include solution/src/shared.rs:app-state}}
 ```
 
 Register it once on the router so every handler sees the same state:
 
 ```rust
-{{#include ../../../labs/lab-05-cx-memoize/solution/src/app.rs:app-context-router}}
+{{#include solution/src/app.rs:app-context-router}}
 ```
 
 The key idea is that app context is keyed by type, so `app_context::<AppState>(cx)` is the stable lookup point for shared values such as config, pools, or instrumentation.
-> ✅ **Checkpoint:** the app still renders `/`, `/berths`, and `/berths/a1` successfully after the router starts with `AppState::new()`.
+> [!NOTE]
+> **Checkpoint:** the app still renders `/`, `/berths`, and `/berths/a1` successfully after the router starts with `AppState::new()`.
 
 ### Step 2 — Move berth loading behind `Cx`
 Create a memoized request helper that reads the shared app state and increments a counter when a berth is loaded:
 
 ```rust
-{{#include ../../../labs/lab-05-cx-memoize/solution/src/shared.rs:memoized-loader}}
+{{#include solution/src/shared.rs:memoized-loader}}
 ```
 
 This is where the request-scoped `Cx` becomes important: the function can read both the current request and the long-lived app state in one place. The first call in a request computes the value; later calls with the same args reuse the memoized result without re-running the load.
-> ✅ **Checkpoint:** `cargo test -p lab05-solution --test pages` shows the count staying at `1` even though multiple parts of the page ask for the same berth.
+> [!NOTE]
+> **Checkpoint:** `cargo test -p lab05-solution --test pages` shows the count staying at `1` even though multiple parts of the page ask for the same berth.
 
 ### Step 3 — Render the same berth in three components
 Split the detail page into three sibling components, each asking for the same slug:
 
 ```rust
-{{#include ../../../labs/lab-05-cx-memoize/solution/src/app/_marketing/berths/id.rs:memoized-components}}
+{{#include solution/src/app/_marketing/berths/id.rs:memoized-components}}
 ```
 
 Once the page renders, every component reads the same `Berth` record from a single memoized fetch. Notice how the logic stays local to the code that needs it; no middleware or manual cache is required.
-> ✅ **Checkpoint:** the page still renders the same A1 berth details, but the load count remains `1` because the memoized function is reused across all three components.
+> [!NOTE]
+> **Checkpoint:** the page still renders the same A1 berth details, but the load count remains `1` because the memoized function is reused across all three components.
 
 ### Step 4 — Prove the memoization behavior in an integration test
 Use the same in-process routing test style as Lab 04, but hold onto a shared `AppState` instance for the router. Then perform one request and assert the counter after render:
 
 ```rust
-{{#include ../../../labs/lab-05-cx-memoize/solution/tests/pages.rs:memoize-integration-test}}
+{{#include solution/tests/pages.rs:memoize-integration-test}}
 ```
 
 The test is the proof, not the behavior of a mock. It hits the real router, renders the real page, and confirms that the exact same `load_berth` work was deduplicated inside one request.
-> ✅ **Checkpoint:** `cargo test -p lab05-solution --test pages` passes and the assertion reads `1`.
+> [!NOTE]
+> **Checkpoint:** `cargo test -p lab05-solution --test pages` passes and the assertion reads `1`.
 
 ## Stretch goals
 - Move the counter into a second app-context value and log the request path in the same loader.

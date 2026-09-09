@@ -14,8 +14,9 @@ Topcoat is pre-1.0 and ships breaking changes. Every lab pins the versions below
 
 ## Docs toolchain
 
-The mdBook toolchain is pinned as a set in `.github/workflows/docs.yml` and `.devcontainer/devcontainer.json`. Bump all three together.
+The mdBook toolchain is pinned as a set in `.github/workflows/docs.yml` and `.devcontainer/devcontainer.json`. Bump them together.
 
-| Tested | mdbook | mdbook-admonish | mdbook-mermaid | mdbook-linkcheck | Notes |
-|---|---|---|---|---|---|
-| 2026-09-09 | 0.4.52 | 1.20.0 | 0.15.0 | 0.7.7 | mdbook 0.5 changed the preprocessor JSON (null `[book]` fields, `items` replaces `sections`); admonish 1.20.0 cannot parse it. mermaid ≥ 0.16 requires mdbook 0.5. Move to 0.5 once admonish ships support; then unpin mermaid too. |
+| Tested | mdbook | mdbook-mermaid | mdbook-linkcheck2 | Notes |
+|---|---|---|---|---|
+| 2026-09-09 | 0.5.4 | 0.17.1 | 0.13.0 | Callouts are mdBook 0.5's built-in GitHub-style alerts (`> [!NOTE]`), so `mdbook-admonish` is no longer a dependency — it was the only thing holding the book on 0.4. `mdbook-linkcheck` 0.7.7 version-checks for mdbook 0.4.x and refuses to run under 0.5, so we use the maintained `mdbook-linkcheck2` fork; its config table is `[output.linkcheck2]` and it has no `taiki-e/install-action` manifest, so CI `cargo install`s it. HTML output stays at `docs/book/html` because linkcheck2 is a second output backend. |
+| 2026-09-09 | 0.4.52 | 0.15.0 | — (linkcheck 0.7.7) | Superseded. mdbook 0.5 changed the preprocessor JSON (null `[book]` fields, `items` replaces `sections`); admonish 1.20.0 could not parse it, and mermaid ≥ 0.16 requires mdbook 0.5, so the whole set was held back. |

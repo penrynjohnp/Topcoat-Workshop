@@ -9,6 +9,8 @@ members = [
     "labs/lab-03-components/solution",
     "labs/lab-04-routing/starter",
     "labs/lab-04-routing/solution",
+    "labs/lab-05-cx-memoize/starter",
+    "labs/lab-05-cx-memoize/solution",
 ]
 
 # Single source of truth for versions — see COMPATIBILITY.md

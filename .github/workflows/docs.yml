@@ -9,10 +9,13 @@ jobs:
     environment: { name: github-pages }
     steps:
       - uses: actions/checkout@v4
-      # Pinned as a set: mdbook-admonish does not yet support mdbook 0.5's book format,
-      # and mdbook-mermaid >= 0.16 requires mdbook 0.5. Bump all three together.
+      # Pinned as a set. Callouts use mdBook 0.5's built-in GitHub-style alerts,
+      # so mdbook-admonish is gone. mdbook-linkcheck 0.7.7 refuses to run under
+      # mdbook 0.5, so we use the maintained mdbook-linkcheck2 fork; it has no
+      # install-action manifest, hence the separate cargo install.
       - uses: taiki-e/install-action@v2
-        with: { tool: "mdbook@0.4.52,mdbook-linkcheck@0.7.7,mdbook-admonish@1.20.0,mdbook-mermaid@0.15.0" }
+        with: { tool: "mdbook@0.5.4,mdbook-mermaid@0.17.1" }
+      - run: cargo install mdbook-linkcheck2 --version 0.13.0 --locked
       - run: mdbook build docs
       - uses: actions/upload-pages-artifact@v3
         with: { path: docs/book/html }

@@ -6,7 +6,7 @@
     "ghcr.io/azure/azure-dev/azd:0": {},
     "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y sqlite3 && cargo install topcoat-cli --version 0.7.0 --locked && cargo install mdbook mdbook-admonish mdbook-mermaid --locked",
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y sqlite3 && cargo install topcoat-cli --version 0.7.0 --locked && cargo install mdbook@0.4.52 mdbook-admonish@1.20.0 mdbook-mermaid@0.15.0 --locked",
   "forwardPorts": [3000, 8080],
   "customizations": {
     "vscode": {

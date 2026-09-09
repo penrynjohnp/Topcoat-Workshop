@@ -1,15 +1,22 @@
 [book]
 title = "Topcoat Workshop"
 authors = ["John Plummer"]
+description = "Hands-on labs for learning Topcoat, the server-rendered full-stack Rust web framework."
 language = "en"
+text-direction = "ltr"
 src = "src"
 
 [preprocessor.admonish]
+command = "mdbook-admonish"
+assets_version = "3.1.0" # do not edit: managed by `mdbook-admonish install`
 [preprocessor.mermaid]
 command = "mdbook-mermaid"
 
 [output.html]
 git-repository-url = "https://github.com/penrynjohnp/Topcoat-Workshop"
 edit-url-template = "https://github.com/penrynjohnp/Topcoat-Workshop/edit/main/docs/{path}"
+additional-js = ["mermaid.min.js", "mermaid-init.js"]
+additional-css = ["./mdbook-admonish.css"]
 
 [output.linkcheck]
+optional = true   # installed in CI; local builds work without it

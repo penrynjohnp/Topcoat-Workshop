@@ -1,7 +1,7 @@
 name: Docs
 on:
-  push: { branches: [main], paths: [docs/**, labs/**] }
-  workflow_dispatch: {}
+  push: { branches: [main], paths: [docs/**, labs/**, .github/workflows/docs.yml] }
+  workflow_dispatch:
 permissions: { contents: read, pages: write, id-token: write }
 jobs:
   build-deploy:
@@ -9,9 +9,10 @@ jobs:
     environment: { name: github-pages }
     steps:
       - uses: actions/checkout@v4
+      # Pinned as a set: mdbook-admonish does not yet support mdbook 0.5's book format,
+      # and mdbook-mermaid >= 0.16 requires mdbook 0.5. Bump all three together.
       - uses: taiki-e/install-action@v2
-        with: { tool: "mdbook,mdbook-linkcheck,mdbook-admonish,mdbook-mermaid" }
-      - run: mdbook-mermaid install docs && mdbook-admonish install docs
+        with: { tool: "mdbook@0.4.52,mdbook-linkcheck@0.7.7,mdbook-admonish@1.20.0,mdbook-mermaid@0.15.0" }
       - run: mdbook build docs
       - uses: actions/upload-pages-artifact@v3
         with: { path: docs/book/html }

@@ -1,6 +1,7 @@
 name: Docs
 on:
   push: { branches: [main], paths: [docs/**, labs/**] }
+  workflow_dispatch: {}
 permissions: { contents: read, pages: write, id-token: write }
 jobs:
   build-deploy:

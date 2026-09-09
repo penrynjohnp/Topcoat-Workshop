@@ -8,7 +8,7 @@
 - Write your first `#[page]` and `#[component]`
 
 ## Concepts (read first, 5 min)
-Topcoat renders everything on the server. A **page** is an `async fn` bound to a URL; a **component** is an `async fn` that returns a `view!`. `Router::builder().discover()` finds every `#[page]` in the binary so you don't register routes by hand. `topcoat::dev::script()` injects a tiny script that reloads the browser when `topcoat dev` finishes a rebuild.
+Topcoat renders everything on the server. A **page** is an `async fn` bound to a URL; a **component** is an `async fn` that returns `Result<impl View>` — usually `Ok(view! { ... })`. `Router::builder().discover()` finds every `#[page]` in the binary so you don't register routes by hand. `topcoat::dev::script()` injects a tiny script that reloads the browser when `topcoat dev` finishes a rebuild.
 
 ## Steps
 
@@ -39,13 +39,13 @@ Save. Change the `<h1>` text and save again.
 Below `home`, add:
 ```rust
 #[component]
-async fn hello(name: &str) -> Result {
-    view! {
+async fn hello(name: &str) -> Result<impl View> {
+    Ok(view! {
         <h1>"Hello, " (name) "!"</h1>
-    }
+    })
 }
 ```
-Then in `home`, replace the `<h1>` with `hello(name: "Topcoat")`. Components are invoked like functions, with named arguments, directly inside `view!`; `(name)` interpolates a Rust expression.
+Then in `home`, replace the `<h1>` with `hello(name: "Topcoat")`. Components are invoked like functions, with named arguments, directly inside `view!`; `(name)` interpolates a Rust expression. Pages and components return `Result<impl View>` — the `Ok(...)` around `view!` is what lets a component bail out with an error (a 404, a redirect) instead of markup, which Lab 06 relies on.
 > ✅ **Checkpoint:** page shows **Hello, Topcoat!** Compare with `../solution/src/main.rs`.
 
 ### Step 5 — Bind address

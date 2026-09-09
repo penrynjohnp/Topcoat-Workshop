@@ -4,7 +4,7 @@ Topcoat is pre-1.0 and ships breaking changes. Every lab pins the versions below
 
 | Tested | topcoat | topcoat-cli | toasty | Rust | Labs passing | Notes |
 |---|---|---|---|---|---|---|
-| 2026-09-08 | 0.7.0 | 0.7.0 | 0.10.0 | stable | 01 | Initial skeleton. Lab 01 code taken from upstream `getting_started.md` at this date. |
+| 2026-09-08 | 0.7.0 | 0.7.0 | 0.10.0 | stable | 01 | Lab 01 code from `getting_started.md` at tag `v0.7.0`. Note: `main` already differs (bare `Result` vs `Result<impl View>`); always read docs at the tag. |
 
 ## Upgrading
 

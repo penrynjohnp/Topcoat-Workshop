@@ -1,4 +1,3 @@
-# 10 Toasty
+# Lab 10 — Toasty models and queries
 
-> [!NOTE]
-> Coming in a later phase — see [PLAN.md](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/PLAN.md).
+{{#include ../../../labs/lab-10-toasty-sqlite/README.md:3:}}

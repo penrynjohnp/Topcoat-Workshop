@@ -19,6 +19,8 @@ members = [
     "labs/lab-08-shards-procedures-streaming/solution",
     "labs/lab-09-htmx-alpine/starter",
     "labs/lab-09-htmx-alpine/solution",
+    "labs/lab-10-toasty-sqlite/starter",
+    "labs/lab-10-toasty-sqlite/solution",
 ]
 
 # Single source of truth for versions — see COMPATIBILITY.md
@@ -27,6 +29,7 @@ topcoat = { version = "=0.7.0", features = ["mail"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
 serde = { version = "1", features = ["derive"] }
 web-time = "1"
+toasty = { version = "=0.10.0", features = ["sqlite"] }
 
 [workspace.package]
 edition = "2024"

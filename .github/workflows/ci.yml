@@ -6,7 +6,7 @@ jobs:
   labs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Every lab has a real book page
         run: |
           for d in labs/lab-*/; do
@@ -17,7 +17,7 @@ jobs:
       - name: AGENTS.md and copilot-instructions.md must match
         run: diff -q AGENTS.md .github/copilot-instructions.md
       - uses: dtolnay/rust-toolchain@stable
-        with: { components: rustfmt, clippy }
+        with: { components: "rustfmt, clippy" }
       - uses: Swatinem/rust-cache@v2
       - name: Install topcoat-cli
         run: cargo install topcoat-cli --version 0.7.0 --locked

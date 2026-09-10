@@ -1,0 +1,15 @@
+name: slipway
+metadata:
+  template: topcoat-workshop-slipway@0.1.0
+services:
+  web:
+    project: ../../..
+    language: docker
+    host: containerapp
+    docker:
+      path: ./labs/lab-12-build-containerise-deploy/solution/Dockerfile
+      context: .
+hooks:
+  postprovision:
+    shell: sh
+    run: ./scripts/azd-postprovision.sh

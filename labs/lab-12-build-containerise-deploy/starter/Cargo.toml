@@ -1,0 +1,22 @@
+[package]
+name = "lab12-starter"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+topcoat = { workspace = true, features = ["font-fontsource", "htmx", "icon-iconify", "tailwind", "ui"] }
+tokio.workspace = true
+serde.workspace = true
+web-time.workspace = true
+toasty.workspace = true
+topcoat-asset.workspace = true
+
+[build-dependencies]
+topcoat = { workspace = true, features = ["icon-iconify", "tailwind"] }
+
+[dev-dependencies]
+tokio.workspace = true
+serde.workspace = true
+web-time.workspace = true

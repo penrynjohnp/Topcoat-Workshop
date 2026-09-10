@@ -1,0 +1,14 @@
+name: slipway-starter
+services:
+  web:
+    project: ../../..
+    language: docker
+    host: containerapp
+    docker:
+      path: ./labs/lab-12-build-containerise-deploy/starter/Dockerfile
+      context: .
+hooks:
+  postprovision:
+    shell: sh
+    # TODO(lab-12): Verify the app identity and Key Vault reference after Bicep.
+    run: ./scripts/azd-postprovision.sh

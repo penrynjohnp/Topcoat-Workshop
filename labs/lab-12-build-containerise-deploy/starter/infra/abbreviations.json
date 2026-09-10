@@ -1,0 +1,9 @@
+{
+  "resourcesResourceGroups": "rg-",
+  "containerRegistryRegistries": "cr",
+  "managedIdentityUserAssignedIdentities": "id-",
+  "keyVaultVaults": "kv-",
+  "dBforPostgreSQLFlexibleServers": "pg-",
+  "appManagedEnvironments": "cae-",
+  "appContainerApps": "ca-"
+}

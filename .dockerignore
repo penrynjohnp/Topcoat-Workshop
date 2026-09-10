@@ -1,0 +1,9 @@
+.git
+.github
+.azure
+.env
+target
+rust-toolchain.toml
+docs/book
+**/slipway.db
+**/*.log

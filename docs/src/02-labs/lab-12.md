@@ -1,4 +1,3 @@
-# 12 Deploy with azd
+# Lab 12 — Build, containerise, and deploy with azd
 
-> [!NOTE]
-> Coming in a later phase — see [PLAN.md](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/PLAN.md).
+{{#include ../../../labs/lab-12-build-containerise-deploy/README.md:3:}}

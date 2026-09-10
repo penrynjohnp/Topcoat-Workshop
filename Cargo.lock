@@ -922,6 +922,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "lab08-solution"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "tokio",
+ "topcoat",
+ "web-time",
+]
+
+[[package]]
+name = "lab08-starter"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "tokio",
+ "topcoat",
+ "web-time",
+]
+
+[[package]]
 name = "lettre"
 version = "0.11.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"

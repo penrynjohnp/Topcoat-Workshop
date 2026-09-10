@@ -4,7 +4,7 @@ Topcoat is pre-1.0 and ships breaking changes. Every lab pins the versions below
 
 | Tested | topcoat | topcoat-cli | toasty | Rust | Labs passing | Notes |
 |---|---|---|---|---|---|---|
-| 2026-09-10 | 0.7.0 | 0.7.0 | 0.10.0 | stable (1.98.0) | 01-07 | Lab 01 code from `getting_started.md` at tag `v0.7.0`. Note: `main` already differs (bare `Result` vs `Result<impl View>`); always read docs at the tag. CLI 0.7.0: no top-level `--version`, and `topcoat fmt` has no `--check` (CI formats then `git diff --exit-code`). Attribute render order is not guaranteed once an element takes a spread `Attributes`, so lab tests assert on the attribute set. Runtime expressions have no `&&`/`||` and no `match`; Lab 07 spells combinations with `if`/`else`. The runtime script is an asset, so Lab 07's router takes an `Option<AssetBundle>` and tests pass `None`. |
+| 2026-09-10 | 0.7.0 | 0.7.0 | 0.10.0 | stable (1.98.0) | 01-08 | Lab 01 code from `getting_started.md` at tag `v0.7.0`. Note: `main` already differs (bare `Result` vs `Result<impl View>`); always read docs at the tag. CLI 0.7.0: no top-level `--version`, and `topcoat fmt` has no `--check` (CI formats then `git diff --exit-code`). Attribute render order is not guaranteed once an element takes a spread `Attributes`, so lab tests assert on the attribute set. Runtime expressions have no `&&`/`||` and no `match`; Lab 07 spells combinations with `if`/`else`. The runtime script is an asset, so Lab 07's router takes an `Option<AssetBundle>` and tests pass `None`. Lab 08 explicitly calls `discover_shards()` and `discover_procedures()`; shard arguments are JSON tuples (for one `String`, `["Lady"]`), and streamed swaps arrive in the original response as template/script envelopes. |
 
 ## Upgrading
 

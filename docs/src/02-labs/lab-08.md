@@ -1,4 +1,3 @@
-# 08 Shards, procedures, live!
+# 08 Shards, procedures, and streaming
 
-> [!NOTE]
-> Coming in a later phase — see [PLAN.md](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/PLAN.md).
+{{#include ../../../labs/lab-08-shards-procedures-streaming/README.md:3:}}

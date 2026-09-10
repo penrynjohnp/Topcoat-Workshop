@@ -15,12 +15,14 @@ members = [
     "labs/lab-06-auth-sessions-mail/solution",
     "labs/lab-07-signals-expressions/starter",
     "labs/lab-07-signals-expressions/solution",
+    "labs/lab-08-shards-procedures-streaming/starter",
+    "labs/lab-08-shards-procedures-streaming/solution",
 ]
 
 # Single source of truth for versions — see COMPATIBILITY.md
 [workspace.dependencies]
 topcoat = { version = "=0.7.0", features = ["mail"] }
-tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
 serde = { version = "1", features = ["derive"] }
 web-time = "1"
 

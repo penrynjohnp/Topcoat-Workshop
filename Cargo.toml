@@ -13,6 +13,8 @@ members = [
     "labs/lab-05-cx-memoize/solution",
     "labs/lab-06-auth-sessions-mail/starter",
     "labs/lab-06-auth-sessions-mail/solution",
+    "labs/lab-07-signals-expressions/starter",
+    "labs/lab-07-signals-expressions/solution",
 ]
 
 # Single source of truth for versions — see COMPATIBILITY.md

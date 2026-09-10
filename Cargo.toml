@@ -21,6 +21,8 @@ members = [
     "labs/lab-09-htmx-alpine/solution",
     "labs/lab-10-toasty-sqlite/starter",
     "labs/lab-10-toasty-sqlite/solution",
+    "labs/lab-11-assets-tailwind-ui/starter",
+    "labs/lab-11-assets-tailwind-ui/solution",
 ]
 
 # Single source of truth for versions — see COMPATIBILITY.md
@@ -30,6 +32,7 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
 serde = { version = "1", features = ["derive"] }
 web-time = "1"
 toasty = { version = "=0.10.0", features = ["sqlite"] }
+topcoat-asset = { version = "=0.7.0", features = ["bundler"] }
 
 [workspace.package]
 edition = "2024"

@@ -1,4 +1,3 @@
-# 11 Assets, Tailwind, Topcoat UI
+# Lab 11 — Asset pipeline, fonts, icons, Tailwind, and Topcoat UI
 
-> [!NOTE]
-> Coming in a later phase — see [PLAN.md](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/PLAN.md).
+{{#include ../../../labs/lab-11-assets-tailwind-ui/README.md:3:}}

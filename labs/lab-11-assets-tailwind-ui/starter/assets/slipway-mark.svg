@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Slipway Marina</title>
+  <path fill="#0f766e" d="M29 6h6v28.4l8.9-8.9 4.2 4.2L32 45.8 15.9 29.7l4.2-4.2 8.9 8.9V6Z"/>
+  <path fill="#38bdf8" d="M7 44c5.3 0 5.3 4 10.7 4s5.3-4 10.6-4 5.4 4 10.7 4 5.3-4 10.7-4S55 48 57 48v6c-5.3 0-5.3-4-10.7-4S41 54 35.7 54 30.3 50 25 50s-5.3 4-10.7 4S9 50 7 50v-6Z"/>
+</svg>

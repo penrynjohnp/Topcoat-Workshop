@@ -13,6 +13,7 @@
 - [Shards, procedures, live regions, htmx](01-concepts/reactivity-options.md)
 - [Locality of behaviour vs middleware](01-concepts/functions-not-middleware.md)
 - [What Toasty does](01-concepts/toasty.md)
+- [Assets, styling, and owned UI](01-concepts/assets-styling-ui.md)
 
 # Labs
 - [01 Hello, Topcoat](02-labs/lab-01.md)

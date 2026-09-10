@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@source "./src/**/*.rs";
+
+/* TODO(lab-11): Replace this minimal theme with the vendored neutral theme and marina tokens. */
+@theme inline {
+  --font-sans: "Geist", sans-serif;
+}

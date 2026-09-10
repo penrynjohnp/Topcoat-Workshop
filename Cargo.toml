@@ -17,6 +17,8 @@ members = [
     "labs/lab-07-signals-expressions/solution",
     "labs/lab-08-shards-procedures-streaming/starter",
     "labs/lab-08-shards-procedures-streaming/solution",
+    "labs/lab-09-htmx-alpine/starter",
+    "labs/lab-09-htmx-alpine/solution",
 ]
 
 # Single source of truth for versions — see COMPATIBILITY.md

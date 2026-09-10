@@ -1,4 +1,3 @@
-# 09 htmx and Alpine
+# 09 htmx and Alpine as the pragmatic path
 
-> [!NOTE]
-> Coming in a later phase — see [PLAN.md](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/PLAN.md).
+{{#include ../../../labs/lab-09-htmx-alpine/README.md:3:}}

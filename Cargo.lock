@@ -942,6 +942,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "lab09-solution"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "tokio",
+ "topcoat",
+ "web-time",
+]
+
+[[package]]
+name = "lab09-starter"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "tokio",
+ "topcoat",
+ "web-time",
+]
+
+[[package]]
 name = "lettre"
 version = "0.11.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1611,6 +1631,7 @@ dependencies = [
  "topcoat-core-macro",
  "topcoat-font",
  "topcoat-font-macro",
+ "topcoat-htmx",
  "topcoat-icon",
  "topcoat-icon-macro",
  "topcoat-mail",
@@ -1735,6 +1756,19 @@ dependencies = [
  "quote",
  "syn 2.0.119",
  "topcoat-font-grammar",
+]
+
+[[package]]
+name = "topcoat-htmx"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d42586bec3bbf3b11770d3a1e59eab0a94fa34e2d33a6c0a6c0db63ea4293842"
+dependencies = [
+ "http",
+ "serde",
+ "serde_json",
+ "topcoat-core",
+ "topcoat-router",
 ]
 
 [[package]]

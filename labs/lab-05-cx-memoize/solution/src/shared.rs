@@ -96,9 +96,11 @@ pub fn berths() -> Vec<Berth> {
     ]
 }
 
+// ANCHOR: closure-find
 pub fn find_berth(slug: &str) -> Option<Berth> {
     berths().into_iter().find(|berth| berth.slug == slug)
 }
+// ANCHOR_END: closure-find
 
 // ANCHOR: memoized-loader
 #[memoize(as_ref)]

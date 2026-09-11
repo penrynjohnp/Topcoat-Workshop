@@ -101,6 +101,7 @@ impl Default for AppState {
 }
 // ANCHOR_END: session-store
 
+// ANCHOR: cookie-access
 pub fn secure_cookies(cx: &Cx) -> impl Cookies {
     cookies(cx)
         .private(&app_context::<AppState>(cx).cookie_key)
@@ -110,6 +111,7 @@ pub fn secure_cookies(cx: &Cx) -> impl Cookies {
         .default_same_site(SameSite::Lax)
         .default_path("/")
 }
+// ANCHOR_END: cookie-access
 
 #[memoize(as_ref)]
 pub async fn current_user(cx: &Cx) -> Option<String> {
@@ -126,6 +128,7 @@ pub async fn require_auth(cx: &Cx) -> topcoat::Result<String> {
 }
 // ANCHOR_END: require-auth
 
+// ANCHOR: session-lifecycle
 pub async fn begin_session(cx: &Cx, email: String) -> topcoat::Result<()> {
     let state = app_context::<AppState>(cx);
     let new_session = session::start(cx).await?;
@@ -158,7 +161,9 @@ pub async fn rotate_session(cx: &Cx) -> topcoat::Result<()> {
     }
     Ok(())
 }
+// ANCHOR_END: session-lifecycle
 
+// ANCHOR: cookie-write
 pub fn remember_email(cx: &Cx, email: &str) {
     secure_cookies(cx).add(
         Cookie::build(("last_email", email.to_owned()))
@@ -166,3 +171,4 @@ pub fn remember_email(cx: &Cx, email: &str) {
             .build(),
     );
 }
+// ANCHOR_END: cookie-write

@@ -56,6 +56,7 @@ async fn berth_note(cx: &Cx, slug: &str) -> Result<impl View> {
 }
 // ANCHOR_END: memoized-components
 
+// ANCHOR: request-values
 #[page]
 async fn detail(cx: &Cx) -> Result<impl View> {
     let id = path_param::<Id>(cx);
@@ -69,3 +70,4 @@ async fn detail(cx: &Cx) -> Result<impl View> {
         berth_note(slug: id)
     })
 }
+// ANCHOR_END: request-values

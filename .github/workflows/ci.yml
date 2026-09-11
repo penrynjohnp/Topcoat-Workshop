@@ -21,6 +21,14 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Install topcoat-cli
         run: cargo install topcoat-cli --version 0.7.0 --locked
+      - name: Stage icon cache once (topcoat-icon build scripts race when run in parallel)
+        run: |
+          find target/topcoat/cache -type f -empty -delete 2>/dev/null || true
+          cargo build -p lab11-solution
+      - name: Stage icon cache once (topcoat-icon build scripts race when run in parallel)
+        run: |
+          find target/topcoat/cache -type f -empty -delete 2>/dev/null || true
+          cargo build -p lab11-solution
       - run: cargo fmt --all --check
       - name: topcoat fmt (no --check flag; fail if it changes anything)
         run: |

@@ -1,67 +1,142 @@
 # Locality of behaviour vs middleware
 
-Most web frameworks put cross-cutting concerns — authentication, tenancy, feature flags, locale — in
-middleware: a chain wrapped around the router, running before the handler, mutating a request object
-that the handler later reads. Topcoat's guidance is different. These are `async fn`s that take the
-request context and are called from the component that needs them.
+Authentication is often configured around a route and consumed somewhere deeper in the handler.
+Topcoat recommends a different default for request-scoped application policy: write a focused
+`async fn` that accepts `&Cx`, then call it where its result is needed.
+
+That is **locality of behaviour**. The authorization check, the data it unlocks, and the markup that
+uses that data stay visible in one place.
+
+This page follows Topcoat v0.7.0's [Functions, not
+middlewares](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.7.0/crates/topcoat/docs/functions_not_middlewares.md)
+guide.
 
 ```mermaid
 flowchart LR
-    subgraph Middleware
-        R1[Request] --> M1[auth layer] --> M2[tenant layer] --> H1[handler] --> V1[view]
+    subgraph "Route middleware"
+        R1[Request] --> M[Authentication middleware]
+        M --> H[Handler]
+        H --> C1[Protected component]
     end
-    subgraph "Functions, not middleware"
-        R2[Request] --> P[page] --> C1[public component]
-        P --> C2[work orders component]
+
+    subgraph "Local request function"
+        R2[Request] --> P[Page]
+        P --> C2[Protected component]
         C2 --> A[require_auth cx]
+        A --> S[Session and user lookup]
     end
 ```
 
-## What changes
+## Put the requirement beside the behaviour
 
-In the middleware model, whether a piece of markup is protected is a property of its **route**. The
-handler is trusted because of where it was mounted. That works until the same markup is rendered
-somewhere else — embedded in a public dashboard, pulled into a partial, reused by a second route —
-at which point the protection quietly does not apply, and nothing in the file tells you.
+Middleware makes authentication a property of route configuration. The handler trusts that an outer
+layer ran, often reads a user from request extensions, and passes that user down to the code that
+needs it.
 
-In the Topcoat model, protection is a property of the **component**. A component that shows work
-orders calls `require_auth(cx).await?` as its first line. Embed it on a public page and it still
-refuses; delete the route and add another and it still refuses. The check travels with the thing it
-protects, and you can see it by reading the file.
+That arrangement can be correct. Its weakness is distance. You cannot tell whether a component is
+safe by reading the component alone. You must also inspect every route that can render it and verify
+that the right middleware wraps each route in the right order.
 
-This is the same property [Lab 03](../02-labs/lab-03.md) demonstrates with data: a component that
-fetches what it renders works wherever it is called, because nothing about it depends on a caller
-having prepared something first. Auth is that idea applied to a guard rather than a query.
+A Topcoat request function makes the dependency explicit at the use site. Lab 06 resolves the
+current user from the request-scoped session and turns a missing user into a redirect:
 
-## Why it works here
+```rust
+{{#include ../../../labs/lab-06-auth-sessions-mail/solution/src/auth.rs:require-auth}}
+```
 
-It works because the pieces line up:
+The protected component calls the function before it renders private data:
 
-- A component is an ordinary `async fn`, so calling another `async fn` from it needs no machinery.
-- The request context `Cx` is available to any component that declares it, so a guard does not need
-  a mutated request object handed down a chain.
-- A component returns `Result<impl View>`, so a guard can return an error — a redirect to `/login`,
-  a `403` — with `?`, and the framework turns that into a response. Bailing out is a normal Rust
-  return, not an early `next()` that has to be remembered.
+```rust
+{{#include ../../../labs/lab-06-auth-sessions-mail/solution/src/app/_marketing.rs:protected-work-orders}}
+```
 
-## What you give up
+You can now move `work_orders` between pages without separating it from its guard. A public page may
+embed the component, but an unauthenticated request still stops at `require_auth`.
 
-Be honest about the trade:
+The requirement travels with the behaviour it protects.
 
-- **It is opt-in.** Middleware applies to a whole subtree whether or not the author remembered it; a
-  function call has to be written. A forgotten call is a hole, and no route table will show it to
-  you. Convention and review carry weight they did not before.
-- **The check can run many times per request.** Three components on a page, three calls. `#[memoize]`
-  ([Lab 05](../02-labs/lab-05.md)) dedupes them within a request.
-- **Genuinely global concerns still want a layer.** Compression, request logging, body limits and
-  CORS are not per-component decisions. Topcoat provides router layers and a tower bridge
-  ([Lab 13](../02-labs/lab-13.md)) for exactly these; the argument is about *authorisation and
-  request-scoped policy*, not about every cross-cutting concern.
+## Build small functions by meaning
 
-## The rule of thumb
+Do not replace one large middleware stack with one large request function. Separate the decisions:
 
-Put it in a function called by the component when the answer depends on *what is being rendered*.
-Put it in a layer when the answer depends only on *the HTTP transaction*.
+- read a cookie or session token from `Cx`;
+- resolve an optional current user;
+- require a signed-in user;
+- build `require_admin` or `require_tenant_member` on top.
 
-[Lab 06](../02-labs/lab-06.md) implements `require_auth` this way, alongside cookies and sessions, and
-proves the point with a protected component embedded on a public page.
+Public UI can ask for an optional user and render a signed-out state. Private UI can call
+`require_auth(cx).await?` and fail closed. The helpers share request context without forcing every
+layout and component between them to accept and forward a user parameter.
+
+This works naturally because Topcoat components are async Rust functions. `Cx` is available wherever
+a component declares it, and `?` propagates the redirect or error through the normal return path.
+There is no second dependency-injection mechanism to configure.
+
+When several components ask the same question, place expensive lookup work behind `#[memoize]`.
+Memoization deduplicates identical calls within the request while each component keeps its local,
+explicit dependency. It does not turn request data into a global cache.
+
+## Local checks survive composition
+
+Locality matters when markup appears somewhere its author did not originally expect. Lab 06 embeds
+the protected work-orders component on a public dashboard. The integration test proves that the
+component still redirects an unauthenticated request:
+
+```rust
+{{#include ../../../labs/lab-06-auth-sessions-mail/solution/tests/auth.rs:auth-integration-test}}
+```
+
+The same rule becomes more important with partial endpoints. A shard or procedure request invokes
+that endpoint directly; page and layout guards do not run first. Calling `require_auth(cx)` inside
+the endpoint keeps the requirement attached to the server operation rather than to one page that
+happens to expose it.
+
+> [!WARNING]
+> Locality does not make authorization automatic. Every entry point that reads or changes protected
+> data must call the appropriate guard, and every client-supplied argument remains untrusted.
+
+## What you give up versus middleware
+
+The function style has real costs.
+
+- **You give up blanket enforcement by router configuration.** Correctly mounted middleware can
+  protect an entire route subtree in one place. A local guard is opt-in. If an author forgets the
+  call, the route table cannot save them.
+- **You give up one central policy map.** Middleware stacks make it easy to list the layers around a
+  route. Local calls are distributed through components and request functions, so audits need code
+  search, conventions, and tests.
+- **You may execute the same policy path more than once.** A layout, page, and nested component can
+  all ask for the current user. `#[memoize]` removes repeated expensive work, but the calls and result
+  propagation still exist.
+- **You give up some ecosystem uniformity.** Tower middleware is a shared abstraction across many
+  Rust HTTP frameworks. A project-specific `require_auth(&Cx)` function is simpler locally, but it
+  is not a reusable middleware package that another router can mount unchanged.
+- **You must choose the guard boundary carefully.** Guarding only a small nested component may allow
+  public page work to run before authentication fails. If the whole page is private, call the guard
+  at the page boundary as well as inside independently callable protected endpoints.
+
+These are not reasons to hide policy again. They are reasons to support local guards with naming,
+review, integration tests, and memoized lookup functions.
+
+## Middleware still has a job
+
+Local request functions are best when application code needs an answer: who is the user, which
+tenant is active, which feature is enabled, or whether this operation is allowed.
+
+Middleware and router layers remain a better fit for transport-wide behaviour that should apply
+regardless of what the page renders. Examples include tracing, compression, request normalization,
+body limits, and CORS.
+
+A useful boundary is:
+
+- use a `cx` function when the policy follows **the application behaviour**;
+- use a layer when the policy follows **the HTTP transaction**.
+
+Topcoat's guidance is not “middleware is bad.” It is “do not move a component's request-scoped
+requirements away from the component merely because middleware is familiar.”
+
+**See also:** [Lab 05 — Cx, app context, and memoization](../02-labs/lab-05.md),
+[Lab 06 — Cookies, sessions, and mail](../02-labs/lab-06.md),
+[Lab 08 — Shards, procedures, and streaming](../02-labs/lab-08.md),
+[Request lifecycle](request-lifecycle.md), and
+[Shards, procedures, live regions, htmx](reactivity-options.md).

@@ -38,6 +38,7 @@ async fn root_layout(cx: &Cx, slot: Slot<'_>) -> Result<impl View> {
     })
 }
 
+// ANCHOR: protected-work-orders
 #[component]
 async fn work_orders(cx: &Cx) -> Result<impl View> {
     let email = require_auth(cx).await?;
@@ -51,6 +52,7 @@ async fn work_orders(cx: &Cx) -> Result<impl View> {
         </section>
     })
 }
+// ANCHOR_END: protected-work-orders
 
 #[page]
 #[rustfmt::skip]

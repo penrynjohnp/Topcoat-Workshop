@@ -73,7 +73,7 @@ Topcoat-Workshop/
 │   │   └── solution/             # complete, tested by CI
 │   ├── lab-02-.../
 │   └── ...
-├── slipway/                      # the capstone at its final state (= lab-12 solution)
+├── slipway/                      # the finished capstone (= Lab 12 solution + Lab 13 tower bridge)
 ├── slides/                       # per-module decks (markdown/Marp, exportable to pptx)
 ├── scripts/
 │   ├── setup.sh                  # install toolchain, topcoat-cli, verify

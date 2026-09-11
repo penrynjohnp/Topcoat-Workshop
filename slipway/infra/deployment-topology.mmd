@@ -1,0 +1,12 @@
+flowchart LR
+    Browser[Browser] -->|HTTPS| ACA[Azure Container Apps\nSlipway]
+    ACA -->|managed identity pull| ACR[Azure Container Registry]
+    ACA -->|managed identity secret read| KV[Azure Key Vault]
+    ACA -->|Entra token + TLS| PG[PostgreSQL Flexible Server]
+    ACA -->|structured stdout| LAW[Log Analytics]
+    LAW --> AI[Application Insights]
+    GHA[GitHub Actions] -->|OIDC| AZD[Azure Developer CLI]
+    AZD -->|Bicep provision| ACA
+    AZD --> ACR
+    AZD --> KV
+    AZD --> PG

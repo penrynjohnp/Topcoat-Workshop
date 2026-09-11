@@ -2770,6 +2770,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "slipway-capstone"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "azure_core",
+ "azure_identity",
+ "base64 0.22.1",
+ "percent-encoding",
+ "serde",
+ "toasty",
+ "tokio",
+ "topcoat",
+ "topcoat-asset",
+ "tower",
+ "tower-http 0.7.1",
+ "tracing",
+ "tracing-subscriber",
+ "web-time",
+]
+
+[[package]]
 name = "smallvec"
 version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

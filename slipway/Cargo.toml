@@ -1,0 +1,31 @@
+[package]
+name = "slipway-capstone"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+topcoat = { workspace = true, features = ["font-fontsource", "htmx", "icon-iconify", "tailwind", "tower", "ui"] }
+tokio.workspace = true
+axum.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+serde.workspace = true
+web-time.workspace = true
+toasty.workspace = true
+topcoat-asset.workspace = true
+azure_core.workspace = true
+azure_identity.workspace = true
+base64.workspace = true
+percent-encoding.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+[build-dependencies]
+topcoat = { workspace = true, features = ["icon-iconify", "tailwind"] }
+
+[dev-dependencies]
+tokio.workspace = true
+serde.workspace = true
+web-time.workspace = true

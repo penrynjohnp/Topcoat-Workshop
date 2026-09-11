@@ -1,0 +1,11 @@
+{
+  "resourcesResourceGroups": "rg-",
+  "operationalInsightsWorkspaces": "law-",
+  "insightsComponents": "appi-",
+  "containerRegistryRegistries": "cr",
+  "managedIdentityUserAssignedIdentities": "id-",
+  "keyVaultVaults": "kv-",
+  "dBforPostgreSQLFlexibleServers": "pg-",
+  "appManagedEnvironments": "cae-",
+  "appContainerApps": "ca-"
+}

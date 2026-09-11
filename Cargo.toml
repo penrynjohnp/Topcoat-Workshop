@@ -27,6 +27,7 @@ members = [
     "labs/lab-12-build-containerise-deploy/solution",
     "labs/lab-13-tower-bridge/starter",
     "labs/lab-13-tower-bridge/solution",
+    "slipway",
 ]
 
 # Single source of truth for versions — see COMPATIBILITY.md

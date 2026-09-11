@@ -7,3 +7,4 @@ docs/book
 .env
 .DS_Store
 mail/
+slides/out/

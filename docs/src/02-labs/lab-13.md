@@ -1,4 +1,3 @@
 # 13 Tower bridge and Axum
 
-> [!NOTE]
-> Coming in a later phase — see [PLAN.md](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/PLAN.md).
+{{#include ../../../labs/lab-13-tower-bridge/README.md:3:}}

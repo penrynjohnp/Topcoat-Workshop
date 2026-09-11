@@ -25,6 +25,8 @@ members = [
     "labs/lab-11-assets-tailwind-ui/solution",
     "labs/lab-12-build-containerise-deploy/starter",
     "labs/lab-12-build-containerise-deploy/solution",
+    "labs/lab-13-tower-bridge/starter",
+    "labs/lab-13-tower-bridge/solution",
 ]
 
 # Single source of truth for versions — see COMPATIBILITY.md
@@ -41,6 +43,9 @@ base64 = "0.22"
 percent-encoding = "2.3"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+axum = "0.8"
+tower = "0.5"
+tower-http = { version = "0.7", features = ["full"] }
 
 [workspace.package]
 edition = "2024"

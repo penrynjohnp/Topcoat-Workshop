@@ -95,6 +95,12 @@ Dioxus targets web, desktop, and mobile from one Rust UI model. That cross-platf
 when the same product must become a browser app and native application, but it introduces a broader
 runtime and tooling model than a server-rendered website needs.
 
+On [10 September 2026](https://dioxuslabs.com/blog/joining-cognition), the Dioxus team joined
+Cognition, continues to maintain Dioxus, and has said its investment is weighted towards
+Dioxus-Native and Blitz rather than the web target.
+
+[Stewardship and stated direction](../03-reference/when-to-use-topcoat.md#stewardship-and-stated-direction)
+
 Topcoat chooses a narrower target. It keeps markup and data access on the server, then adds only the
 browser behaviour a page needs. If you need an application-sized client runtime or a shared native
 UI, choose the framework designed around that requirement rather than stretching Topcoat into it.

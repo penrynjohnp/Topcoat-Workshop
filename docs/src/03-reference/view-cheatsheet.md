@@ -1,106 +1,99 @@
 # `view!` cheat sheet
 
-Everything below is pinned to **topcoat 0.7.0** (see [COMPATIBILITY.md](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/COMPATIBILITY.md)).
-Code is included from the [Lab 02 solution](../02-labs/lab-02.md), so it is compiled and tested by CI.
+Use this page when you know what markup you want and need the Topcoat syntax. Every example comes
+from the compiled solutions for Labs 02–03 and targets Topcoat 0.7.0.
+
+The syntax follows the pinned v0.7.0 [`view!`
+guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.7.0/crates/topcoat-view/macro/docs/view.md).
 
 ## Syntax at a glance
 
-| You want | You write |
-|---|---|
-| Literal text | `<h1>"Berths"</h1>` |
-| A Rust value | `<h1>(berth.name)</h1>` |
-| An attribute value | `href=(berth.url())` |
-| A dynamic attribute name | `(name)=(value)` |
-| A boolean attribute, known statically | `disabled=""` |
-| A boolean attribute, known at run time | `disabled=(is_disabled)` — absent when `false` |
-| An optional attribute | `title=(maybe_note)` — absent when `None` |
-| A conditional attribute | `aria-current=(is_current.then_some("page"))` |
-| Several conditional attributes | `if is_current { aria-current="page" class="active" }` |
-| A conditional class | `class=(class!("nav-link", "active" if is_current))` |
-| An enumerated attribute | `aria-expanded=(if open { "true" } else { "false" })` |
-| A reusable attribute set | `<article (attributes! { class="card" data-id=(id) })>` |
-| A component | `status_badge(status: &berth.status)` |
-| Rendering outside a component | `view! { cx => site_nav(current_path: "/") }` |
+| Construct | One-line example | What it does |
+|---|---|---|
+| Interpolation | `{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:cheatsheet-interpolation}}` | Inserts a Rust expression as an escaped child node. Parentheses also supply dynamic attribute values. |
+| Loop | `{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:cheatsheet-loop}}` | Repeats the body for each item using ordinary Rust `for` syntax. |
+| Conditional | `{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:cheatsheet-conditional}}` | Renders the selected `if`/`else` branch. `match` is also supported in child position. |
+| Conditional attribute | `{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:86:86}}` | Omits the whole attribute when the expression is `None` or `false`. |
+| `class!` | `{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:85:85}}` | Joins static and conditional classes without leaving extra separators. |
+| `attributes!` | `{{#include ../../../labs/lab-03-components/solution/src/lib.rs:cheatsheet-attributes}}` | Builds a reusable `Attributes` value with the same attribute syntax as `view!`. |
+| Component call | `{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:cheatsheet-component-call}}` | Calls a component with named properties. |
+| Child content | `{{#include ../../../labs/lab-03-components/solution/src/lib.rs:cheatsheet-child-content}}` | Passes unnamed nodes after the named properties into the component's `Child<'_>` parameter. |
 
-## Data into markup
+## Interpolation
 
-```rust
-{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:model}}
-```
+Write literal text in quotes. Put a Rust expression in parentheses:
 
-`for` and `if` in child position:
+- child position produces a node;
+- attribute-value position produces an escaped value;
+- a `bool` attribute value is present when `true` and absent when `false`;
+- an `Option` attribute value is present for `Some` and absent for `None`.
 
-```rust
-{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:berth_list}}
-```
+Views are lazy. An interpolated expression runs when its view renders, not merely when the `view!`
+value is created.
 
-`match`, with pattern bindings in scope inside each arm:
+## Loops and conditionals
 
-```rust
-{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:status_badge}}
-```
+`view!` uses Rust-shaped `for`, `if`, and `match` control flow with markup bodies. A loop body renders
+once per item. A conditional renders only its selected branch.
 
-## Conditional attributes and class lists
+Values follow ordinary Rust ownership rules. For example, `for berth in berths` consumes `berths`.
+Sibling components and loop iterations may render concurrently, but their HTML remains in source
+order. Do not use component execution order for coordination.
 
-```rust
-{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:nav}}
-```
+## Conditional attributes
 
-`class!` entries may be `expr`, `expr if cond`, or `expr if cond else alt`. An entry is *absent* when
-it is `None`, an empty string, or its condition is false — absent entries leave no stray separator,
-and when every entry is absent the `class` attribute is dropped. A list of literals is a
-`StaticClass` and can live in a `const`.
+An expression-valued attribute removes itself when its value is `false` or `None`. This is the right
+shape for HTML boolean attributes and optional values.
 
-`attributes!` accepts the full attribute syntax — literals, expressions, dynamic names, spreads, and
-attribute-level `if`/`for`/`match` — and produces a map-like `Attributes` value. Keys are unique;
-inserting the same key twice replaces it; render order is not guaranteed. Spreading consumes the
-value, so clone it to use it twice.
+A literal attribute is always present. `disabled="false"` still disables an HTML control because the
+attribute exists. Use `disabled=(is_disabled)` when presence is conditional.
 
-## A page
+For enumerated attributes such as `aria-expanded`, return the strings `"true"` and `"false"`. Those
+values have meaning and should not be replaced with attribute omission.
 
-```rust
-{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:page}}
-```
+## `class!` and `attributes!`
 
-Pages, layouts, components, shards and procedures all have the request context in scope implicitly.
-In a plain function, name it first: `view! { cx => ... }`.
+`class!` accepts ordinary entries and conditional entries such as `"active" if is_current`. Empty,
+absent, and false entries are omitted. If every entry is absent, the whole `class` attribute is
+omitted.
 
-## Components
+`attributes!` creates an `Attributes` collection outside an element. You can pass it as a component
+property or spread it into an element with `(attrs)`. Spreading consumes the collection. Clone it if
+you need to spread it more than once.
 
-| You want | You write |
-|---|---|
-| Define one | `#[component] async fn card(slug: &str) -> Result<impl View>` |
-| Call one | `card(slug: "a1")` |
-| Pass children | `card(slug: "a1", <p>"note"</p>)` |
-| Accept children | `#[default] child: Child<'_>`, rendered as `(child)` |
-| Accept caller attributes | `#[default] attrs: Attributes`, spread as `<article (attrs)>` |
-| Merge caller classes | `class=(class!("card", attrs.remove("class")))` |
-| Optional prop | `#[default] tone: Tone` / `#[default(80)] max: usize` |
-| Convert on the way in | `#[into] label: String` |
-| Ask for the request context | `cx: &Cx` |
-| Two different `view!` returns, or recursion | `.boxed()` from `ViewExt` |
+Attribute keys in an `Attributes` collection are unique, and insertion order is not a rendering
+contract. Tests should compare the attribute set rather than an exact opening-tag string.
 
-`key` is reserved on component calls and cannot be a parameter name.
+## Component calls and child content
 
-A component owning the document, via child content:
+Component properties use `name: value`. Child nodes follow the named properties without a property
+name or commas. The receiving component declares a `Child<'_>` parameter and interpolates it where
+the caller's content belongs.
+
+Lab 03's document layout shows the receiving side:
 
 ```rust
 {{#include ../../../labs/lab-03-components/solution/src/lib.rs:layout}}
 ```
 
-A component that fetches what it renders, accepts caller attributes, and offers a child slot:
+A component call may include another component as child content. The children become one view passed
+to the receiving component; they are not ordinary positional Rust arguments.
 
-```rust
-{{#include ../../../labs/lab-03-components/solution/src/lib.rs:berth_card}}
-```
+> [!NOTE]
+> `key` is reserved on component calls. Use it to give repeated component invocations stable identity,
+> especially inside loops; do not declare a component property named `key`.
 
-## Gotchas
+## Formatting and common mistakes
 
-- Bare words are Rust. Literal text needs quotes.
-- `rustfmt` will not format inside `view!`. Run `topcoat fmt` as well — and note that 0.7.0's
-  `topcoat fmt` has no `--check`, so CI formats and then runs `git diff --exit-code`.
-- `for berth in berths` moves the collection, exactly as it does in ordinary Rust.
-- `true` renders a present, empty attribute; `false` and `None` remove it.
-- Views are lazy: nothing renders until the view becomes a response or is interpolated into one.
-- Spreading an `Attributes` consumes it, and puts that element's attributes in a map — **render order
-  is then not guaranteed**. Assert on the attribute set, not on an exact string.
+- Bare words are Rust expressions. Quote literal text.
+- HTML void elements such as `<img>` and `<input>` have no closing tag.
+- Run both `cargo fmt` and `topcoat fmt`; `rustfmt` does not format the inside of `view!`.
+- In a plain function, provide the request context explicitly with `view! { cx => ... }`. Pages,
+  layouts, components, and shards receive it implicitly.
+- Spreading `Attributes` consumes the value.
+- A `view!` value captures referenced variables like an `async move` block.
+
+**See also:** [Lab 02 — The `view!` macro](../02-labs/lab-02.md),
+[Lab 03 — Components](../02-labs/lab-03.md),
+[Views and markup](../01-concepts/views-and-markup.md), and
+[Components and composition](../01-concepts/components-and-composition.md).

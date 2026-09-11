@@ -132,11 +132,15 @@ async fn status_badge(status: &Status) -> Result<impl View> {
 #[component]
 async fn berth_list(berths: Vec<Berth>) -> Result<impl View> {
     Ok(view! {
+        // ANCHOR: cheatsheet-conditional
         if berths.is_empty() {
+            // ANCHOR_END: cheatsheet-conditional
             <p class="empty">"No berths yet."</p>
         } else {
             <ul class="berths">
+                // ANCHOR: cheatsheet-loop
                 for berth in berths {
+                    // ANCHOR_END: cheatsheet-loop
                     <li>
                         <article
                             (attributes! {
@@ -148,14 +152,18 @@ async fn berth_list(berths: Vec<Berth>) -> Result<impl View> {
                             <h2>
                                 <a href=(berth.url())>
                                     "Berth "
+                                    // ANCHOR: cheatsheet-interpolation
                                     (berth.name)
+                                    // ANCHOR_END: cheatsheet-interpolation
                                 </a>
                             </h2>
                             <p class="berth-length">
                                 (berth.length_m)
                                 "m"
                             </p>
+                            // ANCHOR: cheatsheet-component-call
                             status_badge(status: &berth.status)
+                            // ANCHOR_END: cheatsheet-component-call
                         </article>
                     </li>
                 }

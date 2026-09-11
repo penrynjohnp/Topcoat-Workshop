@@ -253,7 +253,9 @@ async fn home() -> Result<impl View> {
 
 #[page("/berths")]
 async fn berths_page() -> Result<impl View> {
+    // ANCHOR: cheatsheet-child-content
     Ok(view! { layout(title: "Berths", current_path: "/berths", berth_list()) })
+    // ANCHOR_END: cheatsheet-child-content
 }
 
 #[page("/berths/featured")]
@@ -270,7 +272,9 @@ async fn featured_berth_page() -> Result<impl View> {
             // a note in the card's child slot.
             berth_card(
                 slug: "a2",
+                // ANCHOR: cheatsheet-attributes
                 attrs: attributes! { class="berth-card-detail" data-detail="" },
+                // ANCHOR_END: cheatsheet-attributes
                 <p class="berth-note">"Ask at the office about long-stay rates."</p>
             )
         )

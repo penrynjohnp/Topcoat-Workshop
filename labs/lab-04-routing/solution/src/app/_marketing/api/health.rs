@@ -14,3 +14,4 @@ pub(crate) struct Health {
 async fn health() -> Result<Json<Health>> {
     Ok(Json(Health { status: "ok" }))
 }
+// ANCHOR_END: health-route

@@ -9,6 +9,7 @@ use topcoat::{
     view::{View, view},
 };
 
+// ANCHOR: group-layout-home
 #[layout]
 async fn root_layout(cx: &Cx, slot: Slot<'_>) -> Result<impl View> {
     Ok(view! {
@@ -42,3 +43,4 @@ async fn home() -> Result<impl View> {
         },
     )
 }
+// ANCHOR_END: group-layout-home

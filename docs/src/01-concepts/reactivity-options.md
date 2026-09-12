@@ -246,7 +246,7 @@ Mixing is normal. Lab 09 runs a shard and an htmx route side by side in one app,
 component, and a single page may hold signals, a shard, and a live region at once.
 
 > [!NOTE]
-> The client reactivity runtime is explicitly experimental in v0.8.0 and documented as limited.
+> Updated 2026-09-12: the client reactivity runtime is explicitly experimental in v0.8.0 and documented as limited.
 > Expect both additions and breaking changes; check [Compatibility](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/COMPATIBILITY.md)
 > before relying on a behaviour described here.
 

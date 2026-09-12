@@ -31,7 +31,7 @@ engineers who can support the language. Building the next internal tool in Rust 
 than introducing another stack, even when that tool does not need exceptional performance.
 
 > [!NOTE]
-> AI can shorten the learning loop, but it cannot make an immature API stable. Topcoat is pre-1.0,
+> Updated 2026-09-12: AI can shorten the learning loop, but it cannot make an immature API stable. Topcoat is pre-1.0,
 > experimental, and expected to change. This workshop pins the version it teaches and records known
 > constraints in the repository's
 > [Compatibility matrix](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/COMPATIBILITY.md).

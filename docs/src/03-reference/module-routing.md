@@ -4,8 +4,8 @@
 your route tree, declare every child with `mod`, and omit path strings from handlers whose paths
 should be derived.
 
-This reference maps every convention exercised in Lab 04. It follows Topcoat v0.7.0's
-[`module_router!` reference](https://docs.rs/topcoat/0.7.0/topcoat/router/macro.module_router.html).
+This reference maps every convention exercised in Lab 04. It follows Topcoat v0.8.0's
+[`module_router!` reference](https://docs.rs/topcoat/0.8.0/topcoat/router/macro.module_router.html).
 
 ## Convention table
 

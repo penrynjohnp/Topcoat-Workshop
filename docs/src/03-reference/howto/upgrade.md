@@ -3,7 +3,7 @@
 Topcoat is pre-1.0, so an upgrade is a compatibility exercise, not only a version edit. You update the workspace pins, the CLI and documentation toolchain, run the drift check, then record what actually passes in [`COMPATIBILITY.md`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/COMPATIBILITY.md).
 
 > [!WARNING]
-> Read the guides from the release tag that you are testing, such as [`v0.7.0`](https://github.com/tokio-rs/topcoat/tree/v0.7.0), not `main`. The unreleased API can already differ from the version in this workshop.
+> Read the guides from the release tag that you are testing, such as [`v0.8.0`](https://github.com/tokio-rs/topcoat/tree/v0.8.0), not `main`. The unreleased API can already differ from the version in this workshop.
 
 ## 1. Establish a clean baseline
 

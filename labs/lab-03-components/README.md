@@ -260,8 +260,12 @@ calls for keying an invocation's identity.
 - **`use of moved value: attrs`** — spreading an `Attributes` consumes it. `clone()` if you need it
   twice.
 - **Attribute order changes between renders** — expected. Spreading an `Attributes` value routes that
-  element's attributes through a map, and 0.7.0 documents that render order is not guaranteed. Assert
-  on the set of attributes, not on a byte-for-byte string, as the solution's test does.
+  element's attributes through a map, and the [`Attributes`
+  type](https://docs.rs/topcoat/0.8.0/topcoat/view/struct.Attributes.html) is documented as map-like:
+  each key appears at most once, and you must not rely on render order. Note that this caveat comes
+  from `Attributes`, not from `view!` generally — the `view!` guide says rendered markup follows
+  source order, and it is *component body execution* order that is unspecified. Assert on the set of
+  attributes, not on a byte-for-byte string, as the solution's test does.
 - **`cannot find value cx`** — components only get the request context if they declare `cx: &Cx`.
   That is Lab 05.
 

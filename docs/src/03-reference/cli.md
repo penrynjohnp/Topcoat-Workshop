@@ -1,15 +1,19 @@
 # CLI commands
 
-This page records the complete `--help` surface of **Topcoat CLI 0.7.0**, the version pinned by this
-workshop. The CLI has four working command groups: `dev`, `fmt`, `asset`, and `ui`.
+This page records the complete `--help` surface of **Topcoat CLI 0.8.0**, the version pinned by this
+workshop. The CLI has four working command groups: `dev`, `fmt`, `asset`, and `ui`. Every table below
+was regenerated from the installed 0.8.0 binary; the command groups and flags are unchanged from
+0.7.0.
 
 > [!WARNING]
-> Topcoat CLI 0.7.0 has **no top-level `--version` flag**. `topcoat --version` is an error. The
-> formatter alone exposes `topcoat fmt --version`, which prints `topcoat-fmt 0.7.0`.
+> Topcoat CLI 0.8.0 has **no top-level `--version` flag**. `topcoat --version` fails with
+> `error: unexpected argument '--version' found`. The formatter alone exposes
+> `topcoat fmt --version`, which prints `topcoat-fmt 0.8.0`.
 
 > [!NOTE]
-> There is no `topcoat build` command in 0.7.0. Use Cargo to build the binary, then use `topcoat asset
-> bundle` with the same package, binary, and profile selection.
+> There is still no `topcoat build` command in 0.8.0. `topcoat build` fails with
+> `error: unrecognized subcommand 'build'` and suggests `ui`, which is unrelated. Use Cargo to build
+> the binary, then use `topcoat asset bundle` with the same package, binary, and profile selection.
 
 ## Top-level command
 
@@ -33,7 +37,7 @@ Usage is `topcoat dev [OPTIONS]`.
 
 | Flag | Value | Meaning |
 |---|---|---|
-| `--bin` | `<BIN>` | Build and run the named binary target. |
+| `--bin` | `<BIN>` | Build the named binary target. |
 | `-p`, `--package` | `<PACKAGE>` | Build the named workspace package. |
 | `-r`, `--release` | — | Build with Cargo's `release` profile. |
 | `--profile` | `<NAME>` | Build with the named Cargo profile. |
@@ -58,8 +62,11 @@ Usage is `topcoat fmt [OPTIONS] [FILES]...`.
 | `-V`, `--version` | — | Print the formatter version. This is subcommand-specific, not a top-level CLI version flag. |
 
 > [!WARNING]
-> `topcoat fmt` has **no `--check` flag** in 0.7.0. `topcoat fmt --check` is an error. CI must run the
-> formatter and then fail if `git diff --exit-code -- '*.rs'` reports a change.
+> `topcoat fmt` has **no `--check` flag** in 0.8.0. `topcoat fmt --check` fails with
+> `error: unexpected argument '--check' found` and then suggests `tip: to pass '--check' as a value,
+> use '-- --check'`. Ignore that tip. It only offers to treat `--check` as a *file path*, so
+> `topcoat fmt -- --check` looks for a file named `--check` rather than enabling a check mode. CI
+> must run the formatter and then fail if `git diff --exit-code -- '*.rs'` reports a change.
 
 Run `cargo fmt` as well. Rustfmt treats a macro body as opaque tokens; `topcoat fmt` understands the
 markup inside supported Topcoat macros.
@@ -188,15 +195,17 @@ Usage is `topcoat ui remove [OPTIONS] <COMPONENTS>...`.
 `help` to request that command's help.
 
 The normal `--help` form is available on every working command listed above. `topcoat help --help`
-is not a separate supported help page in 0.7.0; use `topcoat --help` instead.
+is not a separate supported help page in 0.8.0; use `topcoat --help` instead.
 
-## Missing commands and flags in 0.7.0
+## Missing commands and flags in 0.8.0
+
+The `Result` column quotes the 0.8.0 binary verbatim.
 
 | Attempt | Result | Use instead |
 |---|---|---|
-| `topcoat --version` | Error: unexpected argument. | Check the workspace pin and use `topcoat fmt --version` only as a formatter-binary check. |
-| `topcoat fmt --check` | Error: unexpected argument. | Run `topcoat fmt` and then `git diff --exit-code -- '*.rs'`. |
-| `topcoat build` | Error: unrecognized command. | Run `cargo build`, followed by `topcoat asset bundle` when assets are used. |
+| `topcoat --version` | `error: unexpected argument '--version' found` | Check the workspace pin and use `topcoat fmt --version` only as a formatter-binary check. |
+| `topcoat fmt --check` | `error: unexpected argument '--check' found`, with `tip: to pass '--check' as a value, use '-- --check'` | Run `topcoat fmt` and then `git diff --exit-code -- '*.rs'`. The tip is misleading: it would pass `--check` as a file name. |
+| `topcoat build` | `error: unrecognized subcommand 'build'`, with `tip: a similar subcommand exists: 'ui'` | Run `cargo build`, followed by `topcoat asset bundle` when assets are used. The suggested `ui` command is unrelated. |
 
 **See also:** [Lab 02 — The `view!` macro](../02-labs/lab-02.md),
 [Lab 11 — Assets, Tailwind, and Topcoat UI](../02-labs/lab-11.md),

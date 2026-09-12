@@ -4,7 +4,7 @@ These projects solve different problems at different layers. Choose from the ren
 model your product needs, then consider maturity and stewardship alongside those technical facts.
 
 This comparison is a snapshot dated **11 September 2026**. Topcoat examples elsewhere in this
-workshop remain pinned to v0.7.0 even when a newer release exists.
+workshop remain pinned to v0.8.0 even when a newer release exists.
 
 ## Technical comparison
 
@@ -17,8 +17,8 @@ workshop remain pinned to v0.7.0 even when a newer release exists.
 | **Scope supplied** | Pages, layouts, components, routing, request context, cookies, sessions, assets, UI source, mail, streaming, and selective reactivity. | A deliberately thin HTTP layer over Hyper with Tower interoperability. | A web UI framework with routing, reactive primitives, server functions, streaming, and hydration. | A cross-platform UI and full-stack toolchain, including routing, server functions, assets, and platform bundling. |
 | **Maturity signal** | Its README calls it early-stage and experimental and says to expect breaking changes. | Pre-1.0, with an established 0.8 release line; its repository says work toward 0.9 introduces breaking changes on `main`. | Pre-1.0; its README says the APIs are basically settled while acknowledging bugs and that adopters may need to contribute missing pieces. | Pre-1.0; the stable line was 0.7.10 and 0.8 was in alpha when this snapshot was checked. It supports several platforms, which gives it a broader compatibility surface. |
 
-Sources for the rendering models are the [Topcoat v0.7.0
-README](https://github.com/tokio-rs/topcoat/blob/v0.7.0/README.md), [Axum crate
+Sources for the rendering models are the [Topcoat v0.8.0
+README](https://github.com/tokio-rs/topcoat/blob/v0.8.0/README.md), [Axum crate
 documentation](https://docs.rs/axum/latest/axum/), [Leptos
 README](https://github.com/leptos-rs/leptos), and [Dioxus
 README](https://github.com/DioxusLabs/dioxus) plus its [full-stack
@@ -87,7 +87,7 @@ maintainer time. It does not by itself determine whether a framework fits your a
 
 | Project | Maintainer and organisation | Dated status | Publicly stated investment or direction |
 |---|---|---|---|
-| **Topcoat** | Maintained as a [`tokio-rs` project](https://github.com/tokio-rs/topcoat), announced on the [Tokio site](https://tokio.rs/blog/2026-07-22-announcing-topcoat). | **22 July 2026:** first public announcement. The v0.7.0 README describes the project as early-stage and experimental, with breaking changes expected. | Its [published roadmap](https://github.com/tokio-rs/topcoat/blob/v0.7.0/README.md#roadmap) lists more reactivity, Topcoat UI, Toasty integration, validation, authentication, static export, deployment documentation, and other full-stack facilities. |
+| **Topcoat** | Maintained as a [`tokio-rs` project](https://github.com/tokio-rs/topcoat), announced on the [Tokio site](https://tokio.rs/blog/2026-07-22-announcing-topcoat). | **22 July 2026:** first public announcement. The v0.8.0 README describes the project as early-stage and experimental, with breaking changes expected. | Its [published roadmap](https://github.com/tokio-rs/topcoat/blob/v0.8.0/README.md#roadmap) lists more reactivity, Topcoat UI, Toasty integration, validation, authentication, static export, deployment documentation, and other full-stack facilities. |
 | **Axum** | Maintained under [`tokio-rs`](https://github.com/tokio-rs/axum), the same GitHub organisation as Tokio and Topcoat. | **11 September 2026 snapshot:** crates.io's released line is 0.8; the repository states that `main` contains breaking work toward Axum 0.9. | Axum's stated centre remains ergonomic, modular HTTP routing and request handling with [Tower ecosystem](https://docs.rs/axum/latest/axum/#high-level-features) interoperability. The repository identifies Axum 0.9 as the current release direction rather than publishing a broader product roadmap. |
 | **Leptos** | Community-maintained in the [`leptos-rs` organisation](https://github.com/leptos-rs/leptos). Its book directs users to community discussions, issues, Discord, and the [community crate ecosystem](https://book.leptos.dev/getting_started/community_crates.html). | **11 September 2026 snapshot:** the stable crate line is 0.8 and a 0.9 beta is published. The README says its APIs are basically settled, while describing production adoption as a relationship that may still include contributing missing pieces. | Its public project description continues to focus on full-stack isomorphic web development, fine-grained reactivity, SSR/hydration, streamed HTML, and server functions. Priorities are discussed through the repository and community channels rather than a single published roadmap. |
 | **Dioxus** | On **10 September 2026**, the [Dioxus team announced that it had joined Cognition](https://dioxuslabs.com/blog/joining-cognition). The post says the team continues to maintain Dioxus and its related open-source projects, with **one full-time engineer**, lead Blitz engineer Nico Burns, devoted to maintaining and improving Dioxus. | **10 September 2026:** the announcement says joining Cognition leaves the team less time devoted entirely to Dioxus, while Cognition supports continued open-source work. | The same announcement says future investment is weighted toward **Dioxus-Native and Blitz**, its native HTML/CSS renderer, rather than the web target. It also names Blitz, Taffy, Parley, Subsecond, `wasm-split`, and DX as work intended to benefit users beyond Dioxus itself. |

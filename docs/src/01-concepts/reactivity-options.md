@@ -30,9 +30,11 @@ A signal plus `$(...)` is the client-only end of Topcoat's reactivity spectrum. 
 filtering rendered rows, or synchronizing an input. A runtime expression re-runs in JavaScript and
 patches its node without a server request.
 
-The middle ground is a **signal-parameter shard**. The page owns the signal, passes it as `$(query)`,
-and the shard reads the `Signal<T>` in server code. The signal handle stays stable while its value
-changes, so the shard is the boundary that re-renders instead of the whole page.
+The middle ground is a **signal-parameter shard**. The page owns the signal and passes the handle as
+`$(query)`; the shard declares a `Signal<T>` parameter and reads it in server code. The handle itself
+does not change when the value does, so whether a change re-renders the shard depends on how the
+shard body reads it — a tracked `.get()` or `.read()` makes the shard the boundary that re-renders,
+instead of the whole page.
 
 That makes a signal the wrong tool when the answer requires server data. A captured value is only a
 snapshot from the render that produced it. [How `$(...)` reaches the browser](dual-expressions.md)
@@ -76,9 +78,9 @@ sequenceDiagram
     Note over B,A: First render: the shard runs inline, no extra request
     B->>R: user types in the search input
     R->>R: @input handler writes the query signal
-    R->>R: argument expression $(query) re-evaluates
+    R->>R: the shard read that signal on the server, so it needs a re-render
     Note over R: same-tick changes coalesce into one request
-    R->>S: POST /_topcoat/shards/{id} with ["Lady"]
+    R->>S: POST /_topcoat/runtime/shards/{id} with {"args":[{"t":"Signal","id":…,"v":"Lady"}],"signals":{}}
     S->>A: run the shard with the decoded arguments
     A->>A: validate input, repeat guards, query server data
     A-->>S: HTML fragment (no layout, no document shell)

@@ -44,7 +44,7 @@ Labs [02](../02-labs/lab-02.md) and [09](../02-labs/lab-09.md). The
 | `` `impl Trait` … opaque type ``, or two arms returning different types | A component returns two different `view!` types | Call `.boxed()` on both arms and import `ViewExt` |
 | The caller's `class` replaced the component's own | `attrs` was spread without removing `class` first | `attrs.remove("class")`, then pass the removed value to `class!` as an entry |
 | `use of moved value: attrs` | Spreading an `Attributes` consumes it | `clone()` when you need it twice |
-| Attribute order changes between renders | Expected: spreading `Attributes` routes that element through a map, and 0.8.0 does not guarantee render order | Assert on the *set* of attributes, not on a byte-for-byte string |
+| Attribute order changes between renders | Expected: spreading `Attributes` routes that element through a map, and the 0.8.0 `Attributes` type is map-like — each key appears once and render order must not be relied on. `view!` itself renders in source order; it is component body execution order that is unspecified | Assert on the *set* of attributes, not on a byte-for-byte string |
 | `error: expected view node` after upgrading | The pre-0.8 `signal name = value;` statement is no longer valid inside `view!` | Create signals in the body with `signal(cx, || value)` and pass them into the view |
 | `cannot find value cx` | Components only receive the request context when they declare it | Add `cx: &Cx` to the signature — introduced in [Lab 05](../02-labs/lab-05.md) |
 

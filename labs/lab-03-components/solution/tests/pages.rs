@@ -73,8 +73,9 @@ async fn pages_provide_their_own_content_as_children() {
 /// Normalises a card for comparison by sorting the opening tag's attributes.
 ///
 /// Spreading an `Attributes` value into an element routes that element's
-/// attributes through a map, and topcoat 0.7.0 documents that attribute render
-/// order is not guaranteed. The attribute *set* is what has to match.
+/// attributes through a map. Topcoat 0.8.0 documents `Attributes` as map-like,
+/// where each key appears at most once and render order must not be relied on.
+/// The attribute *set* is what has to match.
 fn normalized(card: &str) -> String {
     let tag_end = card.find('>').expect("opening tag");
     let (open, rest) = card.split_at(tag_end);

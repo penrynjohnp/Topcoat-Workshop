@@ -225,7 +225,7 @@ Not every audience wants Bicep and `azd`. The same image from Step 1 runs anywhe
 - **New database connections start failing hours after a successful deploy, but existing ones still work.** This is the Step 4 warning: the managed-identity access token Toasty is holding has expired and it has no callback to refresh it. Restart the revision (`az containerapp revision restart`) to force a fresh token on the next connect; this is a known limitation of Toasty 0.10.0, not a misconfiguration.
 - **`azd provision` fails deploying the `app` module with a missing Key Vault secret reference.** `secret-bootstrap.bicep`'s own RBAC-propagation retry loop (Step 7) can still lose a race on a very fresh subscription — it gives up after six 15-second attempts. Re-run `azd provision`; the script is idempotent and the `app` module's `dependsOn` guarantees it never runs before the secret exists.
 - **`azd down` succeeds but a re-`azd up` fails with a Key Vault name conflict.** Use `azd down --purge` — without it, the vault is soft-deleted and its name stays reserved for its retention period.
-- **`topcoat build` is unknown.** As in Lab 11, CLI 0.7.0 has no such command; the Dockerfile uses `cargo build --release` followed by `topcoat asset bundle --release`, matching profiles.
+- **`topcoat build` is unknown.** As in Lab 11, CLI 0.8.0 has no such command; the Dockerfile uses `cargo build --release` followed by `topcoat asset bundle --release`, matching profiles.
 
 ## What's next
 Slipway is now a deployed, production-configured app with no secrets in source control. The optional Lab 13 goes one direction further — mounting an Axum router for a JSON API under `/api/v1` through Topcoat's tower bridge, inside this same container.

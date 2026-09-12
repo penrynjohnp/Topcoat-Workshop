@@ -7,8 +7,8 @@ Topcoat recommends a different default for request-scoped application policy: wr
 That is **locality of behaviour**. The authorization check, the data it unlocks, and the markup that
 uses that data stay visible in one place.
 
-This page follows Topcoat v0.7.0's [Functions, not
-middlewares](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.7.0/crates/topcoat/docs/functions_not_middlewares.md)
+This page follows Topcoat v0.8.0's [Functions, not
+middlewares](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/functions_not_middlewares.md)
 guide.
 
 ```mermaid

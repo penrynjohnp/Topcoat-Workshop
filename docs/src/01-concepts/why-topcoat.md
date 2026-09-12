@@ -53,7 +53,7 @@ from applications that do not need a substantial browser runtime. It fits forms,
 admin tools, dashboards, and data-heavy business applications where the server remains the source
 of truth.
 
-This section follows the server-rendering and reactivity model in the Topcoat v0.7.0 README. The
+This section follows the server-rendering and reactivity model in the Topcoat v0.8.0 README. The
 mechanics are developed further in [How `$(...)` reaches the browser](dual-expressions.md) and
 [Shards, procedures, live regions, htmx](reactivity-options.md).
 

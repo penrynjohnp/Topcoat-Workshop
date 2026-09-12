@@ -192,7 +192,7 @@ git diff
 ```
 
 `cargo fmt` leaves `view!` bodies alone — to rustfmt they are opaque token trees. `topcoat fmt` is
-the formatter that understands them, so run both. Note that CLI 0.7.0 has no `--check` flag, which
+the formatter that understands them, so run both. Note that CLI 0.8.0 has no `--check` flag, which
 is why CI formats and then runs `git diff --exit-code` (see `COMPATIBILITY.md`).
 > [!NOTE]
 > **Checkpoint:** `git diff` shows your markup restored to the canonical layout. Compare your file
@@ -218,7 +218,7 @@ is why CI formats and then runs `git diff --exit-code` (see `COMPATIBILITY.md`).
   you need it again afterwards.
 - **The attribute renders as `aria-current=""` when you wanted it gone** — you passed `true`, not
   `Some(...)`/`None`. `true` renders a present, empty attribute; `false` and `None` remove it.
-- **`topcoat: command not found`** — `cargo install topcoat-cli --version 0.7.0 --locked`.
+- **`topcoat: command not found`** — `cargo install topcoat-cli --version 0.8.0 --locked`.
 
 ## What's next
 Lab 03 turns this one-file page into composed components — `layout`, `nav`, `berth_card` — with

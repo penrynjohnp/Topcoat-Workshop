@@ -77,7 +77,7 @@ Magic links are persistent too, and their tokens are cryptographically random:
 {{#include solution/src/auth.rs:database-magic-links}}
 ```
 
-The existing `#[procedure]` now loads and updates a `WorkOrder`. Topcoat 0.7 runtime numbers use `f64`, so the server validates that surrogate before converting it to Toasty's `u64` key:
+The existing `#[procedure]` now loads and updates a `WorkOrder`. Topcoat 0.8 runtime numbers use `f64`, so the server validates that surrogate before converting it to Toasty's `u64` key:
 
 ```rust
 {{#include solution/src/app/_marketing.rs:complete-work-order-procedure}}
@@ -130,7 +130,7 @@ The final integration test creates a record, authenticates, drops the first app 
 - **A berth relation is empty even though the child row exists.** The query did not call `.include(...)`, or the child has the wrong `berth_slug`.
 - **POST returns 415 or fails to extract `Form`.** Send `Content-Type: application/x-www-form-urlencoded`.
 - **A session row exists but the old browser cookie no longer works.** The cookie encryption key changed across the restart. Persist that key in deployment configuration; never hard-code it or commit it.
-- **The procedure rejects a numeric ID.** Topcoat 0.7 transports runtime numbers as `f64`; accept the surrogate, validate that it is a non-negative integer, then convert it to the database key.
+- **The procedure rejects a numeric ID.** Topcoat 0.8 transports runtime numbers as `f64`; accept the surrogate, validate that it is a non-negative integer, then convert it to the database key.
 
 ## What's next
 Lab 11 keeps this persistent server-rendered app and adds bundled assets, fonts, icons, Tailwind, and owned Topcoat UI components.

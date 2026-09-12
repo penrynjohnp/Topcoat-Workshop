@@ -4,12 +4,12 @@ A Topcoat request stays on the server from routing through HTML generation. You 
 short chain: the router selects a page, Topcoat creates a request context, layouts and components
 compose the response, and `view!` describes the HTML sent to the browser.
 
-The routing and view descriptions here follow the pinned v0.7.0 [getting started
-guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.7.0/crates/topcoat/docs/getting_started.md)
-and the release README. The request-context and app-context sections follow the v0.7.0 [app context
-guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.7.0/crates/topcoat/docs/app_context.md)
+The routing and view descriptions here follow the pinned v0.8.0 [getting started
+guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/getting_started.md)
+and the release README. The request-context and app-context sections follow the v0.8.0 [app context
+guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/app_context.md)
 and [functions, not middlewares
-guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.7.0/crates/topcoat/docs/functions_not_middlewares.md).
+guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/functions_not_middlewares.md).
 
 ```mermaid
 flowchart LR

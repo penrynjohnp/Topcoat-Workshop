@@ -9,7 +9,7 @@
       "version": "lts"
     }
   },
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y chromium sqlite3 && cargo install topcoat-cli --version 0.7.0 --locked && cargo install mdbook@0.5.4 mdbook-mermaid@0.17.1 mdbook-linkcheck2@0.13.0 --locked",
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y chromium sqlite3 && cargo install topcoat-cli --version 0.8.0 --locked && cargo install mdbook@0.5.4 mdbook-mermaid@0.17.1 mdbook-linkcheck2@0.13.0 --locked",
   "forwardPorts": [3000, 8080],
   "customizations": {
     "vscode": {

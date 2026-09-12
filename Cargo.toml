@@ -32,7 +32,7 @@ members = [
 
 # Single source of truth for versions — see COMPATIBILITY.md
 [workspace.dependencies]
-topcoat = { version = "=0.7.0", features = ["mail"] }
+topcoat = { version = "=0.8.0", features = ["mail"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
 serde = { version = "1", features = ["derive"] }
 web-time = "1"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Install and verify the toolchain pinned in COMPATIBILITY.md
 set -euo pipefail
-TOPCOAT_CLI_VERSION="0.7.0"
+TOPCOAT_CLI_VERSION="0.8.0"
 command -v rustup >/dev/null || { echo "rustup not found — install from https://rustup.rs then re-run"; exit 1; }
 rustup show active-toolchain
 

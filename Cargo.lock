@@ -1660,7 +1660,7 @@ dependencies = [
  "toasty",
  "tokio",
  "topcoat",
- "topcoat-asset 0.7.0",
+ "topcoat-asset",
  "web-time",
 ]
 
@@ -1672,7 +1672,7 @@ dependencies = [
  "toasty",
  "tokio",
  "topcoat",
- "topcoat-asset 0.7.0",
+ "topcoat-asset",
  "web-time",
 ]
 
@@ -1684,7 +1684,7 @@ dependencies = [
  "toasty",
  "tokio",
  "topcoat",
- "topcoat-asset 0.7.0",
+ "topcoat-asset",
  "web-time",
 ]
 
@@ -2763,7 +2763,7 @@ dependencies = [
  "toasty",
  "tokio",
  "topcoat",
- "topcoat-asset 0.7.0",
+ "topcoat-asset",
  "tracing",
  "tracing-subscriber",
  "web-time",
@@ -2782,7 +2782,7 @@ dependencies = [
  "toasty",
  "tokio",
  "topcoat",
- "topcoat-asset 0.7.0",
+ "topcoat-asset",
  "tower",
  "tower-http 0.7.1",
  "tracing",
@@ -3374,9 +3374,9 @@ dependencies = [
  "serde",
  "tokio",
  "tokio-tungstenite",
- "topcoat-asset 0.8.0",
+ "topcoat-asset",
  "topcoat-cookie",
- "topcoat-core 0.8.0",
+ "topcoat-core",
  "topcoat-core-macro",
  "topcoat-font",
  "topcoat-font-macro",
@@ -3398,9 +3398,9 @@ dependencies = [
 
 [[package]]
 name = "topcoat-asset"
-version = "0.7.0"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9948a1665b042282790c98949dd3e0c0e85255baaa7f46f899cd52b218c01c89"
+checksum = "fba199ae779d0409672929e7c32711ac35e87c9e39e0823d0b33b6293e3e0011"
 dependencies = [
  "http",
  "memchr",
@@ -3408,27 +3408,12 @@ dependencies = [
  "serde",
  "sha2 0.11.0",
  "thiserror",
- "toml",
- "topcoat-core 0.7.0",
- "ureq",
-]
-
-[[package]]
-name = "topcoat-asset"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fba199ae779d0409672929e7c32711ac35e87c9e39e0823d0b33b6293e3e0011"
-dependencies = [
- "http",
- "memchr",
- "serde",
- "sha2 0.11.0",
- "thiserror",
  "tokio",
  "toml",
- "topcoat-core 0.8.0",
+ "topcoat-core",
  "topcoat-router",
  "topcoat-view",
+ "ureq",
 ]
 
 [[package]]
@@ -3442,24 +3427,8 @@ dependencies = [
  "http",
  "serde",
  "serde_json",
- "topcoat-core 0.8.0",
+ "topcoat-core",
  "topcoat-router",
-]
-
-[[package]]
-name = "topcoat-core"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9b9b5a207216d7a2bb5f41aef5520466d5a55ca5311af9a7b05cb1c7372028d1"
-dependencies = [
- "anyhow",
- "anymap3",
- "elsa",
- "http",
- "pin-project-lite",
- "siphasher",
- "thiserror",
- "tokio",
 ]
 
 [[package]]
@@ -3511,8 +3480,8 @@ dependencies = [
  "inventory",
  "serde",
  "serde_json",
- "topcoat-asset 0.8.0",
- "topcoat-core 0.8.0",
+ "topcoat-asset",
+ "topcoat-core",
  "topcoat-router",
  "topcoat-view",
  "topcoat-view-macro",
@@ -3551,7 +3520,7 @@ dependencies = [
  "http",
  "serde",
  "serde_json",
- "topcoat-core 0.8.0",
+ "topcoat-core",
  "topcoat-router",
 ]
 
@@ -3564,7 +3533,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "topcoat-core 0.8.0",
+ "topcoat-core",
  "topcoat-view",
  "topcoat-view-macro",
  "ureq",
@@ -3606,7 +3575,7 @@ dependencies = [
  "lettre",
  "thiserror",
  "time",
- "topcoat-core 0.8.0",
+ "topcoat-core",
  "topcoat-router",
  "topcoat-view",
 ]
@@ -3662,7 +3631,7 @@ dependencies = [
  "serde_path_to_error",
  "serde_urlencoded",
  "tokio",
- "topcoat-core 0.8.0",
+ "topcoat-core",
  "topcoat-view",
  "tower",
  "tower-http 0.7.1",
@@ -3702,8 +3671,8 @@ dependencies = [
  "ref-cast",
  "serde",
  "serde_json",
- "topcoat-asset 0.8.0",
- "topcoat-core 0.8.0",
+ "topcoat-asset",
+ "topcoat-core",
  "topcoat-router",
  "topcoat-view",
 ]
@@ -3747,7 +3716,7 @@ dependencies = [
  "thiserror",
  "tokio",
  "topcoat-cookie",
- "topcoat-core 0.8.0",
+ "topcoat-core",
  "topcoat-router",
  "web-time",
 ]
@@ -3760,7 +3729,7 @@ checksum = "9a77a6feaf18eb77c5176c299977727bc9dcc16ddfdf6b032af19ffaa1cb9b1b"
 dependencies = [
  "sha2 0.11.0",
  "thiserror",
- "topcoat-core 0.8.0",
+ "topcoat-core",
  "ureq",
 ]
 
@@ -3784,7 +3753,7 @@ dependencies = [
  "pin-project-lite",
  "siphasher",
  "smallvec",
- "topcoat-core 0.8.0",
+ "topcoat-core",
 ]
 
 [[package]]

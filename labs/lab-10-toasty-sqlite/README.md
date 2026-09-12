@@ -99,7 +99,7 @@ GET and POST pages share one server-rendered form. The POST trims the title, app
 {{#include solution/src/app/_marketing/dashboard/work_orders/new.rs:manual-form-validation}}
 ```
 
-Topcoat validation helpers are still on the roadmap, so this lab deliberately keeps validation explicit. Invalid input returns HTTP 200, preserves submitted values, and renders both messages; valid input returns 303 with `Location: /dashboard`.
+Topcoat validation helpers are still on the roadmap, so this lab deliberately keeps validation explicit. Topcoat 0.8.0 now decodes an empty form or query value as `None` for an `Option<T>`. These two required fields deliberately remain `String`, so an empty submission reaches the explicit `is_empty()` and managed-berth checks below. Invalid input returns HTTP 200, preserves submitted values, and renders both messages; valid input returns 303 with `Location: /dashboard`.
 
 ```rust
 {{#include solution/tests/persistence.rs:form-validation-test}}

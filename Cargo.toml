@@ -37,7 +37,7 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
 serde = { version = "1", features = ["derive"] }
 web-time = "1"
 toasty = { version = "=0.10.0", features = ["postgresql", "sqlite"] }
-topcoat-asset = { version = "=0.7.0", features = ["bundler"] }
+topcoat-asset = { version = "=0.8.0", features = ["bundler"] }
 azure_core = { version = "=0.30.1", default-features = false, features = ["reqwest", "reqwest_gzip", "tokio"] }
 azure_identity = { version = "=0.30.0", default-features = false, features = ["tokio"] }
 base64 = "0.22"

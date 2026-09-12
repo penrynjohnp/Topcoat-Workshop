@@ -21,7 +21,7 @@ use topcoat::{
     context::{Cx, app_context},
     icon::icon,
     router::{Slot, layout, page, request::uri},
-    runtime::procedure,
+    runtime::{procedure, signal},
     view::{View, component, view},
 };
 
@@ -103,14 +103,13 @@ pub(crate) async fn mark_work_order_complete(cx: &Cx, id: f64) -> Result<bool> {
 
 #[component]
 async fn work_order_row(cx: &Cx, order: &WorkOrder) -> Result<impl View> {
-    let _ = cx;
     let id = order.id as f64;
     let completed_initially = order.completed;
-    Ok(view! {
-        signal work_order_id = id;
-        signal completed = completed_initially;
+    let completed = signal(cx, || completed_initially);
 
+    Ok(view! {
         <li
+            id=(order.id)
             :class=$(if completed.get() {
                 "work-order complete flex items-center justify-between gap-4 rounded-xl bg-emerald-50 p-4 text-emerald-900"
             } else {
@@ -122,7 +121,7 @@ async fn work_order_row(cx: &Cx, order: &WorkOrder) -> Result<impl View> {
                 type="button"
                 :disabled=$(completed.get())
                 @click=$(async |_event| {
-                    let saved = mark_work_order_complete(work_order_id.get()).await;
+                    let saved = mark_work_order_complete(id).await;
                     completed.set(saved);
                 })
                 class="inline-flex h-9 items-center gap-2 rounded-lg border border-cyan-900/10 bg-white px-3 text-sm font-medium shadow-xs disabled:opacity-60"
@@ -156,7 +155,7 @@ async fn work_orders(cx: &Cx) -> Result<impl View> {
                 card_content(
                     <ul class="grid gap-3">
                         for order in orders {
-                            work_order_row(order: &order)
+                            work_order_row(order: &order, key: order.id)
                         }
                     </ul>
                     <div class="mt-6 flex flex-wrap gap-3">

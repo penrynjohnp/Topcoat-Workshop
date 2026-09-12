@@ -83,13 +83,18 @@ pub(crate) async fn vessel_matches(query: &str) -> Result<impl View> {
                 </p>
             } else {
                 <ul>
+                    // ANCHOR: vessel-result-ids
                     for vessel in matches {
-                        <li data-vessel=(vessel.name)>
+                        let vessel_id = format!(
+                            "vessel-{}",
+                            vessel.name.to_ascii_lowercase().replace(' ', "-"),
+                        );
+                        <li id=(vessel_id) data-vessel=(vessel.name)>
                             <strong>(vessel.name)</strong>
                             " · "
                             (vessel.berth)
                         </li>
-                    }
+                    } // ANCHOR_END: vessel-result-ids
                 </ul>
             }
         </section>

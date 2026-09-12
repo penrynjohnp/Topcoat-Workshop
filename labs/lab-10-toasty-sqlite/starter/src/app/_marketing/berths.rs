@@ -5,7 +5,7 @@ use topcoat::{
     Result,
     context::Cx,
     router::page,
-    runtime::Event,
+    runtime::{Event, signal},
     view::{View, view},
 };
 
@@ -14,11 +14,11 @@ use topcoat::{
 #[rustfmt::skip]
 async fn list(cx: &Cx) -> Result<impl View> {
     let data = managed_berths(cx).await?;
-    Ok(view! {
-        signal query = String::new();
-        signal show_occupied = true;
-        signal show_vacant = true;
+    let query = signal(cx, String::new);
+    let show_occupied = signal(cx, || true);
+    let show_vacant = signal(cx, || true);
 
+    Ok(view! {
         <h1>"Berths"</h1>
 
         <form

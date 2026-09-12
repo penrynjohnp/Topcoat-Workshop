@@ -13,6 +13,7 @@ use topcoat::{
     Result,
     context::{Cx, app_context},
     router::{Slot, layout, page, request::uri},
+    runtime::{Event, Signal, signal},
     view::{View, component, view},
 };
 
@@ -49,9 +50,9 @@ async fn root_layout(cx: &Cx, slot: Slot<'_>) -> Result<impl View> {
 #[rustfmt::skip]
 async fn work_orders(cx: &Cx) -> Result<impl View> {
     let email = require_auth(cx).await?;
-    Ok(view! {
-        signal open = false;
+    let open = signal(cx, || false);
 
+    Ok(view! {
         <section data-component="work-orders">
             <h2>"Work orders"</h2>
             <button
@@ -96,6 +97,54 @@ async fn work_orders(cx: &Cx) -> Result<impl View> {
 // so `$(count.get() + 1)` fails and `$(count.get() + 1.0)` compiles.
 // ANCHOR_END: unsupported-expression
 
+// ANCHOR: server-read-signals
+#[component]
+#[rustfmt::skip]
+async fn server_read_demo(cx: &Cx) -> Result<impl View> {
+    let tracked = signal(cx, || String::from(""));
+    let untracked = signal(cx, || String::from(""));
+
+    Ok(view! {
+        <section data-component="server-read-signals">
+            <h2>"Server-read signals"</h2>
+            <label for="tracked-value">"Tracked value"</label>
+            <input
+                id="tracked-value"
+                :value=$(tracked.get())
+                @input=$(|e: Event| tracked.set(e.target.value))
+            >
+            <label for="untracked-value">"Untracked value"</label>
+            <input
+                id="untracked-value"
+                :value=$(untracked.get())
+                @input=$(|e: Event| untracked.set(e.target.value))
+            >
+            server_read_values(tracked: &tracked, untracked: &untracked)
+        </section>
+    })
+}
+
+#[component]
+async fn server_read_values(
+    tracked: &Signal<String>,
+    untracked: &Signal<String>,
+) -> Result<impl View> {
+    let tracked_value = tracked.get();
+    let untracked_value = untracked.get_untracked();
+
+    Ok(view! {
+        <p data-server-read="tracked">
+            "Tracked on the server: "
+            (tracked_value)
+        </p>
+        <p data-server-read="untracked">
+            "Read without tracking: "
+            (untracked_value)
+        </p>
+    })
+}
+// ANCHOR_END: server-read-signals
+
 #[page]
 #[rustfmt::skip]
 async fn home() -> Result<impl View> {
@@ -104,6 +153,7 @@ async fn home() -> Result<impl View> {
             <p>"Berths, vessels and work orders for a small marina."</p>
             <h2>"Featured berth"</h2>
             berth_card(slug: shared::FEATURED)
+            server_read_demo()
         },
     )
 }

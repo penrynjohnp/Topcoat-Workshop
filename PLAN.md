@@ -2,7 +2,9 @@
 
 **Target repo:** `penrynjohnp/Topcoat-Workshop`
 **Subject:** [Topcoat](https://github.com/tokio-rs/topcoat) — tokio-rs's server-rendered, full-stack Rust web framework (announced 22 July 2026)
-**Plan date:** 8 September 2026 · **Pinned:** topcoat 0.7.0, topcoat-cli 0.7.0, toasty 0.10.0, Rust stable
+**Plan date:** 8 September 2026 · **Pinned:** topcoat 0.8.0, topcoat-cli 0.8.0, toasty 0.10.0, Rust stable
+
+**Upgrade status (12 September 2026):** Labs 01–13, the Slipway capstone, the workspace, and the mdBook pass on the 0.8.0 pins.
 
 ---
 
@@ -10,7 +12,7 @@
 
 ### 1.1 What Topcoat is, in one paragraph
 
-Topcoat renders everything on the server. Components are ordinary `async fn`s that can hit the database directly. Reactivity comes from `$(...)` expressions — a type-checked subset of Rust that Topcoat evaluates on the server for first render and *also* cross-compiles to JavaScript so it re-runs in the browser without a round-trip. When the server *is* needed, a `#[shard]` component re-renders on the server and swaps its HTML in place. No WebAssembly, no separate client build, no serialisation boundary. Think "HTMX with a type checker and a component model," sitting on tokio, with Toasty as the intended ORM.
+Topcoat renders everything on the server. Components are ordinary `async fn`s that can hit the database directly. Reactivity comes from `$(...)` expressions — a type-checked subset of Rust that Topcoat evaluates on the server for first render and *also* cross-compiles to JavaScript so it re-runs in the browser without a round-trip. When the server *is* needed, a `#[shard]` component re-renders on the server and morphs its HTML in place. No WebAssembly, no separate client build, no serialisation boundary. Think "HTMX with a type checker and a component model," sitting on tokio, with Toasty as the intended ORM.
 
 ### 1.2 Who this workshop is for
 
@@ -31,7 +33,7 @@ Every lab should be completable by persona 1 and 2. Module 0 carries a "Rust in 
 
 ### 1.4 Upstream has moved since the announcement (checked 8 Sep 2026)
 
-`topcoat` 0.7.0 shipped on 5 September. Since the July post, several roadmap items have landed: `topcoat-mail` (SMTP/file/in-memory transports), `live!`/`emit!` streaming regions with `suspense` and `error_boundary` components, WebSockets, server-sent events, multipart uploads, sitemaps, a Datastar integration alongside htmx/Alpine, a tower bridge (mount tower services and layers — the Axum story), and a `Props` derive. Emailing, streaming SSR, WebSockets and SSE are gone from the roadmap; Localization, WebTransport and Markdown are new on it. The curriculum below folds these in (mail in Lab 06, `live!`/suspense in Lab 08, tower bridge in Lab 13). Re-run this check before starting each phase.
+`topcoat` 0.8.0 is the current workshop pin. Since the July post, several roadmap items have landed: `topcoat-mail` (SMTP/file/in-memory transports), `live!`/`emit!` streaming regions with `suspense` and `error_boundary` components, WebSockets, server-sent events, multipart uploads, sitemaps, a Datastar integration alongside htmx/Alpine, a tower bridge (mount tower services and layers — the Axum story), and a `Props` derive. Emailing, streaming SSR, WebSockets and SSE are gone from the roadmap; Localization, WebTransport and Markdown are new on it. The curriculum below folds these in (mail in Lab 06, `live!`/suspense in Lab 08, tower bridge in Lab 13). Re-run this check before starting each phase.
 
 ### 1.5 The capstone app: "Slipway"
 
@@ -125,7 +127,7 @@ Signed and encrypted cookies; the session API with bring-your-own storage (start
 `signal` declarations, `@click`/`@input` handlers, `:hidden`/`:class` bind attributes, what the dual Rust/JS expression vocabulary does and does not support (deliberately try something unsupported and read the compile error). Build a berth filter toggle and a collapsible work-order panel with zero server calls. Checkpoint: DevTools network tab shows no requests during interaction.
 
 **Lab 08 — Shards and procedures** (75 min)
-`#[shard]` for server re-render on argument change: live search over vessels as the user types. `#[procedure]` for async server functions called from the browser: "mark work order complete." Observe the HTML swap in DevTools. Discuss request storms and debouncing. Finish with `live!`/`emit!`: wrap the slow work-order history in `suspense` so the page streams in, and add an `error_boundary`. Checkpoint: typing "Lady" narrows the list without a page load.
+`#[shard]` for server re-render on argument change: live search over vessels as the user types. `#[procedure]` for async server functions called from the browser: "mark work order complete." Observe the HTML morph in DevTools. Discuss request storms and debouncing. Finish with `live!`/`emit!`: wrap the slow work-order history in `suspense` so the page streams in, and add an `error_boundary`. Checkpoint: typing "Lady" narrows the list without a page load.
 
 **Lab 09 — htmx and Alpine as the pragmatic path** (45 min)
 Rebuild one interaction from Lab 08 with the `topcoat::htmx` helpers (request/response header helpers, partial swaps). Side-by-side comparison page in the docs: native runtime vs htmx vs Alpine — when each is the right call given the runtime's current limits. Checkpoint: both implementations coexist in the app.

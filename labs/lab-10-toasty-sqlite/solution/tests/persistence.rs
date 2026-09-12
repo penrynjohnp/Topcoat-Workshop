@@ -89,7 +89,7 @@ async fn invalid_form_rerenders_values_and_does_not_insert() {
             Request::builder()
                 .method(Method::POST)
                 .uri("/dashboard/work-orders/new")
-                .header("cookie", cookie)
+                .header("cookie", &cookie)
                 .header("content-type", "application/x-www-form-urlencoded")
                 .body(Body::from(format!("title={title}&berth_slug=yard")))
                 .unwrap(),
@@ -107,6 +107,22 @@ async fn invalid_form_rerenders_values_and_does_not_insert() {
         html.contains(r#"value="yard" selected="selected""#),
         "{html}"
     );
+
+    let empty = router
+        .handle(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/dashboard/work-orders/new")
+                .header("cookie", cookie)
+                .header("content-type", "application/x-www-form-urlencoded")
+                .body(Body::from("title=&berth_slug="))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(empty.status(), StatusCode::OK);
+    let html = body(empty).await;
+    assert!(html.contains("Enter a title."), "{html}");
+    assert!(html.contains("Choose a managed berth."), "{html}");
 
     let mut db = state.db.clone();
     let orders = WorkOrder::all().exec(&mut db).await.unwrap();

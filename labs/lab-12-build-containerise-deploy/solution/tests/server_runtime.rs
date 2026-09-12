@@ -1,15 +1,33 @@
 use slipway::{auth::AppState, models::WorkOrder};
 use topcoat::router::{Body, Method, StatusCode, request::Request, to_bytes};
 
-fn runtime_path(html: &str, prefix: &str) -> String {
-    let start = html.find(prefix).expect("runtime endpoint marker");
-    html[start..start + prefix.len() + 36].to_owned()
+fn runtime_route(html: &str) -> (String, String) {
+    let marker = "<!--::topcoat::shard::start(\"";
+    let start = html.find(marker).expect("runtime endpoint marker") + marker.len();
+    let rest = &html[start..];
+    let shard_end = rest.find("\", \"").expect("shard endpoint id");
+    let shard_id = &rest[..shard_end];
+    let identity_start = shard_end + 4;
+    let identity_rest = &rest[identity_start..];
+    let identity_end = identity_rest.find("\", [").expect("shard identity") + identity_start;
+    (
+        format!("/_topcoat/runtime/shards/{shard_id}"),
+        rest[identity_start..identity_end].to_owned(),
+    )
+}
+
+fn signal_id(html: &str) -> String {
+    let marker = "&quot;t&quot;:&quot;signal&quot;,&quot;id&quot;:&quot;";
+    let start = html.find(marker).expect("signal marker") + marker.len();
+    let end = html[start..].find("&quot;").expect("signal id") + start;
+    html[start..end].to_owned()
 }
 
 fn procedure_path(html: &str) -> String {
     let marker = "&quot;t&quot;:&quot;Procedure&quot;,&quot;id&quot;:&quot;";
     let start = html.find(marker).expect("procedure marker") + marker.len();
-    format!("/_topcoat/procedures/{}", &html[start..start + 36])
+    let end = html[start..].find("&quot;").expect("procedure endpoint id") + start;
+    format!("/_topcoat/runtime/procedures/{}", &html[start..end])
 }
 
 async fn response_body(response: topcoat::router::response::Response) -> String {
@@ -31,7 +49,8 @@ async fn vessel_shard_returns_only_the_filtered_fragment() {
         )
         .await;
     let page = response_body(page).await;
-    let path = runtime_path(&page, "/_topcoat/shards/");
+    let (path, identity) = runtime_route(&page);
+    let signal = signal_id(&page);
 
     let partial = router
         .handle(
@@ -39,19 +58,27 @@ async fn vessel_shard_returns_only_the_filtered_fragment() {
                 .method(Method::POST)
                 .uri(path)
                 .header("content-type", "application/json")
-                .body(Body::from(r#"["Lady"]"#))
+                .header("x-topcoat-identity", &identity)
+                .body(Body::from(format!(
+                    r#"{{"args":[{{"t":"Signal","id":"{signal}","v":"Lady"}}],"signals":{{}}}}"#
+                )))
                 .unwrap(),
         )
         .await;
     assert_eq!(partial.status(), StatusCode::OK);
     let html = response_body(partial).await;
 
+    assert!(html.contains("data-query=\"Lady\""), "{html}");
+    assert!(html.contains("id=\"vessel-lady-jane\""), "{html}");
     assert!(html.contains("Lady Jane"), "{html}");
     assert!(!html.contains("Sea Urchin"), "{html}");
     assert!(!html.contains("Morning Star"), "{html}");
     assert!(!html.contains("<!DOCTYPE html>"), "{html}");
+    assert!(!html.contains("<html"), "{html}");
+    assert!(!html.contains("<body"), "{html}");
     assert!(!html.contains("Slipway Marina"), "{html}");
     assert!(!html.contains("<main>"), "{html}");
+    assert!(!html.contains("id=\"vessel-query\""), "{html}");
 }
 // ANCHOR_END: shard-partial-response-test
 

@@ -4,7 +4,8 @@ use topcoat::{
     asset::{AssetBundle, RouterBuilderAssetExt},
     cookie::RouterBuilderCookieExt,
     mail::{FileTransport, MailConfig, RouterBuilderMailExt},
-    runtime::{RouterBuilderProcedureExt, RouterBuilderShardExt},
+    router::RouterBuilderDiscoverExt,
+    runtime::RouterBuilderRuntimeExt,
     session::{RouterBuilderSessionExt, SessionConfig},
 };
 
@@ -20,8 +21,8 @@ pub fn router(state: AppState, assets: Option<AssetBundle>) -> topcoat::router::
     };
 
     let builder = topcoat::router::module_router!()
-        .discover_shards()
-        .discover_procedures()
+        .runtime()
+        .discover()
         .cookies()
         .sessions(
             SessionConfig::builder()

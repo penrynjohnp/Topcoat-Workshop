@@ -3,15 +3,33 @@
 `Cx` is Topcoat's handle for the current request. Pass `&Cx` to small request functions, or declare it
 on a page, layout, component, route, shard, or procedure that needs request-scoped information.
 
-The helpers in this page are the ones used across Labs 05–08. They follow Topcoat v0.7.0's [app
-context](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.7.0/crates/topcoat/docs/app_context.md)
+The helpers in this page are the ones used across Labs 05–08. They follow Topcoat v0.8.0's [app
+context](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/app_context.md)
 and [functions, not
-middlewares](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.7.0/crates/topcoat/docs/functions_not_middlewares.md)
+middlewares](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/functions_not_middlewares.md)
 guides.
 
 > [!NOTE]
 > `Cx` is request-scoped. Values registered as app context outlive requests, but the `&Cx` used to
 > reach them belongs only to the current request.
+
+## Signals
+
+Signal creation is request-scoped. In a page, component, layout, or shard, call
+`signal(cx, || initial_value)` and pass a signal to a child as `&Signal<T>` when the child needs it:
+
+```rust
+let query = signal(cx, String::new);
+```
+
+The initial value is rendered on the server, then the browser owns the signal. A plain Rust `.get()`
+or `.read()` is a tracked server read; use `.get_untracked()` or `.read_untracked()` when that read
+must not make the body depend on the signal. Validate every signal value read on the server as user
+input. See [How `$(...)` reaches the browser](../01-concepts/dual-expressions.md) for the dual
+expression model.
+
+*Guide basis: the v0.8.0 runtime guide's [Signals](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#signals)
+and [Reading signals on the server](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#reading-signals-on-the-server) sections.*
 
 ## Request
 

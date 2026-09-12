@@ -5,14 +5,14 @@ use topcoat::{
     Result,
     context::Cx,
     router::page,
-    runtime::{Event, shard},
+    runtime::{Event, Signal, shard, signal},
     view::{View, view},
 };
 
 // ANCHOR: vessel-results-shard
 #[shard]
-pub(crate) async fn vessel_results(cx: &Cx, query: String) -> Result<impl View> {
-    let _ = cx;
+pub(crate) async fn vessel_results(query: Signal<String>) -> Result<impl View> {
+    let query = query.get();
     let query = query.trim().to_owned();
     let too_long = query.len() > MAX_QUERY_LEN;
 
@@ -28,10 +28,10 @@ pub(crate) async fn vessel_results(cx: &Cx, query: String) -> Result<impl View> 
 
 // ANCHOR: vessel-search-page
 #[page]
-async fn vessels() -> Result<impl View> {
-    Ok(view! {
-        signal query = String::new();
+async fn vessels(cx: &Cx) -> Result<impl View> {
+    let query = signal(cx, String::new);
 
+    Ok(view! {
         <h1>"Vessels"</h1>
         <label for="vessel-query">"Search vessels"</label>
         <input
@@ -40,7 +40,7 @@ async fn vessels() -> Result<impl View> {
             :value=$(query.get())
             @input=$(|event: Event| query.set(event.target.value))
         >
-        vessel_results(query: $(query.get()))
+        vessel_results(query: $(query))
     })
 }
 // ANCHOR_END: vessel-search-page

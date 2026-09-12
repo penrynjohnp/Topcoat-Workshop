@@ -100,7 +100,11 @@ pub(crate) async fn vessel_matches(cx: &Cx, query: &str) -> Result<impl View> {
             } else {
                 <ul>
                     for vessel in matches {
-                        <li data-vessel=(&vessel.name)>
+                        let vessel_id = format!(
+                            "vessel-{}",
+                            vessel.name.to_ascii_lowercase().replace(' ', "-"),
+                        );
+                        <li id=(vessel_id) data-vessel=(&vessel.name)>
                             <strong>(&vessel.name)</strong>
                             " · "
                             (&vessel.berth.get().name)

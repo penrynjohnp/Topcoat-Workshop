@@ -3,21 +3,22 @@ mod id;
 use crate::shared::{berth_card, berths};
 use topcoat::{
     Result,
+    context::Cx,
     router::page,
-    runtime::Event,
+    runtime::{Event, signal},
     view::{View, view},
 };
 
 // ANCHOR: berth-filter
 #[page]
 #[rustfmt::skip]
-async fn list() -> Result<impl View> {
+async fn list(cx: &Cx) -> Result<impl View> {
     let data = berths();
-    Ok(view! {
-        signal query = String::new();
-        signal show_occupied = true;
-        signal show_vacant = true;
+    let query = signal(cx, String::new);
+    let show_occupied = signal(cx, || true);
+    let show_vacant = signal(cx, || true);
 
+    Ok(view! {
         <h1>"Berths"</h1>
 
         <form

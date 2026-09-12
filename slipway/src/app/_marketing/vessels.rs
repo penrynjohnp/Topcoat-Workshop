@@ -10,14 +10,14 @@ use topcoat::{
     context::Cx,
     icon::icon,
     router::page,
-    runtime::{Event, shard},
+    runtime::{Event, Signal, shard, signal},
     view::{View, attributes, view},
 };
 
 // ANCHOR: vessel-results-shard
 #[shard]
-pub(crate) async fn vessel_results(cx: &Cx, query: String) -> Result<impl View> {
-    let _ = cx;
+pub(crate) async fn vessel_results(query: Signal<String>) -> Result<impl View> {
+    let query = query.get();
     let query = query.trim().to_owned();
     let too_long = query.len() > MAX_QUERY_LEN;
 
@@ -33,10 +33,10 @@ pub(crate) async fn vessel_results(cx: &Cx, query: String) -> Result<impl View> 
 
 // ANCHOR: vessel-search-page
 #[page]
-async fn vessels() -> Result<impl View> {
-    Ok(view! {
-        signal query = String::new();
+async fn vessels(cx: &Cx) -> Result<impl View> {
+    let query = signal(cx, String::new);
 
+    Ok(view! {
         <div class="flex items-center gap-3">
             <span class="rounded-xl bg-cyan-100 p-2 text-cyan-800">
                 icon(data: assets::SEARCH)
@@ -62,7 +62,7 @@ async fn vessels() -> Result<impl View> {
                 }
             )
         </div>
-        vessel_results(query: $(query.get()))
+        vessel_results(query: $(query))
     })
 }
 // ANCHOR_END: vessel-search-page

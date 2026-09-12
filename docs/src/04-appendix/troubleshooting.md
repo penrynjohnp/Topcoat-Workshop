@@ -6,18 +6,18 @@ explains the surrounding concept.
 
 Everything here is specific to the versions in
 [`COMPATIBILITY.md`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/COMPATIBILITY.md):
-Topcoat and Topcoat CLI 0.7.0, Toasty 0.10.0. Topcoat is pre-1.0, so check that file before assuming
+Topcoat and Topcoat CLI 0.8.0, Toasty 0.10.0. Topcoat is pre-1.0, so check that file before assuming
 an error is your mistake.
 
 ## Toolchain and CLI
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `topcoat: command not found` | The CLI is not installed, or `~/.cargo/bin` is not on `PATH` | `cargo install topcoat-cli --version 0.7.0 --locked`, then confirm `PATH` |
+| `topcoat: command not found` | The CLI is not installed, or `~/.cargo/bin` is not on `PATH` | `cargo install topcoat-cli --version 0.8.0 --locked`, then confirm `PATH` |
 | A compile error names a missing import | Topcoat's facade crate re-exports through feature-gated modules, so a path can exist only when its feature is on | Compare your `use topcoat::{...}` block with that lab's solution, and check the crate's enabled features |
-| `topcoat --version` errors with an unexpected argument | CLI 0.7.0 has **no top-level `--version` flag** | Read the pin in `COMPATIBILITY.md`. `topcoat fmt --version` exists and prints `topcoat-fmt 0.7.0`, but only checks the formatter binary |
-| `topcoat fmt --check` is rejected | The formatter has no `--check` flag at 0.7.0 | Run `topcoat fmt <files>` and then `git diff --exit-code -- '*.rs'`, which is what CI does |
-| `topcoat build` is unknown | That command does not exist in CLI 0.7.0 | Use `cargo build` plus `topcoat asset bundle`, with matching profile flags on both |
+| `topcoat --version` errors with an unexpected argument | CLI 0.8.0 has **no top-level `--version` flag** | Read the pin in `COMPATIBILITY.md`. `topcoat fmt --version` exists and prints `topcoat-fmt 0.8.0`, but only checks the formatter binary |
+| `topcoat fmt --check` is rejected | The formatter has no `--check` flag at 0.8.0 | Run `topcoat fmt <files>` and then `git diff --exit-code -- '*.rs'`, which is what CI does |
+| `topcoat build` is unknown | That command does not exist in CLI 0.8.0 | Use `cargo build` plus `topcoat asset bundle`, with matching profile flags on both |
 | A build fails reading an empty Iconify cache file, usually right after `cargo clean` | `topcoat-icon`'s build script stages its cache non-atomically, so parallel workspace builds can read a half-written file | Stage one crate first: `find target/topcoat/cache -type f -empty -delete` then `cargo build -p lab11-solution`, then build the workspace. CI does exactly this |
 
 See [CLI commands](../03-reference/cli.md) for the full `--help` surface and
@@ -44,7 +44,8 @@ Labs [02](../02-labs/lab-02.md) and [09](../02-labs/lab-09.md). The
 | `` `impl Trait` … opaque type ``, or two arms returning different types | A component returns two different `view!` types | Call `.boxed()` on both arms and import `ViewExt` |
 | The caller's `class` replaced the component's own | `attrs` was spread without removing `class` first | `attrs.remove("class")`, then pass the removed value to `class!` as an entry |
 | `use of moved value: attrs` | Spreading an `Attributes` consumes it | `clone()` when you need it twice |
-| Attribute order changes between renders | Expected: spreading `Attributes` routes that element through a map, and 0.7.0 does not guarantee render order | Assert on the *set* of attributes, not on a byte-for-byte string |
+| Attribute order changes between renders | Expected: spreading `Attributes` routes that element through a map, and 0.8.0 does not guarantee render order | Assert on the *set* of attributes, not on a byte-for-byte string |
+| `error: expected view node` after upgrading | The pre-0.8 `signal name = value;` statement is no longer valid inside `view!` | Create signals in the body with `signal(cx, || value)` and pass them into the view |
 | `cannot find value cx` | Components only receive the request context when they declare it | Add `cx: &Cx` to the signature — introduced in [Lab 05](../02-labs/lab-05.md) |
 
 Lab [03](../02-labs/lab-03.md).
@@ -108,12 +109,12 @@ Lab [07](../02-labs/lab-07.md), plus [How `$(...)` reaches the browser](../01-co
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| A shard route returns 404 | Shards are not discovered, or the shard is not linked into the binary | Call `.discover_shards()` on the router and make the shard reachable |
-| A procedure route returns 404 | Procedures are not discovered, or the procedure is never rendered or captured | Call `.discover_procedures()` and reference it from reachable code |
-| A shard `POST` returns 415 or 400 | The body is not a JSON tuple | Send `Content-Type: application/json` with a tuple body such as `["Lady"]` |
-| A signal resets after each search | It was declared *inside* the shard, which is replaced wholesale | Declare it in the page and pass it in as an argument |
+| A shard route returns 404 | `.runtime()` is missing, or the shard is not reachable from compiled code | Keep `.runtime().discover()` on the router and reference the shard from reachable code; do not add explicit discovery calls |
+| A procedure route returns 404 | `.runtime()` is missing, or the procedure is not reachable from compiled code | Keep `.runtime().discover()` on the router and reference the procedure from reachable code; do not add explicit discovery calls |
+| A shard `POST` returns 415 or 400 | The body is not the 0.8.0 runtime envelope, or the identity header is missing | Send `Content-Type: application/json`, `x-topcoat-identity`, and an envelope such as `{\"args\":[{\"t\":\"Signal\",\"id\":\"...\",\"v\":\"Lady\"}],\"signals\":{}}` |
+| A signal resets after each search | It was declared *inside* the shard, or the returned markup lacks stable identities | Own the signal in the page, pass it as `$(query)`, and give reorderable items stable `id` values |
 | Private data appears without the page guard | Shard and procedure endpoints are independently callable, so page and layout code never runs | Call `require_auth(cx)` inside every private endpoint and validate arguments |
-| Every keystroke creates a request | Expected at 0.7.0: same-tick changes coalesce and stale requests abort, but debouncing is application logic | Use htmx's `delay:` trigger, or implement debouncing yourself |
+| Every keystroke creates a request | Expected at 0.8.0: same-tick changes coalesce and stale requests abort, but debouncing is application logic | Use htmx's `delay:` trigger, or implement debouncing yourself |
 | A cookie or header panics during streaming | Headers changed after the first emission | Authenticate and mutate cookies before returning the live view |
 | Only the final streamed content appears in a test | `to_bytes` collects the whole body | Assert on fallback text and `data-topcoat-swap` envelopes, or poll frames to observe timing |
 
@@ -140,7 +141,9 @@ Lab [09](../02-labs/lab-09.md).
 | The database looks empty after changing `SLIPWAY_DATABASE_URL` | A different SQLite file was opened | Print or inspect the exact URL the process used |
 | A relation is empty even though the child row exists | The query did not call `.include(...)`, or the child has the wrong foreign key | Add `.include(...)` and check `berth_slug` |
 | A `POST` returns 415 or fails to extract `Form` | Wrong request content type | Send `Content-Type: application/x-www-form-urlencoded` |
-| A procedure rejects a numeric ID | Topcoat 0.7 transports runtime numbers as `f64` | Accept the `f64`, validate it is a non-negative integer, then convert it to the database key |
+| A procedure rejects a numeric ID | Topcoat 0.8 transports runtime numbers as `f64` | Accept the `f64`, validate it is a non-negative integer, then convert it to the database key |
+| `fontsource_font!` reports incompatible `Asset` types | The workspace still resolves `topcoat-asset` 0.7 alongside Topcoat 0.8 | Pin the direct `topcoat-asset` workspace dependency to 0.8.0 and regenerate the lockfile |
+| A discovered font route is duplicated | Topcoat 0.8 `.discover()` discovers fonts automatically | Remove explicit `.font(...)` registration when using `.discover()` |
 
 Lab [10](../02-labs/lab-10.md), plus [How-to: SQLite to PostgreSQL](../03-reference/howto/postgres.md).
 
@@ -190,7 +193,7 @@ Lab [13](../02-labs/lab-13.md).
 
 1. Compare your code with that lab's `solution/`, which CI compiles and tests on every push.
 2. Check `COMPATIBILITY.md` for a recorded breakage against the pinned versions.
-3. Read the Topcoat guides at the **release tag**, never `main`. The unreleased API is ahead of 0.7.0
+3. Read the Topcoat guides at the **release tag**, never `main`. The unreleased API is ahead of 0.8.0
    and its examples will not compile here.
 4. Open an issue with the lab number, the exact command, and the full error.
 

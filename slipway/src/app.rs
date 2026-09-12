@@ -5,18 +5,17 @@ use serde::Serialize;
 use topcoat::{
     asset::{AssetBundle, RouterBuilderAssetExt},
     cookie::RouterBuilderCookieExt,
-    font::RouterBuilderFontExt,
     mail::{FileTransport, MailConfig, RouterBuilderMailExt},
     router::{
-        Methods,
+        Methods, RouterBuilderDiscoverExt,
         tower::{TowerLayer, TowerRoute},
     },
-    runtime::{RouterBuilderProcedureExt, RouterBuilderShardExt},
+    runtime::RouterBuilderRuntimeExt,
     session::{RouterBuilderSessionExt, SessionConfig},
 };
 use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 
-use crate::{assets, auth::AppState};
+use crate::auth::AppState;
 
 mod _marketing;
 
@@ -40,8 +39,8 @@ pub fn router(state: AppState, assets: Option<AssetBundle>) -> topcoat::router::
     };
 
     let builder = topcoat::router::module_router!()
-        .discover_shards()
-        .discover_procedures()
+        .runtime()
+        .discover()
         .cookies()
         .sessions(
             SessionConfig::builder()
@@ -53,7 +52,6 @@ pub fn router(state: AppState, assets: Option<AssetBundle>) -> topcoat::router::
                 .transport(FileTransport::new("mail"))
                 .build(),
         )
-        .font(assets::GEIST)
         .app_context(state)
         .route(TowerRoute::new(
             Methods::Any,

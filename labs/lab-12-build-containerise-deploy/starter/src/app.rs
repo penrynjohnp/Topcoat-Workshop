@@ -3,13 +3,13 @@ use std::time::Duration;
 use topcoat::{
     asset::{AssetBundle, RouterBuilderAssetExt},
     cookie::RouterBuilderCookieExt,
-    font::RouterBuilderFontExt,
     mail::{FileTransport, MailConfig, RouterBuilderMailExt},
-    runtime::{RouterBuilderProcedureExt, RouterBuilderShardExt},
+    router::RouterBuilderDiscoverExt,
+    runtime::RouterBuilderRuntimeExt,
     session::{RouterBuilderSessionExt, SessionConfig},
 };
 
-use crate::{assets, auth::AppState};
+use crate::auth::AppState;
 
 mod _marketing;
 
@@ -21,8 +21,8 @@ pub fn router(state: AppState, assets: Option<AssetBundle>) -> topcoat::router::
     };
 
     let builder = topcoat::router::module_router!()
-        .discover_shards()
-        .discover_procedures()
+        .runtime()
+        .discover()
         .cookies()
         .sessions(
             SessionConfig::builder()
@@ -34,7 +34,6 @@ pub fn router(state: AppState, assets: Option<AssetBundle>) -> topcoat::router::
                 .transport(FileTransport::new("mail"))
                 .build(),
         )
-        .font(assets::GEIST)
         .app_context(state);
 
     match assets {

@@ -14,7 +14,7 @@ use topcoat::{
     Result,
     context::{Cx, app_context},
     router::{Slot, layout, page, request::uri},
-    runtime::procedure,
+    runtime::{procedure, signal},
     view::{View, component, view},
 };
 
@@ -61,15 +61,17 @@ pub(crate) async fn mark_work_order_complete(cx: &Cx, id: String) -> Result<bool
 }
 // ANCHOR_END: complete-work-order-procedure
 
+// ANCHOR: work-order-procedure-ui
 #[component]
 async fn work_order_row(cx: &Cx, order: &WorkOrder) -> Result<impl View> {
     let state: &AppState = app_context(cx);
     let id = order.id;
     let completed_initially = state.work_order_is_complete(order.id);
-    Ok(view! {
-        signal completed = completed_initially;
+    let completed = signal(cx, || completed_initially);
 
+    Ok(view! {
         <li
+            id=(order.id)
             :class=$(if completed.get() { "work-order complete" } else { "work-order" })
         >
             <span>(order.title)</span>
@@ -87,7 +89,6 @@ async fn work_order_row(cx: &Cx, order: &WorkOrder) -> Result<impl View> {
     })
 }
 
-// ANCHOR: work-order-procedure-ui
 #[component]
 async fn work_orders(cx: &Cx) -> Result<impl View> {
     let email = require_auth(cx).await?;
@@ -100,7 +101,7 @@ async fn work_orders(cx: &Cx) -> Result<impl View> {
             </p>
             <ul>
                 for order in shared::WORK_ORDERS {
-                    work_order_row(order: &order)
+                    work_order_row(order: &order, key: order.id)
                 }
             </ul>
             <p><a href="/dashboard/history">"Stream work-order history"</a></p>

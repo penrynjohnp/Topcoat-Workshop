@@ -21,6 +21,8 @@ pub fn router(state: AppState, assets: Option<AssetBundle>) -> topcoat::router::
     };
     let _ = &assets;
 
+    // TODO(lab-07): import `RouterBuilderRuntimeExt` and call `.runtime()` so
+    // tracked server-side signal reads can request a page re-run.
     let builder = topcoat::router::module_router!()
         .cookies()
         .sessions(

@@ -29,6 +29,7 @@ These rules apply to every page under `docs/src/` other than the lab pages above
 - Assets: `topcoat asset bundle --release` writes `target/release/assets/`; binary and bundle must come from the same build.
 - `topcoat-icon`'s build script stages the Iconify cache non-atomically; parallel builds can read an empty file. CI stages one crate first (`cargo build -p lab11-solution`); do the same locally after `cargo clean`.
 - The CLI at 0.8.0 has no top-level `--version` and `topcoat fmt` has no `--check`; CI formats then `git diff --exit-code`.
+- The `expr!` vocabulary (what `$(...)` supports) is documented at crates/topcoat-runtime/macro/docs/expr.md — read it for any reactivity lab.
 
 ## Conventions
 - `cargo fmt` and `topcoat fmt` on every Rust file; `cargo clippy -D warnings` clean.

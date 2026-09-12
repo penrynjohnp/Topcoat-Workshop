@@ -3,17 +3,21 @@ mod id;
 use crate::shared::{berth_card, berths};
 use topcoat::{
     Result,
+    context::Cx,
     router::page,
     view::{View, view},
 };
 
 #[page]
 #[rustfmt::skip]
-async fn list() -> Result<impl View> {
+async fn list(cx: &Cx) -> Result<impl View> {
     let data = berths();
-    Ok(view! {
-        // TODO(lab-07): declare `query`, `show_occupied` and `show_vacant` signals.
+    let _ = cx;
+    // TODO(lab-07): import `signal` from `topcoat::runtime`, then create
+    // `query`, `show_occupied`, and `show_vacant` here with
+    // `signal(cx, || initial_value)` before entering `view!`.
 
+    Ok(view! {
         <h1>"Berths"</h1>
 
         // TODO(lab-07): add the filter form — a search input bound with `:value` and

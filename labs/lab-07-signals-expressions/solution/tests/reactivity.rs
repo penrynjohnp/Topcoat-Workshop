@@ -54,9 +54,19 @@ async fn every_berth_is_visible_on_first_render() {
 }
 
 #[tokio::test]
-async fn interaction_needs_no_server_endpoint() {
+async fn tracked_server_read_emits_one_dependency_marker() {
+    let (status, html) = get("/").await;
+    assert_eq!(status, StatusCode::OK);
+
+    assert_eq!(html.matches("::topcoat::signal(").count(), 2, "{html}");
+    assert_eq!(html.matches("::topcoat::dep(").count(), 1, "{html}");
+    assert!(html.contains("data-server-read=\"tracked\""), "{html}");
+    assert!(html.contains("data-server-read=\"untracked\""), "{html}");
+}
+
+#[tokio::test]
+async fn client_only_filter_needs_no_shard_or_procedure_endpoint() {
     let (_, html) = get("/berths").await;
-    // Lab 07 is client-only: no shard or procedure endpoints are referenced.
     assert!(!html.contains("/_topcoat/shard"), "{html}");
     assert!(!html.contains("/_topcoat/procedure"), "{html}");
 }

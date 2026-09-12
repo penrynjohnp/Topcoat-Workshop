@@ -39,10 +39,40 @@ fn header_value(response: &Response, name: &str) -> Option<String> {
         .map(|value| value.to_str().unwrap().to_owned())
 }
 
-fn shard_path(html: &str) -> String {
-    let prefix = "/_topcoat/shards/";
-    let start = html.find(prefix).expect("shard endpoint marker");
-    html[start..start + prefix.len() + 36].to_owned()
+fn shard_route(html: &str) -> (String, String) {
+    let marker = "<!--::topcoat::shard::start(\"";
+    let start = html.find(marker).expect("shard endpoint marker") + marker.len();
+    let rest = &html[start..];
+    let shard_end = rest.find("\", \"").expect("shard endpoint id");
+    let shard_id = &rest[..shard_end];
+    let identity_start = shard_end + 4;
+    let identity_end = rest[identity_start..]
+        .find("\", [")
+        .expect("shard identity")
+        + identity_start;
+    (
+        format!("/_topcoat/runtime/shards/{shard_id}"),
+        rest[identity_start..identity_end].to_owned(),
+    )
+}
+
+fn signal_id(html: &str) -> String {
+    let marker = "&quot;t&quot;:&quot;signal&quot;,&quot;id&quot;:&quot;";
+    let start = html.find(marker).expect("signal marker") + marker.len();
+    let end = html[start..].find("&quot;").expect("signal id") + start;
+    html[start..end].to_owned()
+}
+
+fn without_runtime_markers(html: &str) -> String {
+    let mut out = String::with_capacity(html.len());
+    let mut rest = html;
+    while let Some(start) = rest.find("<!--::topcoat::") {
+        out.push_str(&rest[..start]);
+        let end = rest[start..].find("-->").expect("unterminated marker") + start + 3;
+        rest = &rest[end..];
+    }
+    out.push_str(rest);
+    out
 }
 
 // ANCHOR: coexistence-test
@@ -55,13 +85,13 @@ async fn both_implementations_coexist_without_borrowing_each_other_s_mechanism()
 
     // The native page drives its search through a shard endpoint and ships no
     // htmx attributes of its own.
-    assert!(native.contains("/_topcoat/shards/"), "{native}");
+    assert!(native.contains("<!--::topcoat::shard::start("), "{native}");
     assert!(!native.contains("hx-get"), "{native}");
 
     // The htmx page drives its search through attributes and registers no
     // reactive scope for the search.
     assert!(htmx.contains(r#"hx-get="/vessels/htmx/results""#), "{htmx}");
-    assert!(!htmx.contains("/_topcoat/shards/"), "{htmx}");
+    assert!(!htmx.contains("<!--::topcoat::shard::start("), "{htmx}");
 
     // Both are reachable from the app's navigation.
     assert!(native.contains(r#"href="/vessels/htmx""#), "{native}");
@@ -74,13 +104,18 @@ async fn the_shard_and_the_htmx_route_render_the_same_fragment() {
     let router = slipway_capstone::app::router(AppState::test().await.unwrap(), None);
 
     let page = body_of(get(&router, "/vessels").await).await;
+    let (path, identity) = shard_route(&page);
+    let signal = signal_id(&page);
     let shard = router
         .handle(
             Request::builder()
                 .method(Method::POST)
-                .uri(shard_path(&page))
+                .uri(path)
                 .header(header::CONTENT_TYPE, "application/json")
-                .body(Body::from(r#"["Lady"]"#))
+                .header("x-topcoat-identity", &identity)
+                .body(Body::from(format!(
+                    r#"{{"args":[{{"t":"Signal","id":"{signal}","v":"Lady"}}],"signals":{{}}}}"#
+                )))
                 .unwrap(),
         )
         .await;
@@ -89,7 +124,8 @@ async fn the_shard_and_the_htmx_route_render_the_same_fragment() {
     let fragment = body_of(hx_get(&router, "/vessels/htmx/results?q=Lady").await).await;
 
     // The transport differs; the markup does not. Both call `vessel_matches`.
-    assert_eq!(shard, fragment);
+    // The native shard also carries runtime bookkeeping comments.
+    assert_eq!(without_runtime_markers(&shard), fragment);
     assert!(fragment.contains("Lady Jane"), "{fragment}");
 }
 // ANCHOR_END: fragment-equality-test

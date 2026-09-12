@@ -43,6 +43,8 @@ fn build_router() -> Router {
 }
 ```
 
+Topcoat 0.8.0 also adds `TowerRoute::any` as the catch-all shorthand: `Router::builder().route(TowerRoute::any("/api/v1/{*rest}", api_router()))`. The main example keeps `TowerRoute::new(Methods::Any, ...)` so you can still see how method selection fits the general constructor.
+
 > [!NOTE]
 > **Checkpoint:** the app builds, and `curl http://127.0.0.1:3000/api/v1/health` returns `{"status":"ok"}`.
 

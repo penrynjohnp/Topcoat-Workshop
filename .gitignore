@@ -8,3 +8,4 @@ docs/book
 .DS_Store
 mail/
 slides/out/
+.vscode/

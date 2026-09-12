@@ -1,10 +1,10 @@
 # `view!` cheat sheet
 
 Use this page when you know what markup you want and need the Topcoat syntax. Every example comes
-from the compiled solutions for Labs 02–03 and targets Topcoat 0.7.0.
+from the compiled solutions for Labs 02–03 and targets Topcoat 0.8.0.
 
-The syntax follows the pinned v0.7.0 [`view!`
-guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.7.0/crates/topcoat-view/macro/docs/view.md).
+The syntax follows the pinned v0.8.0 [`view!`
+guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat-view/macro/docs/view.md).
 
 ## Syntax at a glance
 
@@ -13,8 +13,8 @@ guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.7.0/crates/topcoat-
 | Interpolation | `{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:cheatsheet-interpolation}}` | Inserts a Rust expression as an escaped child node. Parentheses also supply dynamic attribute values. |
 | Loop | `{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:cheatsheet-loop}}` | Repeats the body for each item using ordinary Rust `for` syntax. |
 | Conditional | `{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:cheatsheet-conditional}}` | Renders the selected `if`/`else` branch. `match` is also supported in child position. |
-| Conditional attribute | `{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:86:86}}` | Omits the whole attribute when the expression is `None` or `false`. |
-| `class!` | `{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:85:85}}` | Joins static and conditional classes without leaving extra separators. |
+| Conditional attribute | `{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:cheatsheet-conditional-attribute}}` | Omits the whole attribute when the expression is `None` or `false`. |
+| `class!` | `{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:cheatsheet-class}}` | Joins static and conditional classes without leaving extra separators. |
 | `attributes!` | `{{#include ../../../labs/lab-03-components/solution/src/lib.rs:cheatsheet-attributes}}` | Builds a reusable `Attributes` value with the same attribute syntax as `view!`. |
 | Component call | `{{#include ../../../labs/lab-02-view-macro/solution/src/lib.rs:cheatsheet-component-call}}` | Calls a component with named properties. |
 | Child content | `{{#include ../../../labs/lab-03-components/solution/src/lib.rs:cheatsheet-child-content}}` | Passes unnamed nodes after the named properties into the component's `Child<'_>` parameter. |

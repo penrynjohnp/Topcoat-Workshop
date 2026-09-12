@@ -17,32 +17,36 @@ Start from the question, not the mechanism.
 | Alpine AJAX | browser decides, server answers | the page already uses Alpine and you want AJAX in the same idiom |
 | Datastar | server pushes | the server drives updates, often over a long-lived stream |
 
-*Guide basis: the v0.7.0 [runtime guide](https://docs.rs/topcoat/0.7.0/topcoat/runtime/index.html),
-[`live!` guide](https://docs.rs/topcoat/0.7.0/topcoat/view/macro.live.html), and the
-[htmx](https://docs.rs/topcoat/0.7.0/topcoat/htmx/index.html),
-[Alpine AJAX](https://docs.rs/topcoat/0.7.0/topcoat/alpine_ajax/index.html), and
-[Datastar](https://docs.rs/topcoat/0.7.0/topcoat/datastar/index.html) integration guides.*
+*Guide basis: the v0.8.0 [runtime guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md),
+[`live!` guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat-view/macro/docs/live.md), and the
+[htmx](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/htmx.md),
+[Alpine AJAX](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/alpine_ajax.md), and
+[Datastar](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/datastar.md) integration guides.*
 
 ## Signals stay in the browser
 
-A `signal` plus `$(...)` never contacts the server after the first render. The server evaluates the
-expression once for the initial HTML, and the compiled JavaScript re-runs it whenever a signal it
-reads changes.
+A signal plus `$(...)` is the client-only end of Topcoat's reactivity spectrum. Create it with
+`signal(cx, || initial_value)` and use it when the browser already has the answer: toggling a panel,
+filtering rendered rows, or synchronizing an input. A runtime expression re-runs in JavaScript and
+patches its node without a server request.
 
-That makes signals the right tool when the browser already holds the answer, and the wrong tool when
-it does not. A signal cannot query a database, and a value captured into an expression is a snapshot
-from the render that produced it. [How `$(...)` reaches the browser](dual-expressions.md) covers the
-mechanics.
+The middle ground is a **signal-parameter shard**. The page owns the signal, passes it as `$(query)`,
+and the shard reads the `Signal<T>` in server code. The signal handle stays stable while its value
+changes, so the shard is the boundary that re-renders instead of the whole page.
 
-*Guide basis: the v0.7.0 [runtime guide — Signals](https://docs.rs/topcoat/0.7.0/topcoat/runtime/index.html#signals)
-and [`expr!` guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.7.0/crates/topcoat-runtime/macro/docs/expr.md).*
+That makes a signal the wrong tool when the answer requires server data. A captured value is only a
+snapshot from the render that produced it. [How `$(...)` reaches the browser](dual-expressions.md)
+covers the mechanics.
+
+*Guide basis: the v0.8.0 runtime guide's [Signals](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#signals)
+and [Shards](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#shards) sections, plus the v0.8.0 [`expr!` vocabulary guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat-runtime/macro/docs/expr.md).*
 
 ## Shards re-render markup on the server
 
 A `#[shard]` is a component whose arguments are runtime expressions. On the first render it runs
-inline, like any component, and its output is part of the document. After that, when a signal one of
-its arguments reads changes, the browser sends the current argument values to the shard's endpoint,
-the function runs again on the server, and the returned HTML replaces that region.
+inline, like any component, and its output is part of the document. A shard can accept `Signal<T>`
+directly; pass the handle as `$(query)` and read it in the shard body. When that read signal changes,
+the browser sends the current value to the shard endpoint and the server re-renders only that region.
 
 Lab 08's vessel search is a shard that owns the result list:
 
@@ -56,8 +60,10 @@ The page owns the query signal, and passes it in:
 {{#include ../../../labs/lab-08-shards-procedures-streaming/solution/src/app/_marketing/vessels.rs:vessel-search-page}}
 ```
 
-The signal lives *outside* the shard on purpose. A re-render replaces the shard's content wholesale,
-so a signal declared inside it would reset on every keystroke. State that must survive re-renders
+The signal lives *outside* the shard on purpose. Topcoat morphs the returned HTML into the existing
+region rather than replacing the subtree wholesale. Existing elements keep focus, scroll position,
+and partially typed values. Give reorderable list items stable `id` attributes so the morph can follow
+each item to its new position. State that must survive re-renders still belongs outside the shard and
 flows in through arguments.
 
 ```mermaid
@@ -70,7 +76,7 @@ sequenceDiagram
     Note over B,A: First render: the shard runs inline, no extra request
     B->>R: user types in the search input
     R->>R: @input handler writes the query signal
-    R->>R: argument expression $(query.get()) re-evaluates
+    R->>R: argument expression $(query) re-evaluates
     Note over R: same-tick changes coalesce into one request
     R->>S: POST /_topcoat/shards/{id} with ["Lady"]
     S->>A: run the shard with the decoded arguments
@@ -78,7 +84,7 @@ sequenceDiagram
     A-->>S: HTML fragment (no layout, no document shell)
     S-->>R: 200 with the fragment
     R->>R: abort any earlier in-flight request
-    R->>B: swap the fragment into the shard's region
+    R->>B: morph the fragment into the shard's region
 ```
 
 Only that region changes. Lab 08's test drives the endpoint directly and asserts the response is a
@@ -88,12 +94,12 @@ fragment, not a page:
 {{#include ../../../labs/lab-08-shards-procedures-streaming/solution/tests/server_runtime.rs:shard-partial-response-test}}
 ```
 
-In v0.7.0 the runtime coalesces changes made in one tick and aborts a stale request when a newer one
+In v0.8.0 the runtime coalesces changes made in one tick and aborts a stale request when a newer one
 starts, so the latest arguments win. It does not debounce a pause between keystrokes — that is
 application logic, and it is exactly what htmx gives you declaratively.
 
-*Guide basis: the v0.7.0 [`#[shard]` guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.7.0/crates/topcoat-runtime/macro/docs/shard.md)
-and the [runtime guide — Shards](https://docs.rs/topcoat/0.7.0/topcoat/runtime/index.html#shards).*
+*Guide basis: the v0.8.0 [`#[shard]` guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat-runtime/macro/docs/shard.md)
+and the [runtime guide — Shards](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#shards).*
 
 ## Procedures call the server without replacing markup
 
@@ -113,8 +119,8 @@ Errors are deliberately opaque to the caller: an `Err` becomes an error response
 expression fails without a value. When the UI must show *why* something failed, return the outcome as
 data — an `Ok` type of `Result<T, String>` — rather than relying on the error.
 
-*Guide basis: the v0.7.0 [`#[procedure]` guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.7.0/crates/topcoat-runtime/macro/docs/procedure.md)
-and the [runtime guide — Procedures](https://docs.rs/topcoat/0.7.0/topcoat/runtime/index.html#procedures).*
+*Guide basis: the v0.8.0 [`#[procedure]` guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat-runtime/macro/docs/procedure.md)
+and the [runtime guide — Procedures](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#procedures).*
 
 > [!WARNING]
 > Shards and procedures are public HTTP endpoints. A request to one runs that function alone, so
@@ -146,7 +152,7 @@ Order matters here. Authenticate, read sessions, and set headers *before* the re
 streaming, because a status code or cookie cannot change once the first emission has left. A failure
 after that point belongs to an in-page boundary, not to an error status.
 
-*Guide basis: the v0.7.0 [`live!` guide](https://docs.rs/topcoat/0.7.0/topcoat/view/macro.live.html),
+*Guide basis: the v0.8.0 [`live!` guide](https://docs.rs/topcoat/0.8.0/topcoat/view/macro.live.html),
 including its `suspense` and `error_boundary` sections.*
 
 ## htmx moves the decision into markup
@@ -181,11 +187,11 @@ A test proves the two transports emit identical markup:
 ```
 
 htmx wins where the runtime is currently thin: `delay:250ms` debouncing and `hx-indicator` loading
-states are free. The shard wins on type safety: `vessel_results(query: $(query.get()))` is checked by
+states are free. The shard wins on type safety: `vessel_results(query: $(query))` is checked by
 the compiler, while `hx-target="#vessel-results-htmx"` is a string that fails silently if you rename
 the element. Neither is a default.
 
-*Guide basis: the v0.7.0 [htmx integration guide](https://docs.rs/topcoat/0.7.0/topcoat/htmx/index.html),
+*Guide basis: the v0.8.0 [htmx integration guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/htmx.md),
 which documents the request accessors and the `IntoResponseParts` responders.*
 
 ## Alpine AJAX has no server-side steering
@@ -202,7 +208,7 @@ nowhere to say so, which is why Topcoat's integration offers request accessors a
 Choose it when the page already uses Alpine for local state and you want its AJAX in the same idiom.
 Choose htmx when the server needs to steer the swap.
 
-*Guide basis: the v0.7.0 [Alpine AJAX integration guide](https://docs.rs/topcoat/0.7.0/topcoat/alpine_ajax/index.html).*
+*Guide basis: the v0.8.0 [Alpine AJAX integration guide](https://docs.rs/topcoat/0.8.0/topcoat/alpine_ajax/index.html).*
 
 ## Datastar lets the server push
 
@@ -221,7 +227,7 @@ then ends; Datastar keeps a channel open for updates the server originates later
 Datastar has no lab in this workshop, so there is no compiled example to include. Treat this section
 as orientation and read the guide before reaching for it.
 
-*Guide basis: the v0.7.0 [Datastar integration guide](https://docs.rs/topcoat/0.7.0/topcoat/datastar/index.html)
+*Guide basis: the v0.8.0 [Datastar integration guide](https://docs.rs/topcoat/0.8.0/topcoat/datastar/index.html)
 and the router's server-sent events guide it builds on.*
 
 ## Choosing in practice
@@ -240,7 +246,7 @@ Mixing is normal. Lab 09 runs a shard and an htmx route side by side in one app,
 component, and a single page may hold signals, a shard, and a live region at once.
 
 > [!NOTE]
-> The client reactivity runtime is explicitly experimental in v0.7.0 and documented as limited.
+> The client reactivity runtime is explicitly experimental in v0.8.0 and documented as limited.
 > Expect both additions and breaking changes; check [Compatibility](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/COMPATIBILITY.md)
 > before relying on a behaviour described here.
 

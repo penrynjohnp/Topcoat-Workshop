@@ -83,8 +83,12 @@ async fn site_nav(current_path: &str) -> Result<impl View> {
                         <a
                             href=(href)
                             class=(class!("nav-link", "nav-link-active" if href == current_path))
-                            aria-current=((href == current_path).then_some("page"))
+                            aria-current=((
+                                // ANCHOR_END: cheatsheet-class
+                                // ANCHOR: cheatsheet-conditional-attribute
+                                href == current_path).then_some("page"))
                         >
+                            // ANCHOR_END: cheatsheet-conditional-attribute
                             (label)
                         </a>
                     </li>

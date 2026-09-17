@@ -42,20 +42,49 @@ Resolve the current user from the request token and guard only the component or 
 {{#include solution/src/auth.rs:require-auth}}
 ```
 
-The `work_orders` component calls the guard itself. The public dashboard embeds that component, proving the protection travels with the markup rather than depending on a route-level middleware chain.
+The `work_orders` component calls the guard itself. The public dashboard embeds that component,
+proving the protection travels with the markup rather than depending on a route-level middleware
+chain. Before returning the redirect error, `require_auth` stores the attempted GET or HEAD path in
+a private, signed cookie that expires after ten minutes.
+
+Topcoat 0.8.1 serializes queued cookie changes even when a handler returns an error such as this
+redirect ([tokio-rs/topcoat#408](https://github.com/tokio-rs/topcoat/pull/408)). In 0.8.0 the router
+dropped the `Set-Cookie` header on error responses, so the login flow could not remember where the
+request started.
+
 > [!NOTE]
-> **Checkpoint:** an unauthenticated request to `/admin` and `/dashboard` returns a redirect to `/login`.
+> `error::redirect` returns 307, preserving the original method and body, while `error::see_other`
+> returns 303 and follows with GET. In 0.8.1 `SeeOther` implements `Error`, so a view-returning guard
+> can send it through `Err`. The lab keeps 307 in this pass, but a browser auth guard should prefer
+> 303 so a guard that fires during POST does not repost the form body to `/login`.
+
+> [!NOTE]
+> **Checkpoint:** an unauthenticated GET of `/admin` or `/dashboard` returns a redirect to `/login`
+> and a short-lived `return_to` cookie in the same error response.
 
 ### Step 4 — Send and consume a magic link
-Request a link for an email address. The handler creates a one-time token, sends a `mail!` message through `FileTransport`, and exposes the link for local inspection. Verification consumes the token, starts a fresh session, and redirects to `/admin`:
+Request a link for an email address. The handler creates a one-time token, sends a `mail!` message
+through `FileTransport`, and exposes the link for local inspection. Verification consumes the token,
+starts a fresh session, and redirects to the remembered protected path or `/admin` as a fallback:
 
 ```rust
 {{#include solution/src/app/_marketing/login/request.rs:magic-link}}
 ```
 
-Open the generated `.eml` file in `mail/` and copy its `/login/verify?token=...` URL. The token is single-use and expires; a production application would persist it in the database and rate-limit requests.
+Open the generated `.eml` file in `mail/` and copy its `/login/verify?token=...` URL. The token is
+single-use and expires; a production application would persist it in the database and rate-limit
+requests. Verification consumes and clears the `return_to` cookie, then uses `see_other` so the
+browser performs a GET of the original protected page. Without a usable cookie it falls back to
+`/admin`.
+
 > [!NOTE]
-> **Checkpoint:** requesting a link creates `mail/*.eml`, and visiting its verification URL sets a session cookie.
+> Treat the cookie as untrusted when you read it. Reject external URLs, `..`, and every backslash:
+> several browsers normalize `/\evil.com` into a protocol-relative destination, so checking only
+> for a leading `//` misses the bypass.
+
+> [!NOTE]
+> **Checkpoint:** requesting a link creates `mail/*.eml`, and visiting its verification URL sets a
+> session cookie, clears `return_to`, and returns 303 to the protected path that started the flow.
 
 ### Step 5 — Exercise logout, sliding expiry, and rotation
 The authenticated admin page refreshes the session expiry as it resolves the user. Logout calls `session::stop` and deletes the corresponding record; the rotate route replaces the token after a privilege change:
@@ -64,9 +93,17 @@ The authenticated admin page refreshes the session expiry as it resolves the use
 {{#include solution/src/app/_marketing/admin.rs:admin-page}}
 ```
 
-State-changing actions use `POST`; a session cookie is only written while the handler still owns the response headers. Keep the file transport and in-memory store for this lab, then replace them with production implementations in later modules.
+State-changing actions use `POST`; a session cookie is only written while the handler still owns
+the response headers. Sliding refresh and an authentication failure cannot occur together in this
+lab: refresh runs only after `require_auth` has resolved a valid session. The return-to feature is
+the real error-response cookie case because it intentionally queues a cookie immediately before the
+auth guard returns its redirect error.
+
+Keep the file transport and in-memory store for this lab, then replace them with production
+implementations in later modules.
 > [!NOTE]
-> **Checkpoint:** after logout, the old cookie no longer authorizes `/admin`; the auth integration test proves it.
+> **Checkpoint:** after logout, the old cookie no longer authorizes `/admin`; the auth integration
+> test proves it.
 
 ### Step 6 — Prove the unauthenticated redirect and login lifecycle
 Use the in-process router test style from Lab 05:
@@ -75,9 +112,13 @@ Use the in-process router test style from Lab 05:
 {{#include solution/tests/auth.rs:auth-integration-test}}
 ```
 
-The test hits the real router, checks the redirect location, reads the generated mail, follows the magic link, sends the returned cookie to `/admin`, and verifies logout invalidates it.
+The test hits the real router, checks that a protected GET returns both the redirect and the
+`return_to` cookie, reads the generated mail, follows the magic link, and verifies the 303 lands on
+the original protected path. It then sends the returned session cookie to that path and verifies
+logout invalidates the session.
 > [!NOTE]
-> **Checkpoint:** `cargo test -p lab06-solution --test auth` passes.
+> **Checkpoint:** `cargo test -p lab06-solution --test auth` passes, including the complete
+> `/dashboard` → `/login` → `/dashboard` round trip.
 
 ## Stretch goals
 - Replace the in-memory session map with a Toasty model while keeping the same helper signatures.

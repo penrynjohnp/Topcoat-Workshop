@@ -34,6 +34,22 @@ async fn module_pages_share_the_layout() {
 }
 
 #[tokio::test]
+async fn undeclared_trailing_slash_redirects_to_the_declared_path() {
+    let response = lab04_solution::app::router()
+        .handle(
+            Request::builder()
+                .method(Method::GET)
+                .uri("/berths/")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+
+    assert_eq!(response.status(), StatusCode::PERMANENT_REDIRECT);
+    assert_eq!(response.headers().get("location").unwrap(), "/berths");
+}
+
+#[tokio::test]
 async fn slug_path_parameter_renders_the_requested_berth() {
     let (status, _, html) = get("/berths/a1").await;
     assert_eq!(status, StatusCode::OK);

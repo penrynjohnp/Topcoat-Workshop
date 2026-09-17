@@ -172,7 +172,25 @@ of `path_param!(id)`; `api/health` contributes `/api/health`. Function names do 
 > **Checkpoint:** remove all manual `.page(...)`, `.layout(...)` and `.route(...)` calls from the
 > final router. `cargo test -p lab04-solution` still finds every route.
 
-### Step 7 — Test the route table, not just the markup
+### Step 7 — Observe trailing-slash canonicalization
+
+Topcoat treats a trailing slash as part of the declared path. The module-derived page declares
+`/berths`, not `/berths/`, so the router's default `TrailingSlash::Redirect` policy redirects the
+other form to the declared one:
+
+```bash
+curl -i http://127.0.0.1:3000/berths/
+```
+
+The redirect is `308 Permanent Redirect`. Unlike 301 or 302, 308 preserves the request method and
+body, so the same policy is safe for routes that accept POST as well as GET. You can choose
+`TrailingSlash::Serve` to answer both forms or `TrailingSlash::Strict` to return 404 for the
+undeclared form.
+> [!NOTE]
+> **Checkpoint:** `/berths/` returns `308` with `Location: /berths`, while `/berths` still returns
+> `200`. The integration test locks in that canonical URL.
+
+### Step 8 — Test the route table, not just the markup
 
 Use the in-process router test from earlier labs. The important difference is that the test calls
 `app::router()`, not a builder that registers test-only routes:
@@ -181,11 +199,11 @@ Use the in-process router test from earlier labs. The important difference is th
 cargo test -p lab04-solution --test pages
 ```
 
-Read the test output and connect each assertion to a route: the slug page, unknown slug, and JSON
-health response. This is the checkpoint for the complete module tree.
+Read the test output and connect each assertion to a route: the trailing-slash redirect, slug page,
+unknown slug, and JSON health response. This is the checkpoint for the complete module tree.
 > [!NOTE]
-> **Checkpoint:** the integration test covers `/berths/{id}` and `GET /api/health`, and all tests pass
-> with no manual route registration in the test.
+> **Checkpoint:** the integration test covers the `/berths/` redirect, `/berths/{id}`, and
+> `GET /api/health`, and all tests pass with no manual route registration in the test.
 
 ## Stretch goals
 - Add `app/_marketing/about.rs` and observe that a group module does not add `marketing` to the URL.

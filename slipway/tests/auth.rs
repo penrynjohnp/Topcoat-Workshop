@@ -45,9 +45,10 @@ async fn unauthenticated_admin_redirects_to_login() {
 
 #[tokio::test]
 async fn protected_component_embedded_on_public_dashboard_redirects() {
-    let (status, _, _, location) = request(Method::GET, "/dashboard", None).await;
+    let (status, _, set_cookie, location) = request(Method::GET, "/dashboard", None).await;
     assert_eq!(status, StatusCode::TEMPORARY_REDIRECT);
     assert_eq!(location.as_deref(), Some("/login"));
+    assert!(set_cookie.starts_with("return_to="), "{set_cookie}");
 }
 
 #[tokio::test]
@@ -59,11 +60,36 @@ async fn magic_link_logs_in_and_logout_invalidates_the_session() {
 
     let state = AppState::test().await.unwrap();
     let router = slipway_capstone::app::router(state, None);
+
+    let protected = router
+        .handle(
+            Request::builder()
+                .method(Method::GET)
+                .uri("/dashboard")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(protected.status(), StatusCode::TEMPORARY_REDIRECT);
+    assert_eq!(protected.headers().get("location").unwrap(), "/login");
+    let return_to_cookie = protected
+        .headers()
+        .get("set-cookie")
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .split(';')
+        .next()
+        .unwrap()
+        .to_owned();
+    assert!(return_to_cookie.starts_with("return_to="));
+
     let response = router
         .handle(
             Request::builder()
                 .method(Method::GET)
                 .uri("/login/request?email=ada@example.com")
+                .header("cookie", &return_to_cookie)
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -91,21 +117,45 @@ async fn magic_link_logs_in_and_logout_invalidates_the_session() {
             Request::builder()
                 .method(Method::GET)
                 .uri(format!("/login/verify?token={token}"))
+                .header("cookie", &return_to_cookie)
                 .body(Body::empty())
                 .unwrap(),
         )
         .await;
     assert_eq!(verify.status(), StatusCode::SEE_OTHER);
-    let cookie = verify
+    assert_eq!(verify.headers().get("location").unwrap(), "/dashboard");
+    let set_cookies: Vec<_> = verify
         .headers()
-        .get("set-cookie")
-        .unwrap()
-        .to_str()
+        .get_all("set-cookie")
+        .iter()
+        .map(|value| value.to_str().unwrap())
+        .collect();
+    assert!(
+        set_cookies
+            .iter()
+            .any(|value| value.starts_with("return_to=") && value.contains("Max-Age=0")),
+        "{set_cookies:?}"
+    );
+    let cookie = set_cookies
+        .iter()
+        .find(|value| !value.starts_with("return_to="))
         .unwrap()
         .split(';')
         .next()
         .unwrap()
         .to_owned();
+
+    let dashboard = router
+        .handle(
+            Request::builder()
+                .method(Method::GET)
+                .uri("/dashboard")
+                .header("cookie", &cookie)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(dashboard.status(), StatusCode::OK);
 
     let admin = router
         .handle(

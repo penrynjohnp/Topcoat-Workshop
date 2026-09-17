@@ -6,7 +6,11 @@ use crate::{
 };
 use topcoat::{
     context::{Cx, app_context},
-    cookie::{Cookie, Cookies, Key, SameSite, cookies},
+    cookie::{Cookie, Cookies, Key, SameSite, cookies, time::Duration as CookieDuration},
+    router::{
+        Method,
+        request::{method, uri},
+    },
     session,
 };
 
@@ -59,6 +63,46 @@ pub fn secure_cookies(cx: &Cx) -> impl Cookies {
         .default_http_only(true)
         .default_same_site(SameSite::Lax)
         .default_path("/")
+}
+
+const RETURN_TO_COOKIE: &str = "return_to";
+const DEFAULT_RETURN_TO: &str = "/admin";
+
+fn remember_return_to(cx: &Cx) {
+    if method(cx) != Method::GET && method(cx) != Method::HEAD {
+        return;
+    }
+
+    let return_to = uri(cx).path_and_query().map_or("/", |value| value.as_str());
+    secure_cookies(cx).add(
+        Cookie::build((RETURN_TO_COOKIE, return_to.to_owned()))
+            .path("/")
+            .max_age(CookieDuration::minutes(10))
+            .build(),
+    );
+}
+
+fn validated_return_to(return_to: Option<String>) -> String {
+    return_to
+        .filter(|value| {
+            value.starts_with('/')
+                && !value.starts_with("//")
+                && !value.contains('\\')
+                && !value.contains("..")
+        })
+        .unwrap_or_else(|| DEFAULT_RETURN_TO.to_owned())
+}
+
+pub fn take_return_to(cx: &Cx) -> String {
+    let jar = secure_cookies(cx);
+    let return_to = jar
+        .get(RETURN_TO_COOKIE)
+        .map(|cookie| cookie.value().to_owned());
+    if return_to.is_some() {
+        jar.remove(Cookie::build((RETURN_TO_COOKIE, "")).path("/").build());
+    }
+
+    validated_return_to(return_to)
 }
 
 fn hash_key(hash: &session::TokenHash) -> String {
@@ -156,7 +200,10 @@ pub async fn current_user(cx: &Cx) -> topcoat::Result<Option<String>> {
 pub async fn require_auth(cx: &Cx) -> topcoat::Result<String> {
     match current_user(cx).await? {
         Some(email) => Ok(email),
-        None => Err(topcoat::router::error::redirect("/login").into()),
+        None => {
+            remember_return_to(cx);
+            Err(topcoat::router::error::redirect("/login").into())
+        }
     }
 }
 // ANCHOR_END: require-auth
@@ -237,4 +284,41 @@ pub fn remember_email(cx: &Cx, email: &str) {
             .path("/")
             .build(),
     );
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{DEFAULT_RETURN_TO, validated_return_to};
+
+    #[test]
+    fn return_to_accepts_a_local_path() {
+        assert_eq!(
+            validated_return_to(Some("/dashboard?tab=open".to_owned())),
+            "/dashboard?tab=open"
+        );
+    }
+
+    #[test]
+    fn return_to_rejects_unsafe_destinations() {
+        for destination in [
+            "//evil.com",
+            r"/\evil.com",
+            "http://evil.com",
+            "https:/evil.com",
+        ] {
+            assert_eq!(
+                validated_return_to(Some(destination.to_owned())),
+                DEFAULT_RETURN_TO,
+                "{destination}"
+            );
+        }
+    }
+
+    #[test]
+    fn return_to_rejects_dot_dot() {
+        assert_eq!(
+            validated_return_to(Some("/dashboard/../admin".to_owned())),
+            DEFAULT_RETURN_TO
+        );
+    }
 }

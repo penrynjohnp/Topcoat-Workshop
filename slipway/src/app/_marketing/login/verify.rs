@@ -1,4 +1,4 @@
-use crate::auth::{AppState, begin_session, consume_magic_link};
+use crate::auth::{AppState, begin_session, consume_magic_link, take_return_to};
 use topcoat::{
     Result,
     context::{Cx, app_context},
@@ -15,5 +15,5 @@ async fn verify(cx: &Cx) -> Result<SeeOther> {
         .await?
         .ok_or_else(topcoat::router::error::not_found)?;
     begin_session(cx, link.email).await?;
-    Ok(see_other("/admin"))
+    Ok(see_other(take_return_to(cx)))
 }

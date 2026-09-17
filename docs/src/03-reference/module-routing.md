@@ -24,6 +24,8 @@ This reference maps every convention exercised in Lab 04. It follows Topcoat v0.
 | A pathless `#[route(METHOD)]` uses the module path and only the declared method. | `#[route(GET)]` in `api::health` | `GET /api/health` |
 | `mod child;` makes a route module reachable by Rust and therefore discoverable. | `mod _marketing`, `mod berths`, `mod id`, `mod api`, `mod health` | The corresponding descendants are registered. Without the declaration, the file adds no route. |
 | A path string on `#[page]`, `#[layout]`, or `#[route]` disables derivation for that item. | Used during Lab 04's manual-routing steps, then removed from the final solution. | The explicit path wins; the final table above applies only to pathless handlers. |
+| A path beginning with `./` is joined below the enclosing module path. | `#[page("./export")]` in an `app::settings` module | `/settings/export` |
+| A bare `./` declares the module path with a trailing slash. | `#[page("./")]` in an `app::settings` module | `/settings/` |
 
 The module path and the served path are related but not identical. Groups remain in Topcoat's
 logical path so they can scope layouts, even though their names are absent from the browser URL.
@@ -44,6 +46,24 @@ layouts, layers, and routes beneath its module.
 Handlers with explicit path strings and feature-specific items are not automatically part of that
 module-derived set. Register them explicitly or add the appropriate discovery extension when your
 application uses them.
+
+## Trailing-slash policy
+
+A trailing slash is part of a route's declared path. Configure the undeclared form with
+`RouterBuilder::trailing_slash`; the default is `TrailingSlash::Redirect`.
+
+| Policy | Request for the undeclared form | Method and body | Browser URL |
+|---|---|---|---|
+| `TrailingSlash::Redirect` (default) | Returns `308 Permanent Redirect` to the declared form. | Preserved when the client follows the redirect. | Changes to the declared canonical form. |
+| `TrailingSlash::Serve` | Runs the same route under both forms. | Passed to the handler normally. | Stays exactly as requested. |
+| `TrailingSlash::Strict` | Matches no route and returns 404. | Not handled. | Stays exactly as requested. |
+
+For example, Lab 04 declares `/berths`, so `/berths/` redirects to `/berths` by default. A module
+handler declared as `#[page("./")]` reverses the canonical form: it serves the module path with the
+slash, and the default policy redirects the slashless request to it. The policy does not affect the
+root `/`, catch-all routes, or a pair of routes that explicitly declares both forms.
+
+*Guide basis: Topcoat v0.8.1 [router paths](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/router.md#paths), [relative module routes](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat-router/docs/module_router.md#relative-paths), and [`TrailingSlash`](https://docs.rs/topcoat/0.8.1/topcoat/router/enum.TrailingSlash.html).*
 
 ## Groups, layouts, and the root page
 

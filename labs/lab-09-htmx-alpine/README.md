@@ -8,7 +8,7 @@
 - Choose between the native runtime, htmx, and Alpine AJAX for a given interaction, and say why — morph versus swap, where state lives, and what each guide does *not* promise
 
 ## Concepts (read first, 5 min)
-Read the pinned [`topcoat::htmx` guide](https://github.com/tokio-rs/topcoat/blob/v0.8.0/crates/topcoat/docs/htmx.md) and the [Alpine AJAX guide](https://github.com/tokio-rs/topcoat/blob/v0.8.0/crates/topcoat/docs/alpine-ajax.md) beside it. Lab 08 built a live vessel search out of a signal and a `#[shard]`. The page creates the state with `signal(cx, String::new)` and hands the live handle to the shard as `Signal<String>` with `query: $(query)`. The shard's `.get()` is a tracked read, so a change re-runs *only that shard*, and the returned fragment is morphed into place rather than replacing the region — focus and the partly-typed query survive. Topcoat coalesces changes made in one tick and aborts stale in-flight requests so the latest result wins, but it does not debounce the pauses between keystrokes. Topcoat owns the endpoint, the request, and the update; the only thing you wrote was Rust.
+Read the pinned [`topcoat::htmx` guide](https://github.com/tokio-rs/topcoat/blob/v0.8.1/crates/topcoat/docs/htmx.md) and the [Alpine AJAX guide](https://github.com/tokio-rs/topcoat/blob/v0.8.1/crates/topcoat/docs/alpine-ajax.md) beside it. Lab 08 built a live vessel search out of a signal and a `#[shard]`. The page creates the state with `signal(cx, String::new)` and hands the live handle to the shard as `Signal<String>` with `query: $(query)`. The shard's `.get()` is a tracked read, so a change re-runs *only that shard*, and the returned fragment is morphed into place rather than replacing the region — focus and the partly-typed query survive. Topcoat coalesces changes made in one tick and aborts stale in-flight requests so the latest result wins, but it does not debounce the pauses between keystrokes. Topcoat owns the endpoint, the request, and the update; the only thing you wrote was Rust.
 
 htmx inverts that. The *client* decides what to request, when to request it, and where to put the answer, using `hx-*` attributes on the element, and the returned fragment is **swapped** into the target. Your server's job shrinks to returning an HTML fragment — and, when it wants to, overriding the client's decisions with `HX-*` response headers.
 
@@ -27,7 +27,7 @@ The workspace pins the version once; this lab adds a feature on top of it. Never
 
 The first build downloads `topcoat-htmx`.
 > [!NOTE]
-> **Checkpoint:** `cargo build -p lab09-solution` succeeds and `cargo tree -p lab09-solution | grep topcoat-htmx` prints `topcoat-htmx v0.8.0`.
+> **Checkpoint:** `cargo build -p lab09-solution` succeeds and `cargo tree -p lab09-solution | grep topcoat-htmx` prints `topcoat-htmx v0.8.1`.
 
 ### Step 2 — Extract the markup both transports will share
 This is the whole point of the lab, so do it before writing any htmx. The vessel filtering and the results list move out of the shard body into `shared.rs`, where a plain function holds the domain logic and a `#[component]` holds the markup:
@@ -135,7 +135,7 @@ The remaining tests cover the guard, both response-header paths, and no-JS opera
 
 ## Choosing between them
 
-Eight questions separate them. Every htmx cell comes from the pinned [`topcoat::htmx` guide](https://github.com/tokio-rs/topcoat/blob/v0.8.0/crates/topcoat/docs/htmx.md), every Alpine cell from the [Alpine AJAX guide](https://github.com/tokio-rs/topcoat/blob/v0.8.0/crates/topcoat/docs/alpine-ajax.md), and every native cell from the runtime guide Lab 08 is built on. Where a guide is silent, the cell says so rather than guessing.
+Eight questions separate them. Every htmx cell comes from the pinned [`topcoat::htmx` guide](https://github.com/tokio-rs/topcoat/blob/v0.8.1/crates/topcoat/docs/htmx.md), every Alpine cell from the [Alpine AJAX guide](https://github.com/tokio-rs/topcoat/blob/v0.8.1/crates/topcoat/docs/alpine-ajax.md), and every native cell from the runtime guide Lab 08 is built on. Where a guide is silent, the cell says so rather than guessing.
 
 | | Native `#[shard]` | htmx | Alpine AJAX |
 |---|---|---|---|

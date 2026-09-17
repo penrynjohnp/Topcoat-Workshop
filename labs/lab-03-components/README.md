@@ -261,7 +261,7 @@ calls for keying an invocation's identity.
   twice.
 - **Attribute order changes between renders** — expected. Spreading an `Attributes` value routes that
   element's attributes through a map, and the [`Attributes`
-  type](https://docs.rs/topcoat/0.8.0/topcoat/view/struct.Attributes.html) is documented as map-like:
+  type](https://docs.rs/topcoat/0.8.1/topcoat/view/struct.Attributes.html) is documented as map-like:
   each key appears at most once, and you must not rely on render order. Note that this caveat comes
   from `Attributes`, not from `view!` generally — the `view!` guide says rendered markup follows
   source order, and it is *component body execution* order that is unspecified. Assert on the set of

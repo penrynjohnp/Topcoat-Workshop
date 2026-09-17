@@ -9,9 +9,9 @@
 - Stream fallbacks, progress, content, and recoverable errors with `live!`, `suspense`, and `error_boundary`
 
 ## Concepts (read first, 5 min)
-Read the pinned [Topcoat runtime guide](https://docs.rs/topcoat/0.8.0/topcoat/runtime/index.html) and [`live!` guide](https://docs.rs/topcoat/0.8.0/topcoat/view/macro.live.html). Lab 07 introduced browser expressions and a whole-page tracked re-run. A shard narrows that server work to one region: the browser sends the current signal to a shard endpoint, the server recomputes just that fragment, and the result is morphed into place. A procedure crosses back for data or an action: an async event handler awaits an ordinary Rust server function and uses its result locally.
+Read the pinned [Topcoat runtime guide](https://docs.rs/topcoat/0.8.1/topcoat/runtime/index.html) and [`live!` guide](https://docs.rs/topcoat/0.8.1/topcoat/view/macro.live.html). Lab 07 introduced browser expressions and a whole-page tracked re-run. A shard narrows that server work to one region: the browser sends the current signal to a shard endpoint, the server recomputes just that fragment, and the result is morphed into place. A procedure crosses back for data or an action: an async event handler awaits an ordinary Rust server function and uses its result locally.
 
-Both are public HTTP endpoints. Arguments are spoofable, page and layout guards do not protect them, and every endpoint must validate input and repeat authorization where needed. Shard input events may produce request storms: Topcoat 0.8.0 coalesces changes in one tick, aborts stale in-flight requests, and lets the latest result win, but it does not debounce pauses between keystrokes. Streaming solves a different problem—time to first content. `suspense` and `error_boundary` are convenience components built from the general `live!`/`emit!` replacement-region primitives.
+Both are public HTTP endpoints. Arguments are spoofable, page and layout guards do not protect them, and every endpoint must validate input and repeat authorization where needed. Shard input events may produce request storms: Topcoat 0.8.1 coalesces changes in one tick, aborts stale in-flight requests, and lets the latest result win, but it does not debounce pauses between keystrokes. Streaming solves a different problem—time to first content. `suspense` and `error_boundary` are convenience components built from the general `live!`/`emit!` replacement-region primitives.
 
 ## Steps
 ### Step 1 — Register server runtime endpoints
@@ -26,7 +26,7 @@ The runtime script and asset-bundle arrangement from Lab 07 remains unchanged.
 > **Checkpoint:** `cargo check -p lab08-solution` succeeds and `/vessels` still renders.
 
 ### Step 2 — Search vessels with a shard
-The page owns the query signal so the input stays outside the shard. In Topcoat 0.8.0, the caller creates the signal with `signal(cx, String::new)`, then hands the live signal handle to the shard as `Signal<String>` with `query: $(query)`. The handle itself is stable. The shard's `.get()` is a tracked server read, so changing the signal re-runs only that shard. The shard validates the value, filters server-owned vessel data, and returns only the result region:
+The page owns the query signal so the input stays outside the shard. In Topcoat 0.8.1, the caller creates the signal with `signal(cx, String::new)`, then hands the live signal handle to the shard as `Signal<String>` with `query: $(query)`. The handle itself is stable. The shard's `.get()` is a tracked server read, so changing the signal re-runs only that shard. The shard validates the value, filters server-owned vessel data, and returns only the result region:
 
 ```rust
 {{#include solution/src/app/_marketing/vessels.rs:vessel-results-shard}}

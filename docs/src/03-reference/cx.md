@@ -3,10 +3,10 @@
 `Cx` is Topcoat's handle for the current request. Pass `&Cx` to small request functions, or declare it
 on a page, layout, component, route, shard, or procedure that needs request-scoped information.
 
-The helpers in this page are the ones used across Labs 05–08. They follow Topcoat v0.8.0's [app
-context](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/app_context.md)
+The helpers in this page are the ones used across Labs 05–08. They follow Topcoat v0.8.1's [app
+context](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/app_context.md)
 and [functions, not
-middlewares](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/functions_not_middlewares.md)
+middlewares](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/functions_not_middlewares.md)
 guides.
 
 > [!NOTE]
@@ -28,8 +28,8 @@ must not make the body depend on the signal. Validate every signal value read on
 input. See [How `$(...)` reaches the browser](../01-concepts/dual-expressions.md) for the dual
 expression model.
 
-*Guide basis: the v0.8.0 runtime guide's [Signals](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#signals)
-and [Reading signals on the server](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#reading-signals-on-the-server) sections.*
+*Guide basis: the v0.8.1 runtime guide's [Signals](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/runtime.md#signals)
+and [Reading signals on the server](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/runtime.md#reading-signals-on-the-server) sections.*
 
 ## Request
 

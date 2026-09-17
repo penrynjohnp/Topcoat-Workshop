@@ -1,10 +1,10 @@
 # `view!` cheat sheet
 
 Use this page when you know what markup you want and need the Topcoat syntax. Every example comes
-from the compiled solutions for Labs 02–03 and targets Topcoat 0.8.0.
+from the compiled solutions for Labs 02–03 and targets Topcoat 0.8.1.
 
-The syntax follows the pinned v0.8.0 [`view!`
-guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat-view/macro/docs/view.md).
+The syntax follows the pinned v0.8.1 [`view!`
+guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat-view/macro/docs/view.md).
 
 ## Syntax at a glance
 

@@ -1,17 +1,17 @@
 # CLI commands
 
-This page records the complete `--help` surface of **Topcoat CLI 0.8.0**, the version pinned by this
+This page records the complete `--help` surface of **Topcoat CLI 0.8.1**, the version pinned by this
 workshop. The CLI has four working command groups: `dev`, `fmt`, `asset`, and `ui`. Every table below
-was regenerated from the installed 0.8.0 binary; the command groups and flags are unchanged from
-0.7.0.
+was regenerated from the installed 0.8.1 binary; the command groups and flags are unchanged by this
+patch release.
 
 > [!WARNING]
-> Topcoat CLI 0.8.0 has **no top-level `--version` flag**. `topcoat --version` fails with
+> Topcoat CLI 0.8.1 has **no top-level `--version` flag**. `topcoat --version` fails with
 > `error: unexpected argument '--version' found`. The formatter alone exposes
-> `topcoat fmt --version`, which prints `topcoat-fmt 0.8.0`.
+> `topcoat fmt --version`, which prints `topcoat-fmt 0.8.1`.
 
 > [!NOTE]
-> There is still no `topcoat build` command in 0.8.0. `topcoat build` fails with
+> There is still no `topcoat build` command in 0.8.1. `topcoat build` fails with
 > `error: unrecognized subcommand 'build'` and suggests `ui`, which is unrelated. Use Cargo to build
 > the binary, then use `topcoat asset bundle` with the same package, binary, and profile selection.
 
@@ -62,7 +62,7 @@ Usage is `topcoat fmt [OPTIONS] [FILES]...`.
 | `-V`, `--version` | — | Print the formatter version. This is subcommand-specific, not a top-level CLI version flag. |
 
 > [!WARNING]
-> `topcoat fmt` has **no `--check` flag** in 0.8.0. `topcoat fmt --check` fails with
+> `topcoat fmt` has **no `--check` flag** in 0.8.1. `topcoat fmt --check` fails with
 > `error: unexpected argument '--check' found` and then suggests `tip: to pass '--check' as a value,
 > use '-- --check'`. Ignore that tip. It only offers to treat `--check` as a *file path*, so
 > `topcoat fmt -- --check` looks for a file named `--check` rather than enabling a check mode. CI
@@ -195,11 +195,11 @@ Usage is `topcoat ui remove [OPTIONS] <COMPONENTS>...`.
 `help` to request that command's help.
 
 The normal `--help` form is available on every working command listed above. `topcoat help --help`
-is not a separate supported help page in 0.8.0; use `topcoat --help` instead.
+is not a separate supported help page in 0.8.1; use `topcoat --help` instead.
 
-## Missing commands and flags in 0.8.0
+## Missing commands and flags in 0.8.1
 
-The `Result` column quotes the 0.8.0 binary verbatim.
+The `Result` column quotes the 0.8.1 binary verbatim.
 
 | Attempt | Result | Use instead |
 |---|---|---|

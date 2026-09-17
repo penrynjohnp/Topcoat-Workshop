@@ -9,8 +9,8 @@ representations from it:
 The server result supplies the initial page. The JavaScript supplies later interaction without a
 WebAssembly bundle, a separate frontend build, or a server request for every state change.
 
-*Guide basis: Topcoat v0.8.0 [Runtime expressions](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#runtime-expressions)
-and the release-tagged [`expr!` vocabulary guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat-runtime/macro/docs/expr.md).*
+*Guide basis: Topcoat v0.8.1 [Runtime expressions](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/runtime.md#runtime-expressions)
+and the release-tagged [`expr!` vocabulary guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat-runtime/macro/docs/expr.md).*
 
 ```mermaid
 flowchart TD
@@ -44,9 +44,9 @@ browser:
 {{#include ../../../labs/lab-07-signals-expressions/solution/tests/reactivity.rs:reactivity-integration-test}}
 ```
 
-*Guide basis: Topcoat v0.8.0 [Runtime expressions](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#runtime-expressions),
-[Signals](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#signals), and
-[Bind attributes](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#bind-attributes).*
+*Guide basis: Topcoat v0.8.1 [Runtime expressions](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/runtime.md#runtime-expressions),
+[Signals](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/runtime.md#signals), and
+[Bind attributes](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/runtime.md#bind-attributes).*
 
 ## Signals give the browser state
 
@@ -62,8 +62,8 @@ This is client-only state, not hidden server state. It is suitable for opening a
 markup already in the page, or keeping an input and label synchronized. It cannot query a database
 from the browser or observe a later server change.
 
-*Guide basis: the v0.8.0 runtime guide's [Signals](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#signals)
-section and the v0.8.0 [`Signal` vocabulary](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat-runtime/macro/docs/expr.md#the-shared-vocabulary).*
+*Guide basis: the v0.8.1 runtime guide's [Signals](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/runtime.md#signals)
+section and the v0.8.1 [`Signal` vocabulary](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat-runtime/macro/docs/expr.md#the-shared-vocabulary).*
 
 ## Handlers write; expressions and binds read
 
@@ -84,8 +84,8 @@ Lab 07 combines handlers and binds into a filter whose interactions make no netw
 The filter's `@input` handler writes the query signal. Each row's `:hidden` expression reads that
 signal and the status signals. Only those dependent expressions re-run after an edit or click.
 
-*Guide basis: Topcoat v0.8.0 [Event handlers](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#event-handlers)
-and [Bind attributes](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#bind-attributes).*
+*Guide basis: Topcoat v0.8.1 [Event handlers](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/runtime.md#event-handlers)
+and [Bind attributes](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/runtime.md#bind-attributes).*
 
 ## Server reads are tracked or untracked
 
@@ -98,7 +98,7 @@ The browser owns every signal after the initial render. Treat every value read o
 input: validate it before querying, authorizing, or mutating anything. A shard is often the better
 choice when only one region needs to re-render.
 
-*Guide basis: the v0.8.0 runtime guide's [Reading signals on the server](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#reading-signals-on-the-server)
+*Guide basis: the v0.8.1 runtime guide's [Reading signals on the server](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/runtime.md#reading-signals-on-the-server)
 section.*
 
 ## Captures are render-time snapshots
@@ -113,12 +113,12 @@ in the database afterward, the captures do not update. They remain snapshots fro
 Use a shard when changing server data must produce new markup. Do not treat a captured value as a
 live connection to Rust memory or the database.
 
-*Guide basis: the Topcoat v0.8.0 [`expr!` guide — Captured variables](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat-runtime/macro/docs/expr.md#captured-variables).*
+*Guide basis: the Topcoat v0.8.1 [`expr!` guide — Captured variables](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat-runtime/macro/docs/expr.md#captured-variables).*
 
 ## One vocabulary must work in both languages
 
 The Rust and JavaScript forms must produce equivalent behavior. Topcoat therefore supports a
-restricted shared vocabulary rather than arbitrary Rust. In v0.8.0 it includes `f64`, `bool`,
+restricted shared vocabulary rather than arbitrary Rust. In v0.8.1 it includes `f64`, `bool`,
 `String` and `&str`, `Option`, `Result`, tuples, and signals, with a documented subset of methods.
 
 All numbers are `f64` so their model agrees with JavaScript. Write `1.0`, not `1`. String operations
@@ -129,12 +129,12 @@ Supported expression shapes include literals, the documented operators, method c
 simple `let` bindings, `if`/`else`, closures, `.await`, and basic loops. Unsupported syntax is a
 compile error rather than JavaScript that behaves differently from the server result.
 
-*Guide basis: the Topcoat v0.8.0 [`expr!` guide — Shared vocabulary and supported syntax](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat-runtime/macro/docs/expr.md#the-shared-vocabulary).*
+*Guide basis: the Topcoat v0.8.1 [`expr!` guide — Shared vocabulary and supported syntax](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat-runtime/macro/docs/expr.md#the-shared-vocabulary).*
 
 ## Unsupported Rust fails at compile time
 
 `match`, integer literals, struct expressions, multi-segment paths, and `&&`/`||` are outside the
-v0.8.0 expression vocabulary. Lab 07 deliberately preserves an invalid `match` example as a comment
+v0.8.1 expression vocabulary. Lab 07 deliberately preserves an invalid `match` example as a comment
 so you can reproduce the compiler diagnostic:
 
 ```rust
@@ -144,7 +144,7 @@ so you can reproduce the compiler diagnostic:
 Restructure first. The berth filter replaces logical operators with `let` bindings and
 `if`/`else`, which keeps both outputs type-checked and equivalent.
 
-*Guide basis: the Topcoat v0.8.0 [`expr!` guide — Supported syntax](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat-runtime/macro/docs/expr.md#supported-syntax).*
+*Guide basis: the Topcoat v0.8.1 [`expr!` guide — Supported syntax](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat-runtime/macro/docs/expr.md#supported-syntax).*
 
 ## `raw!` is the escape hatch
 
@@ -154,9 +154,9 @@ omit that Rust form, the expression can only run in a browser-only position.
 
 This escape hatch removes part of the guarantee that makes `$(...)` useful. You are responsible for
 keeping the JavaScript and Rust behavior equivalent, so prefer restructuring the expression first.
-Use raw JavaScript only for a small operation that cannot yet be stated in the v0.8.0 vocabulary.
+Use raw JavaScript only for a small operation that cannot yet be stated in the v0.8.1 vocabulary.
 
-*Guide basis: the Topcoat v0.8.0 [`expr!` guide — Embedding JavaScript](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat-runtime/macro/docs/expr.md#embedding-javascript).*
+*Guide basis: the Topcoat v0.8.1 [`expr!` guide — Embedding JavaScript](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat-runtime/macro/docs/expr.md#embedding-javascript).*
 
 ## The runtime script completes the path
 
@@ -177,8 +177,8 @@ The root layout emits the runtime script only when the matching bundle is availa
 The binary and asset bundle must come from the same build. Without the script, the server-rendered
 HTML still exists, but handlers and reactive binds do not run in the browser.
 
-*Guide basis: Topcoat v0.8.0 [Runtime setup](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#setup)
-and [Runtime expressions](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.0/crates/topcoat/docs/runtime.md#runtime-expressions).*
+*Guide basis: Topcoat v0.8.1 [Runtime setup](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/runtime.md#setup)
+and [Runtime expressions](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/runtime.md#runtime-expressions).*
 
 **See also:** [Lab 07 — Signals and expressions](../02-labs/lab-07.md),
 [Request lifecycle](request-lifecycle.md), [Shards, procedures, live regions, htmx](reactivity-options.md),

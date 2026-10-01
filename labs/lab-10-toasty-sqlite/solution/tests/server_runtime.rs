@@ -394,6 +394,7 @@ async fn connected_status_updates_reconnects_and_rechecks_auth() {
         )
         .await;
     assert!(logout.status().is_redirection());
+    state.updates.send(()).ok();
     let expired = receive_until(&mut reconnected, "Your session has expired.").await;
     assert!(!expired.contains("Completed work orders"), "{expired}");
     wait_for_subscribers(&state, 0).await;

@@ -139,6 +139,9 @@ Subscribe before reading current state. Emit a snapshot, then return its token w
 The completion procedure sends a notification after changing application state.
 A reconnect reloads state; a disconnect drops the subscription.
 Check the stored session before each private emission, without reusing the memoized initial user.
+`#[memoize]` caches for one request/render, and one connected live render keeps the same `Cx` across every loop iteration.
+A memoized call inside the loop therefore returns its first result until a reconnection starts a fresh render.
+Labs 08-09 use `current_user_uncached` for this reason; Labs 10-12 call `current_user` safely only because their DB-backed version is not memoized, not because the call site behaves differently.
 
 The notification channel is process-local. It is not a durable event log or cross-replica fanout.
 

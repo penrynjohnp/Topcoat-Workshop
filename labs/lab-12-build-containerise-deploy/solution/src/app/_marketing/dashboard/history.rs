@@ -24,6 +24,7 @@ async fn work_order_status(cx: &Cx) -> Result<impl View> {
                 .exec(&mut db)
                 .await?
                 .len();
+            // Safe in this live loop only while the DB-backed current_user remains uncached.
             if current_user(cx).await?.is_none() {
                 return emit! { <p role="alert">"Your session has expired."</p> };
             }

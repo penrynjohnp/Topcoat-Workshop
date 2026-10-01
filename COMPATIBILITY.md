@@ -33,6 +33,7 @@ The mdBook toolchain is pinned as a set in `.github/workflows/docs.yml` and `.de
 - Suspense behavior is selected with `SuspenseMode::Stream` or `SuspenseMode::Wait`.
 - A `TowerRoute` mounted under a prefix needs `StripPrefixLayer` before the request reaches the nested service.
 - Live shards hold a WebSocket using `RUNTIME_PROTOCOL`, expose connection state through `connected(cx)`, and reconnect after the connection drops.
+- `#[memoize]` caches for one request/render. A connected live render reuses one `Cx` across loop iterations, so a memoized result remains fixed until reconnection starts a fresh render; changing state inside a `live!` loop must use an uncached path.
 
 ## 0.8.0 upgrade notes
 

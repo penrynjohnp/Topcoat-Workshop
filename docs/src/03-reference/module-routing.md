@@ -4,8 +4,8 @@
 your route tree, declare every child with `mod`, and omit path strings from handlers whose paths
 should be derived.
 
-This reference maps every convention exercised in Lab 04. It follows Topcoat v0.8.1's
-[`module_router!` reference](https://docs.rs/topcoat/0.8.1/topcoat/router/macro.module_router.html).
+This reference maps every convention exercised in Lab 04. It follows Topcoat v0.9.0's
+[`module_router!` reference](https://docs.rs/topcoat/0.9.0/topcoat/router/macro.module_router.html).
 
 ## Convention table
 
@@ -63,7 +63,7 @@ handler declared as `#[page("./")]` reverses the canonical form: it serves the m
 slash, and the default policy redirects the slashless request to it. The policy does not affect the
 root `/`, catch-all routes, or a pair of routes that explicitly declares both forms.
 
-*Guide basis: Topcoat v0.8.1 [router paths](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/router.md#paths), [relative module routes](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat-router/docs/module_router.md#relative-paths), and [`TrailingSlash`](https://docs.rs/topcoat/0.8.1/topcoat/router/enum.TrailingSlash.html).*
+*Guide basis: Topcoat v0.9.0 [router paths](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat/docs/router.md#paths), [relative module routes](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat-router/docs/module_router.md#relative-paths), and [`TrailingSlash`](https://docs.rs/topcoat/0.9.0/topcoat/router/enum.TrailingSlash.html).*
 
 ## Groups, layouts, and the root page
 

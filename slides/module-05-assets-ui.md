@@ -85,13 +85,28 @@ Copying source is a trade-off: you gain ownership and take responsibility for ma
 
 ---
 
+# Fields do not replace server validation
+
+Topcoat 0.9.0 adds owned field components:
+
+- `field` groups a control with its supporting content;
+- `field_label` targets the control's ID;
+- `field_error` announces validation feedback;
+- `aria-describedby` links feedback to the control;
+- the server still validates and preserves submitted values.
+
+Refresh with `topcoat ui add --overwrite`, not `topcoat ui update`.
+Preserve custom card classes and merge theme tokens deliberately.
+
+---
+
 # Release correctness matters
 
 After a clean build:
 
 1. stage the icon cache with `cargo build -p lab11-solution`;
 2. run the release build;
-3. run `topcoat asset bundle --release`;
+3. run `topcoat asset bundle --release -p lab11-solution`;
 4. package the matching binary and `target/release/assets/`.
 
 Do not mix a debug binary with release assets. Do not run parallel icon-cache builds after `cargo clean`.

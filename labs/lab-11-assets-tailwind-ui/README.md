@@ -1,6 +1,6 @@
 # Lab 11 — Asset pipeline, fonts, icons, Tailwind, and Topcoat UI
 
-**Time:** 75 min · **Module:** 5 · **Prerequisites:** Lab 10 complete (or copy `labs/lab-10-toasty-sqlite/solution`)
+**Time:** 90 min · **Module:** 5 · **Prerequisites:** Lab 10 complete (or copy `labs/lab-10-toasty-sqlite/solution`)
 
 ## What you'll learn
 - Bundle local and remote files behind content-hashed `asset!` URLs
@@ -8,7 +8,7 @@
 - Vendor Topcoat UI components into your source tree and restyle every use from one owned file
 
 ## Concepts (read first, 5 min)
-Read [Assets, styling, and owned UI](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/docs/src/01-concepts/assets-styling-ui.md) and the pinned [Topcoat 0.8.1 asset guide](https://docs.rs/topcoat/0.8.1/topcoat/asset/index.html). An `asset!` handle is not file contents. It embeds a declaration in the compiled binary. The bundler scans that exact binary, copies or downloads the declared files, gives each output a content-derived filename, and writes a manifest that resolves handles to URLs. The binary and bundle are therefore one release unit. A consequence worth knowing before you debug a missing file: the declaration only survives while some code path uses the handle, so a handle you declare and never render can be optimised out of the binary and the bundler then skips it. `.assets(...)` serves everything it did find under `/_topcoat/assets`.
+Read [Assets, styling, and owned UI](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/docs/src/01-concepts/assets-styling-ui.md) and the pinned [Topcoat 0.9.0 asset guide](https://docs.rs/topcoat/0.9.0/topcoat/asset/index.html). An `asset!` handle is not file contents. It embeds a declaration in the compiled binary. The bundler scans that exact binary, copies or downloads the declared files, gives each output a content-derived filename, and writes a manifest that resolves handles to URLs. The binary and bundle are therefore one release unit. A consequence worth knowing before you debug a missing file: the declaration only survives while some code path uses the handle, so a handle you declare and never render can be optimised out of the binary and the bundler then skips it. `.assets(...)` serves everything it did find under `/_topcoat/assets`.
 
 Tailwind, Fontsource, and Iconify join that same pipeline. A Cargo build script runs Topcoat's standalone Tailwind integration and stages icon metadata; no Node, PostCSS, Vite, or client application appears. Topcoat UI follows a different ownership model from a component dependency: the CLI copies ordinary Rust source into this crate. You can inspect and change it, and Tailwind scans those local class strings with the rest of the app.
 
@@ -20,7 +20,7 @@ Enable `font-fontsource`, `icon-iconify`, `tailwind`, and `ui` alongside the inh
 {{#include solution/build.rs:asset-build-script}}
 ```
 
-Topcoat 0.8.1 downloads its pinned standalone Tailwind CLI — version `4.3.2` — on the first build and caches it in the shared Topcoat cache at `topcoat/cache/tailwind` under Cargo's target directory, so every package in the workspace reuses one copy. This is a Rust/Cargo build step, not an npm step. For an offline or sandboxed build, `BuildConfig::executable("tailwindcss")` uses a preinstalled CLI and downloads nothing; `version_checksum("4.3.2", "sha256:…")` verifies the download instead, and only `sha256` is supported.
+Topcoat 0.9.0 downloads its pinned standalone Tailwind CLI — version `4.3.2` — on the first build and caches it in the shared Topcoat cache at `topcoat/cache/tailwind` under Cargo's target directory, so every package in the workspace reuses one copy. This is a Rust/Cargo build step, not an npm step. For an offline or sandboxed build, `BuildConfig::executable("tailwindcss")` uses a preinstalled CLI and downloads nothing; `version_checksum("4.3.2", "sha256:…")` verifies the download instead, and only `sha256` is supported.
 
 > [!NOTE]
 > **Checkpoint:** `cargo check -p lab11-solution` succeeds, and no `package.json` or `node_modules` directory exists.
@@ -54,7 +54,9 @@ Iconify works one phase earlier. `build.rs` stages the Lucide set, then `include
 > **Checkpoint:** misspell one included icon, run `cargo check -p lab11-solution`, and read the compile-time suggestion. Restore the correct name before continuing.
 
 ### Step 4 — Vendor Topcoat UI
-From the repository root, run `topcoat ui init --package lab11-solution --components-dir src/components --theme neutral`, then `topcoat ui add --package lab11-solution card button input label`. The first command creates `components.toml` and `styles.css`; the second copies four Rust modules under `src/components/` and records their registry hashes.
+From the repository root, run `topcoat ui init --package lab11-solution --components-dir src/components --theme neutral`, then `topcoat ui add --package lab11-solution card button input label field`.
+The commands create install state and copy owned Rust modules under `src/components/`.
+The new `field` component depends on the existing label component.
 
 The generated install state is committed with the app:
 
@@ -64,8 +66,12 @@ The generated install state is committed with the app:
 
 These modules are not wrappers around a hidden runtime package. They are your components now. Re-running `topcoat ui add card --overwrite` replaces local changes, so inspect the diff before accepting an upstream version.
 
+CLI 0.9.0 has no `topcoat ui update` command. Use `topcoat ui add --overwrite --package lab11-solution --registry topcoat COMPONENT` for an intentional refresh.
+Merge customized source and theme tokens rather than overwriting the marina card or palette.
+Registry hashes describe the upstream baseline, so customized files remain marked as modified.
+
 > [!NOTE]
-> **Checkpoint:** `topcoat ui list --package lab11-solution --installed` lists `button`, `card`, `input`, and `label`, and `git status --short` shows their source files.
+> **Checkpoint:** `topcoat ui list --package lab11-solution --installed` lists `button`, `card`, `field`, `input`, and `label`.
 
 ### Step 5 — Own the theme and card
 The installed theme exposes semantic tokens. Change the neutral values to Slipway's cyan, teal, and deep-water palette rather than scattering raw colors through every component:
@@ -85,7 +91,22 @@ Every berth card now calls this owned component. The integration test counts bot
 > [!NOTE]
 > **Checkpoint:** `cargo test -p lab11-solution --test pages vendored_card_style_reaches_every_berth` passes.
 
-### Step 6 — Load the release unit
+### Step 6 — Compose accessible form fields
+Use `field`, `field_label`, and `field_error` around the existing title and berth controls.
+The server still owns validation and preserves submitted values.
+Link each error's `id` through the control's `aria-describedby`, and set `aria-invalid` on invalid controls:
+
+```rust
+{{#include solution/src/app/_marketing/dashboard/work_orders/new.rs:work-order-form}}
+```
+
+The owned field components provide layout and feedback styling, not a validation engine.
+The input and select keep their existing `title` and `berth_slug` names.
+
+> [!NOTE]
+> **Checkpoint:** submit invalid values and inspect the label/control/error associations. `cargo test -p lab11-solution --test persistence` proves invalid values are preserved without an insert.
+
+### Step 7 — Load the release unit
 The root layout loads the font stylesheet, generated Tailwind asset, Topcoat runtime, checksummed htmx asset, and local mark only when an asset bundle is registered:
 
 ```rust
@@ -97,7 +118,7 @@ Tests that focus on routing can still build a router without assets. The real bi
 > [!NOTE]
 > **Checkpoint:** run `topcoat dev -p lab11-solution`, open view-source, and verify the CSS, htmx, logo, font files, and font stylesheet use `/_topcoat/` URLs rather than the old htmx CDN URL.
 
-### Step 7 — Assert the hash contract
+### Step 8 — Assert the hash contract
 The asset test embeds a local declaration in its test binary, bundles that binary into a temporary directory, resolves the handle through the generated catalog, and checks the 16-character hexadecimal content hash:
 
 ```rust
@@ -109,8 +130,8 @@ This tests the pipeline rather than guessing at a filename. A second page test e
 > [!NOTE]
 > **Checkpoint:** `cargo test -p lab11-solution --test assets --test pages` passes.
 
-### Step 8 — Bundle the release profile
-Topcoat CLI 0.8.1 has no `topcoat build` command. Build with Cargo and bundle with the same profile: `cargo build --release -p lab11-solution`, then `topcoat asset bundle --release -p lab11-solution`. The normal output is `target/release/assets/` beside `target/release/lab11-solution`.
+### Step 9 — Bundle the release profile
+Topcoat CLI 0.9.0 has no `topcoat build` command. Build with Cargo and bundle with the same profile: `cargo build --release -p lab11-solution`, then `topcoat asset bundle --release -p lab11-solution`. The normal output is `target/release/assets/` beside `target/release/lab11-solution`.
 
 Do not copy a debug asset directory beside a release binary. An asset's ID derives from the path it was declared with, and a build script writes into `OUT_DIR`, whose path covers the target directory, the profile, and a per-build hash. `tailwind::stylesheet!()` is one such asset, so a debug bundle cannot describe a release binary even when the generated CSS is byte-identical — and a bundle built in another checkout cannot describe this one.
 
@@ -130,7 +151,7 @@ Do not copy a debug asset directory beside a release binary. An asset's ID deriv
 - **Rendering panics with “failed to resolve asset.”** The loaded manifest came from a different binary, checkout, or profile. Re-run the bundler for the binary you will execute.
 - **Tailwind omits a class.** Keep class names as literal strings in Rust or `styles.css`; dynamically assembled fragments are invisible to its scanner.
 - **A local card edit vanished.** `topcoat ui add card --overwrite` replaced the owned file. Restore the diff, then reapply upstream changes deliberately.
-- **`topcoat build` is unknown.** That command does not exist in CLI 0.8.1. Use Cargo plus `topcoat asset bundle` with matching profile flags.
+- **`topcoat build` is unknown.** That command does not exist in CLI 0.9.0. Use Cargo plus `topcoat asset bundle` with matching profile flags.
 - **A declared asset is missing from the bundle.** The bundler scans the compiled binary, and a declaration whose handle is never used can be optimised out before it gets there. Render the handle, or hold it somewhere the compiler cannot discard.
 
 ## What's next

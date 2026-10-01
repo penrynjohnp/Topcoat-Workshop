@@ -58,9 +58,67 @@ async fn tracked_server_read_emits_one_dependency_marker() {
     let (status, html) = get("/").await;
     assert_eq!(status, StatusCode::OK);
 
-    assert_eq!(html.matches("::topcoat::signal(").count(), 2, "{html}");
+    assert_eq!(html.matches("::topcoat::signal(").count(), 3, "{html}");
     assert_eq!(html.matches("::topcoat::dep(").count(), 1, "{html}");
     assert!(html.contains("data-server-read=\"tracked\""), "{html}");
+    assert!(html.contains("data-server-read=\"untracked\""), "{html}");
+}
+
+#[tokio::test]
+async fn integer_and_collection_expressions_render_initial_status() {
+    let (status, html) = get("/").await;
+    assert_eq!(status, StatusCode::OK);
+    assert!(
+        html.contains("data-component=\"inspection-status\""),
+        "{html}"
+    );
+    assert!(html.contains("Scheduled"), "{html}");
+    assert!(
+        html.contains("data-command=\"advance-inspection\""),
+        "{html}"
+    );
+    assert!(html.contains("&quot;t&quot;:&quot;usize&quot;"), "{html}");
+}
+
+#[tokio::test]
+async fn page_rerun_restores_tracked_signal_values() {
+    let router = lab07_solution::app::router(AppState::new(), None);
+    let initial = router
+        .handle(Request::builder().uri("/").body(Body::empty()).unwrap())
+        .await;
+    let body = to_bytes(initial.into_body(), usize::MAX).await.unwrap();
+    let html = String::from_utf8(body.to_vec()).unwrap();
+    let dependency = html.split("::topcoat::dep(\"").nth(1).unwrap();
+    let signal_id = dependency.split('"').next().unwrap();
+    let declaration = html
+        .split("<!--::topcoat::signal(")
+        .skip(1)
+        .map(|part| {
+            let json = html_escape::decode_html_entities(part.split(")-->").next().unwrap());
+            serde_json::from_str::<serde_json::Value>(&json).unwrap()
+        })
+        .find(|value| value["id"] == signal_id)
+        .unwrap();
+    assert_eq!(declaration["v"], "");
+    let mut values = serde_json::Map::new();
+    values.insert(signal_id.to_owned(), serde_json::json!("A1"));
+    let response = router
+        .handle(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/?probe=rerun")
+                .header("x-topcoat-runtime", "true")
+                .header("content-type", "application/json")
+                .body(Body::from(
+                    serde_json::json!({ "signals": values }).to_string(),
+                ))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(response.status(), StatusCode::OK);
+    let body = to_bytes(response.into_body(), usize::MAX).await.unwrap();
+    let html = String::from_utf8(body.to_vec()).unwrap();
+    assert!(html.contains("Tracked on the server: A1"), "{html}");
     assert!(html.contains("data-server-read=\"untracked\""), "{html}");
 }
 

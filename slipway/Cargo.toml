@@ -26,6 +26,9 @@ tracing-subscriber.workspace = true
 topcoat = { workspace = true, features = ["icon-iconify", "tailwind"] }
 
 [dev-dependencies]
+futures-util.workspace = true
+tokio-tungstenite.workspace = true
+serde_json.workspace = true
 tokio.workspace = true
 serde.workspace = true
 web-time.workspace = true

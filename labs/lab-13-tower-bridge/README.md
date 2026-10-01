@@ -14,36 +14,18 @@ The `TowerRoute` and `TowerLayer` bridge work at the router boundary, not at the
 
 ## Steps
 ### Step 1 — Mount an Axum router under `/api/v1`
-Start by creating a tiny Axum router with a JSON health endpoint, then mount it with `TowerRoute` from the Topcoat router. The key is the catch-all route: it forwards the request subtree to the nested service without rewriting the path. This is the “route under a prefix” pattern Topcoat expects when you want an existing Axum app to live beside the page routes.
+Create a small Axum router with `/health`, then mount it under `/api/v1` with `TowerRoute`.
+The adapter forwards the original URI. Add `StripPrefixLayer::new("/api/v1")` so this relative
+Axum route receives `/health`, while Topcoat still matches the external `/api/v1/health` path.
+The capstone instead defines an already-prefixed Axum route and does not strip it.
 
 ```rust
-use axum::{Json, Router as AxumRouter, routing::get};
-use serde::Serialize;
-use topcoat::router::{Methods, Router, RouterBuilderDiscoverExt, tower::{TowerLayer, TowerRoute}};
-use tower_http::{compression::CompressionLayer, trace::TraceLayer};
-
-#[derive(Serialize)]
-struct HealthResponse {
-    status: &'static str,
-}
-
-fn api_router() -> AxumRouter {
-    AxumRouter::new().route(
-        "/health",
-        get(|| async { Json(HealthResponse { status: "ok" }) }),
-    )
-}
-
-fn build_router() -> Router {
-    Router::builder()
-        .route(TowerRoute::new(Methods::Any, "/api/v1/{*rest}", api_router()))
-        .layer(TowerLayer::new(CompressionLayer::new()).at("/api/v1"))
-        .layer(TowerLayer::new(TraceLayer::new_for_http()).at("/api/v1"))
-        .build()
-}
+{{#include solution/src/lib.rs:tower-bridge-router}}
 ```
 
-Topcoat 0.8.1 also adds `TowerRoute::any` as the catch-all shorthand: `Router::builder().route(TowerRoute::any("/api/v1/{*rest}", api_router()))`. The main example keeps `TowerRoute::new(Methods::Any, ...)` so you can still see how method selection fits the general constructor.
+`TowerRoute::any` is shorthand for `TowerRoute::new(Methods::Any, ...)`.
+This example keeps the general constructor to make method selection visible.
+Read the tagged [Tower guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat-router/docs/tower.md).
 
 > [!NOTE]
 > **Checkpoint:** the app builds, and `curl http://127.0.0.1:3000/api/v1/health` returns `{"status":"ok"}`.
@@ -52,44 +34,18 @@ Topcoat 0.8.1 also adds `TowerRoute::any` as the catch-all shorthand: `Router::b
 The Topcoat router still owns the public HTML pages. Add a single `#[page("/")]` root page to confirm the app shell still renders normally and that the mounted API is just a sibling route, not a replacement. This keeps the “Topcoat first, Tower second” story explicit for learners.
 
 ```rust
-use topcoat::{Result, router::page, view::{View, view}};
-
-#[page("/")]
-async fn home() -> Result<impl View> {
-    Ok(view! {
-        <!DOCTYPE html>
-        <html>
-            <body>
-                <h1>"Slipway + Axum"</h1>
-                <p>"API: /api/v1/health"</p>
-            </body>
-        </html>
-    })
-}
+{{#include solution/src/lib.rs:tower-bridge-home}}
 ```
 
 > [!NOTE]
 > **Checkpoint:** `GET /` still renders the Topcoat HTML page; `GET /api/v1/health` returns JSON.
 
 ### Step 3 — Test the API route
-Use a tower-compatible request against the Topcoat router and assert the mounted JSON. The test is more valuable than a browser smoke test here because it proves the route is mounted under the right path and returns the expected payload, not just that the server starts.
+Request the actual Topcoat `build_router()` rather than testing a separately nested Axum router.
+Check the mounted JSON, method handling, missing API paths, and the ordinary Topcoat page:
 
 ```rust
-#[tokio::test]
-async fn api_v1_health_route_works() {
-    use axum::body::Body;
-    use http::{Request, StatusCode};
-    use tower::ServiceExt;
-
-    let router = build_router();
-    let req = Request::builder()
-        .uri("/api/v1/health")
-        .body(Body::empty())
-        .unwrap();
-
-    let response = tower::ServiceExt::oneshot(router, req).await.unwrap();
-    assert_eq!(response.status(), StatusCode::OK);
-}
+{{#include solution/tests/tower_bridge.rs:tower-bridge-tests}}
 ```
 
 > [!NOTE]
@@ -101,6 +57,7 @@ async fn api_v1_health_route_works() {
 - Explore whether the Topcoat app can embed a `TowerService` fallback for the remaining unmatched routes in a later project.
 
 ## Troubleshooting
+- **The mounted `/health` returns 404.** `TowerRoute` forwards `/api/v1/health`; add `StripPrefixLayer` for a relative Axum route, or define the full prefixed route without stripping it.
 - **`TowerRoute` does not match `/api/v1` exactly.** Register the catch-all form `"/api/v1/{*rest}"` and, if you also serve the bare prefix, add a second route for `"/api/v1"`.
 - **JSON response is empty or the `Content-Type` is wrong.** Return `axum::Json(...)` for the endpoint and make sure the route is nested inside the mounted Axum router.
 - **Middleware does not wrap the API path.** Use `.at("/api/v1")` on each `TowerLayer` call; otherwise the layer wraps every route in the router.

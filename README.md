@@ -9,6 +9,10 @@ Thirteen labs build one application from a static page to a containerised deploy
 Container Apps. Every `solution/` is compiled and tested in CI against the pinned versions in
 [COMPATIBILITY.md](COMPATIBILITY.md) — Topcoat is pre-1.0 and its API changes between minor versions.
 
+The current target is **Topcoat and CLI 0.9.0**, with Toasty 0.10.0 and Rust 1.98.0.
+The reactivity lessons cover typed integer/collection expressions, keyed identity, connected server
+push, and suspense wait mode. Owned UI lessons include accessible form-field composition.
+
 ## Who this is for
 
 - **Rust developers new to the web** — you know ownership, traits, and `async`; you don't need to
@@ -31,12 +35,12 @@ mount an Axum API through the tower bridge.
 | 0 Orientation | — | 45 min |
 | 1 Foundations | 01–03 | 2¼ h |
 | 2 Routing & the request | 04–06 | 3¼ h |
-| 3 Reactivity | 07–09 | 3 h |
+| 3 Reactivity | 07–09 | 3¼ h |
 | 4 Data with Toasty | 10 | 1½ h |
-| 5 Assets, styling, UI | 11 | 1¼ h |
+| 5 Assets, styling, UI | 11 | 1½ h |
 | 6 Production on Azure | 12 (+13) | 2¾ h |
 
-About 13¼ hours of hands-on time for Labs 01–12, or 14 hours including the optional Lab 13. Run it as
+About 13¾ hours of hands-on time for Labs 01–12, or 14½ hours including the optional Lab 13. Run it as
 a two-day instructor-led workshop, or self-paced at roughly a module a week. Each lab is resumable —
 skip one and copy the previous lab's `solution/`.
 
@@ -49,10 +53,10 @@ skip one and copy the previous lab's `solution/`.
 | 05 | [Cx, app context, and memoization](labs/lab-05-cx-memoize/README.md) | 60 min |
 | 06 | [Cookies, sessions, and functions—not middleware](labs/lab-06-auth-sessions-mail/README.md) | 75 min |
 | 07 | [Signals and `$(...)` expressions](labs/lab-07-signals-expressions/README.md) | 60 min |
-| 08 | [Shards, procedures, and streaming](labs/lab-08-shards-procedures-streaming/README.md) | 75 min |
+| 08 | [Shards, procedures, and streaming](labs/lab-08-shards-procedures-streaming/README.md) | 90 min |
 | 09 | [htmx and Alpine as the pragmatic path](labs/lab-09-htmx-alpine/README.md) | 45 min |
 | 10 | [Toasty models and queries](labs/lab-10-toasty-sqlite/README.md) | 90 min |
-| 11 | [Asset pipeline, fonts, icons, Tailwind, and Topcoat UI](labs/lab-11-assets-tailwind-ui/README.md) | 75 min |
+| 11 | [Asset pipeline, fonts, icons, Tailwind, and Topcoat UI](labs/lab-11-assets-tailwind-ui/README.md) | 90 min |
 | 12 | [Build, containerise, and deploy with azd](labs/lab-12-build-containerise-deploy/README.md) | 120 min |
 | 13 | [Tower bridge and Axum](labs/lab-13-tower-bridge/README.md) | 45 min |
 

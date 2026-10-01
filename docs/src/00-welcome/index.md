@@ -40,7 +40,7 @@ you can compare your work against the end state at any point.
 | 5 Assets, styling, UI | [11](../02-labs/lab-11.md) | 1¼ h |
 | 6 Production on Azure | [12](../02-labs/lab-12.md), [13](../02-labs/lab-13.md) | 2¾ h |
 
-Labs 01–12 take about 13¼ hours of hands-on time, or about 14 hours including the optional Lab 13.
+Labs 01–12 take about 13¾ hours of hands-on time, or about 14½ hours including the optional Lab 13.
 That fits a two-day instructor-led workshop, or a self-paced course of roughly one module per week.
 Each lab is independently resumable: if you skip one, copy the previous lab's `solution/` and carry
 on.

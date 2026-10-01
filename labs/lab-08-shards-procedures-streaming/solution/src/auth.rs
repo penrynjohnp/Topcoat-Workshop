@@ -20,6 +20,7 @@ pub struct AppState {
     pub sessions: Arc<Mutex<HashMap<session::TokenHash, SessionRecord>>>,
     pub magic_links: Arc<Mutex<HashMap<String, MagicLink>>>,
     pub completed_work_orders: Arc<Mutex<HashSet<String>>>,
+    pub updates: tokio::sync::broadcast::Sender<()>,
     pub next_magic_link: Arc<AtomicUsize>,
     pub cookie_key: Arc<Key>,
 }
@@ -44,6 +45,7 @@ impl AppState {
             sessions: Arc::new(Mutex::new(HashMap::new())),
             magic_links: Arc::new(Mutex::new(HashMap::new())),
             completed_work_orders: Arc::new(Mutex::new(HashSet::new())),
+            updates: tokio::sync::broadcast::channel(16).0,
             next_magic_link: Arc::new(AtomicUsize::new(1)),
             cookie_key: Arc::new(Key::generate()),
         }
@@ -61,14 +63,22 @@ impl AppState {
 
     pub fn remove_session(&self, hash: &session::TokenHash) {
         self.sessions.lock().unwrap().remove(hash);
+        self.updates.send(()).ok();
     }
 
+    // ANCHOR: completion-notifications
     pub fn complete_work_order(&self, id: &str) -> bool {
-        self.completed_work_orders
+        let completed = self
+            .completed_work_orders
             .lock()
             .unwrap()
-            .insert(id.to_owned())
+            .insert(id.to_owned());
+        if completed {
+            self.updates.send(()).ok();
+        }
+        completed
     }
+    // ANCHOR_END: completion-notifications
 
     pub fn work_order_is_complete(&self, id: &str) -> bool {
         self.completed_work_orders.lock().unwrap().contains(id)
@@ -128,9 +138,15 @@ pub fn secure_cookies(cx: &Cx) -> impl Cookies {
 
 #[memoize(as_ref)]
 pub async fn current_user(cx: &Cx) -> Option<String> {
+    current_user_uncached(cx).await
+}
+
+// ANCHOR: fresh-live-session
+pub async fn current_user_uncached(cx: &Cx) -> Option<String> {
     let hash = session::token_hash(cx).await.ok().flatten()?;
     app_context::<AppState>(cx).current_email(&hash)
 }
+// ANCHOR_END: fresh-live-session
 
 // ANCHOR: require-auth
 pub async fn require_auth(cx: &Cx) -> topcoat::Result<String> {

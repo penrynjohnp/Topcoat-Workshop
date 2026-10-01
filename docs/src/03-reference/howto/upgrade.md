@@ -1,9 +1,12 @@
 # How-to: pin and upgrade Topcoat
 
-Topcoat is pre-1.0, so an upgrade is a compatibility exercise, not only a version edit. You update the workspace pins, the CLI and documentation toolchain, run the drift check, then record what actually passes in [`COMPATIBILITY.md`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/COMPATIBILITY.md).
+Topcoat is pre-1.0, so an upgrade is a compatibility exercise, not only a version edit.
+Update the workspace and CLI pins, validate the existing toolchain, and record what passes in
+[`COMPATIBILITY.md`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/COMPATIBILITY.md).
+Change Toasty, Rust, or mdBook separately only when the upgrade requires it.
 
 > [!WARNING]
-> Read the guides from the release tag that you are testing, such as [`v0.8.1`](https://github.com/tokio-rs/topcoat/tree/v0.8.1), not `main`. The unreleased API can already differ from the version in this workshop.
+> Read the guides from the release tag that you are testing, such as [`v0.9.0`](https://github.com/tokio-rs/topcoat/tree/v0.9.0), not `main`. The unreleased API can already differ from the version in this workshop.
 
 ## 1. Establish a clean baseline
 
@@ -25,13 +28,15 @@ Update the CLI pin in all installation paths:
 - [`scripts/setup.sh`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/scripts/setup.sh) installs `topcoat-cli` for learners.
 - [`.github/workflows/ci.yml`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/.github/workflows/ci.yml) installs the same CLI for formatting checks.
 - [`.devcontainer/devcontainer.json`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/.devcontainer/devcontainer.json) installs it when the container is created.
+- [Lab 12's Dockerfile](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/labs/lab-12-build-containerise-deploy/solution/Dockerfile) installs it for that release image.
+- [Lab 12's starter Dockerfile](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/labs/lab-12-build-containerise-deploy/starter/Dockerfile) keeps the learner scaffold on the same CLI release.
+- [Slipway's Dockerfile](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/slipway/Dockerfile) installs it for the capstone release image.
 
 Use a repository search to find stale copies rather than assuming these are the only locations:
 
 ```bash
-grep -RIn --exclude-dir=.git --exclude-dir=target \
-  -E 'topcoat-cli|topcoat =|topcoat-asset|toasty =|mdbook@|mdbook-mermaid@|mdbook-linkcheck2@' \
-  Cargo.toml scripts .github .devcontainer COMPATIBILITY.md
+rg -n 'topcoat-cli|topcoat =|topcoat-asset|toasty =|mdbook@|mdbook-mermaid@|mdbook-linkcheck2@' \
+  Cargo.toml scripts .github .devcontainer labs slipway COMPATIBILITY.md
 ```
 
 The docs toolchain is a set. Change `mdbook`, `mdbook-mermaid`, and `mdbook-linkcheck2` together in [`docs.yml`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/.github/workflows/docs.yml) and the devcontainer. Keep [`docs/book.toml`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/docs/book.toml) compatible with that set. For example, mdBook 0.5 uses its built-in GitHub alert syntax and this book uses the `linkcheck2` output backend; do not reintroduce an older admonition or linkcheck setup without testing the whole set.
@@ -41,7 +46,7 @@ Install the new tools locally, then refresh the lockfile after changing the Rust
 ```bash
 cargo install topcoat-cli --version X.Y.Z --locked --force
 cargo install mdbook@A.B.C mdbook-mermaid@D.E.F mdbook-linkcheck2@G.H.I --locked
-cargo update
+cargo update -p topcoat -p topcoat-asset
 ```
 
 Replace the placeholder versions with the versions under test. Keep `Cargo.lock` in the change because it records the resolved graph that you validated.
@@ -68,16 +73,20 @@ find target/topcoat/cache -type f -empty -delete 2>/dev/null || true
 cargo build -p lab11-solution
 ```
 
-For asset-bearing labs and Slipway, build and bundle with the same profile. A release binary must use the release bundle at `target/release/assets/`:
-
-```bash
-cargo build --workspace --release
-topcoat asset bundle --release
-```
+For each asset-bearing package, run Cargo and the bundler with the same profile and package selection.
+Use `cargo build --release -p lab11-solution`, then `topcoat asset bundle --release -p lab11-solution`.
+Repeat separately for Lab 12's package `slipway` and the capstone package `slipway-capstone`.
+Smoke-test or stage each matching binary/bundle pair before another package overwrites
+the shared default `target/release/assets/` directory.
 
 ## 4. Run the upstream drift workflow
 
-The weekly [drift workflow](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/.github/workflows/drift.yml) tests the workspace against the latest published Topcoat crates instead of the exact pin. It changes only the CI checkout: it removes the exact `topcoat` requirement, runs `cargo update`, prints the resolved Topcoat version, and runs the workspace build and tests. It does not test a new Toasty pin or replace the versions in your branch.
+The weekly [drift workflow](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/.github/workflows/drift.yml)
+selects the latest non-yanked stable Topcoat release and verifies matching asset and CLI releases.
+It changes both inline-table requirements with a structured TOML parser in the disposable CI checkout.
+It resolves the family, installs the matching CLI, stages icons serially, and builds/tests the workspace.
+It can select a future minor version rather than only patches within a caret requirement.
+It leaves Toasty and the versions in your branch unchanged.
 
 Dispatch it from GitHub Actions after the local checks pass, or use `gh`:
 
@@ -86,7 +95,8 @@ gh workflow run drift.yml
 gh run list --workflow drift.yml --limit 1
 ```
 
-Open the run and inspect the `cargo tree -p topcoat --depth 0` output. A successful drift run tells you that the current labs also build against the latest resolved Topcoat. A failed run creates a `drift` issue with the run link; use that issue to identify the first breaking API before deciding whether to upgrade the pinned workshop version.
+Inspect the resolved version in the run. Resolution, installation, or build/test failure creates a
+drift issue with the run link. Use it to identify the first incompatibility before changing workshop pins.
 
 > [!NOTE]
 > Drift is a signal, not the compatibility record. The pinned version still needs the full lab, formatting, clippy, asset, and documentation checks below.

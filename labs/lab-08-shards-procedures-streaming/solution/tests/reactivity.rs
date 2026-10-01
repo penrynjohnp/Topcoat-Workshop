@@ -1,5 +1,85 @@
 use lab08_solution::auth::AppState;
-use topcoat::router::{Body, Method, StatusCode, request::Request, to_bytes};
+use topcoat::{
+    Result,
+    context::Cx,
+    router::{
+        Body, Method, Router, StatusCode, page,
+        request::{Request, uri},
+        to_bytes,
+    },
+    runtime::{RouterBuilderRuntimeExt, Surrogated, signal},
+    view::{View, component, view},
+};
+
+#[component]
+async fn identity_item(cx: &Cx, name: &str) -> Result<impl View> {
+    let open = signal(cx, || false);
+    let metadata = serde_json::to_value(open.clone().into_surrogate()).unwrap();
+    let id = metadata["id"].as_str().unwrap().to_owned();
+    Ok(view! {
+        <li data-identity-item=(name) data-signal-id=(id) :hidden=$(open.get())>
+            (name)
+        </li>
+    })
+}
+
+#[page("/identity")]
+async fn identity_fixture(cx: &Cx) -> Result<impl View> {
+    let mut names = ["Alpha", "Bravo"];
+    if uri(cx).query().is_some() {
+        names.reverse();
+    }
+    Ok(view! {
+        <ul>
+            #[key(name)]
+            for name in names {
+                identity_item(name: name)
+            }
+        </ul>
+    })
+}
+
+#[tokio::test]
+async fn keyed_rows_keep_signal_identity_when_reordered() {
+    let router = Router::builder().page(identity_fixture).runtime().build();
+    let mut rendered = Vec::new();
+    for path in ["/identity", "/identity?reverse=true"] {
+        let response = router
+            .handle(Request::builder().uri(path).body(Body::empty()).unwrap())
+            .await;
+        assert_eq!(response.status(), StatusCode::OK);
+        let body = to_bytes(response.into_body(), usize::MAX).await.unwrap();
+        rendered.push(String::from_utf8(body.to_vec()).unwrap());
+    }
+    let signal_for = |html: &str, name: &str| {
+        let marker = format!("data-identity-item=\"{name}\" data-signal-id=\"");
+        html.split(&marker)
+            .nth(1)
+            .unwrap()
+            .split('"')
+            .next()
+            .unwrap()
+            .to_owned()
+    };
+    assert_ne!(
+        signal_for(&rendered[0], "Alpha"),
+        signal_for(&rendered[0], "Bravo")
+    );
+    for name in ["Alpha", "Bravo"] {
+        assert_eq!(
+            signal_for(&rendered[0], name),
+            signal_for(&rendered[1], name)
+        );
+    }
+    assert!(
+        rendered[0].find("data-identity-item=\"Alpha\"")
+            < rendered[0].find("data-identity-item=\"Bravo\"")
+    );
+    assert!(
+        rendered[1].find("data-identity-item=\"Bravo\"")
+            < rendered[1].find("data-identity-item=\"Alpha\"")
+    );
+}
 
 async fn get(path: &str) -> (StatusCode, String) {
     let router = lab08_solution::app::router(AppState::new(), None);

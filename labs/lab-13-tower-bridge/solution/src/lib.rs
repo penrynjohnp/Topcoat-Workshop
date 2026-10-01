@@ -1,9 +1,10 @@
+// ANCHOR: tower-bridge-router
 use axum::{Json, Router as AxumRouter, routing::get};
 use serde::Serialize;
 use topcoat::{
     Result,
     router::{
-        Methods, Router, RouterBuilderDiscoverExt, page,
+        Methods, Router, RouterBuilderDiscoverExt, StripPrefixLayer, page,
         tower::{TowerLayer, TowerRoute},
     },
     view::{View, view},
@@ -29,12 +30,15 @@ pub fn build_router() -> Router {
             "/api/v1/{*rest}",
             api_router(),
         ))
+        .layer(StripPrefixLayer::new("/api/v1"))
         .layer(TowerLayer::new(CompressionLayer::new()).at("/api/v1"))
         .layer(TowerLayer::new(TraceLayer::new_for_http()).at("/api/v1"))
         .discover()
         .build()
 }
+// ANCHOR_END: tower-bridge-router
 
+// ANCHOR: tower-bridge-home
 #[page("/")]
 pub async fn home() -> Result<impl View> {
     Ok(view! {
@@ -48,3 +52,4 @@ pub async fn home() -> Result<impl View> {
         </html>
     })
 }
+// ANCHOR_END: tower-bridge-home

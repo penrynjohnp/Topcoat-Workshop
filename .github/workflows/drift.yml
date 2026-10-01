@@ -9,19 +9,63 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: Unpin and update
-        run: |
-          sed -i 's/topcoat = "=\([0-9.]*\)"/topcoat = "\1"/' Cargo.toml
-          cargo update
-          cargo tree -p topcoat --depth 0 | tee /tmp/ver.txt
       - id: build
-        run: cargo build --workspace && cargo test --workspace
+        name: Resolve and test the latest published Topcoat family
         continue-on-error: true
+        run: |
+          python3 -m pip install --disable-pip-version-check tomlkit==0.13.3
+          python3 - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          from urllib.request import Request, urlopen
+          import tomlkit
+
+          def registry(path):
+              request = Request(
+                  f"https://crates.io/api/v1/{path}",
+                  headers={"User-Agent": "Topcoat-Workshop upstream-drift"},
+              )
+              with urlopen(request, timeout=30) as response:
+                  return json.load(response)
+
+          def pin_family(document, version):
+              dependencies = document["workspace"]["dependencies"]
+              for crate in ("topcoat", "topcoat-asset"):
+                  dependencies[crate]["version"] = f"={version}"
+
+          versions = registry("crates/topcoat/versions")["versions"]
+          stable = [
+              release["num"] for release in versions
+              if not release["yanked"] and re.fullmatch(r"\d+\.\d+\.\d+", release["num"])
+          ]
+          version = max(stable, key=lambda value: tuple(map(int, value.split("."))))
+          Path("/tmp/ver.txt").write_text(f"topcoat v{version}\n")
+          for crate in ("topcoat-asset", "topcoat-cli"):
+              release = registry(f"crates/{crate}/{version}")["version"]
+              if release["yanked"]:
+                  raise RuntimeError(f"{crate} {version} is yanked")
+
+          manifest = Path("Cargo.toml")
+          document = tomlkit.parse(manifest.read_text())
+          pin_family(document, version)
+          manifest.write_text(tomlkit.dumps(document))
+          Path("/tmp/topcoat-cli-version").write_text(version)
+          PY
+          cargo update -p topcoat -p topcoat-asset
+          cargo tree -p topcoat --depth 0 | tee /tmp/ver.txt
+          version=$(cat /tmp/topcoat-cli-version)
+          cargo install topcoat-cli --version "$version" --locked --force
+          find target/topcoat/cache -type f -empty -delete 2>/dev/null || true
+          cargo build -p lab11-solution
+          cargo build --workspace
+          cargo test --workspace
       - if: steps.build.outcome == 'failure'
         uses: actions/github-script@v7
         with:
           script: |
-            const ver = require('fs').readFileSync('/tmp/ver.txt','utf8').trim();
+            const fs = require('fs');
+            const ver = fs.existsSync('/tmp/ver.txt') ? fs.readFileSync('/tmp/ver.txt','utf8').trim() : 'unresolved latest release';
             await github.rest.issues.create({ ...context.repo,
               title: `Topcoat drift: labs fail against ${ver}`,
               labels: ['drift'],

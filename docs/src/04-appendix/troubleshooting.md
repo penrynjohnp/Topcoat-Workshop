@@ -6,18 +6,18 @@ explains the surrounding concept.
 
 Everything here is specific to the versions in
 [`COMPATIBILITY.md`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/COMPATIBILITY.md):
-Topcoat and Topcoat CLI 0.8.1, Toasty 0.10.0. Topcoat is pre-1.0, so check that file before assuming
+Topcoat and Topcoat CLI 0.9.0, Toasty 0.10.0. Topcoat is pre-1.0, so check that file before assuming
 an error is your mistake.
 
 ## Toolchain and CLI
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `topcoat: command not found` | The CLI is not installed, or `~/.cargo/bin` is not on `PATH` | `cargo install topcoat-cli --version 0.8.1 --locked`, then confirm `PATH` |
+| `topcoat: command not found` | The CLI is not installed, or `~/.cargo/bin` is not on `PATH` | `cargo install topcoat-cli --version 0.9.0 --locked`, then confirm `PATH` |
 | A compile error names a missing import | Topcoat's facade crate re-exports through feature-gated modules, so a path can exist only when its feature is on | Compare your `use topcoat::{...}` block with that lab's solution, and check the crate's enabled features |
-| `topcoat --version` errors with an unexpected argument | CLI 0.8.1 has **no top-level `--version` flag** | Read the pin in `COMPATIBILITY.md`. `topcoat fmt --version` exists and prints `topcoat-fmt 0.8.1`, but only checks the formatter binary |
-| `topcoat fmt --check` is rejected | The formatter has no `--check` flag at 0.8.1 | Run `topcoat fmt <files>` and then `git diff --exit-code -- '*.rs'`, which is what CI does |
-| `topcoat build` is unknown | That command does not exist in CLI 0.8.1 | Use `cargo build` plus `topcoat asset bundle`, with matching profile flags on both |
+| `topcoat --version` errors with an unexpected argument | CLI 0.9.0 has **no top-level `--version` flag** | Read the pin in `COMPATIBILITY.md`. `topcoat fmt --version` exists and prints `topcoat-fmt 0.9.0`, but only checks the formatter binary |
+| `topcoat fmt --check` is rejected | The formatter has no `--check` flag at 0.9.0 | Run `topcoat fmt <files>` and then `git diff --exit-code -- '*.rs'`, which is what CI does |
+| `topcoat build` is unknown | That command does not exist in CLI 0.9.0 | Use `cargo build` plus `topcoat asset bundle`, with matching profile flags on both |
 | A build fails reading an empty Iconify cache file, usually right after `cargo clean` | `topcoat-icon`'s build script stages its cache non-atomically, so parallel workspace builds can read a half-written file | Stage one crate first: `find target/topcoat/cache -type f -empty -delete` then `cargo build -p lab11-solution`, then build the workspace. CI does exactly this |
 
 See [CLI commands](../03-reference/cli.md) for the full `--help` surface and
@@ -44,7 +44,7 @@ Labs [02](../02-labs/lab-02.md) and [09](../02-labs/lab-09.md). The
 | `` `impl Trait` … opaque type ``, or two arms returning different types | A component returns two different `view!` types | Call `.boxed()` on both arms and import `ViewExt` |
 | The caller's `class` replaced the component's own | `attrs` was spread without removing `class` first | `attrs.remove("class")`, then pass the removed value to `class!` as an entry |
 | `use of moved value: attrs` | Spreading an `Attributes` consumes it | `clone()` when you need it twice |
-| Attribute order changes between renders | Expected: spreading `Attributes` routes that element through a map, and the 0.8.1 `Attributes` type is map-like — each key appears once and render order must not be relied on. `view!` itself renders in source order; it is component body execution order that is unspecified | Assert on the *set* of attributes, not on a byte-for-byte string |
+| Attribute order changes between renders | Expected: spreading `Attributes` routes that element through a map, and the 0.9.0 `Attributes` type is map-like — each key appears once and render order must not be relied on. `view!` itself renders in source order; it is component body execution order that is unspecified | Assert on the *set* of attributes, not on a byte-for-byte string |
 | `error: expected view node` after upgrading | The pre-0.8 `signal name = value;` statement is no longer valid inside `view!` | Create signals in the body with `signal(cx, || value)` and pass them into the view |
 | `cannot find value cx` | Components only receive the request context when they declare it | Add `cx: &Cx` to the signature — introduced in [Lab 05](../02-labs/lab-05.md) |
 
@@ -97,7 +97,7 @@ Labs [06](../02-labs/lab-06.md) and [10](../02-labs/lab-10.md), plus
 |---|---|---|
 | `error: unsupported operator` on `&&` or `\|\|` | `bool` has `!`, comparisons, `then`, and `then_some`, but no logical operators in the shared vocabulary | Restructure with `let` bindings and `if`/`else` |
 | `error: unsupported expression` | `match`, struct literals, or multi-segment paths are outside the vocabulary | Restructure, or escape deliberately with `raw!` |
-| Type errors around `1` or `2` | Every runtime number is `f64`, so integer literals are rejected | Write `1.0` |
+| Type errors around `1` or `2` | Unsuffixed integer literals are `usize`, and operands must have matching types | Use a matching suffix such as `1u64`; use `1.0` only with `f64` |
 | The page renders but nothing reacts | The runtime script is missing, or the bundle came from another profile | Build the router with a bundle and re-run `topcoat dev` or the matching `topcoat asset bundle` |
 | Panic: an asset is not present in the loaded bundle | Binary and bundle came from different builds | Rebuild both with the same profile, or pass `None` in tests |
 | A captured value never updates | Captures are snapshots taken during the server render | Use a shard when markup must follow later server state |
@@ -109,14 +109,17 @@ Lab [07](../02-labs/lab-07.md), plus [How `$(...)` reaches the browser](../01-co
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| A shard route returns 404 | `.runtime()` is missing, or the shard is not reachable from compiled code | Keep `.runtime().discover()` on the router and reference the shard from reachable code; do not add explicit discovery calls |
-| A procedure route returns 404 | `.runtime()` is missing, or the procedure is not reachable from compiled code | Keep `.runtime().discover()` on the router and reference the procedure from reachable code; do not add explicit discovery calls |
-| A shard `POST` returns 415 or 400 | The body is not the 0.8.1 runtime envelope, or the identity header is missing | Send `Content-Type: application/json`, `x-topcoat-identity`, and an envelope such as `{\"args\":[{\"t\":\"Signal\",\"id\":\"...\",\"v\":\"Lady\"}],\"signals\":{}}` |
-| A signal resets after each search | It was declared *inside* the shard, or the returned markup lacks stable identities | Own the signal in the page, pass it as `$(query)`, and give reorderable items stable `id` values |
+| A shard or procedure route returns 404 | The endpoint is not registered, or the caller reconstructed an obsolete prefix | Use discovery or `.route(handler)` and consume its emitted URL/path |
+| A page rerun or connection is unavailable | `.runtime()` or the matching runtime script/bundle is missing | Register application layers before `.runtime()` and serve the matching bundle |
+| A shard `POST` returns 415 or 400 | The body is not the 0.9.0 runtime envelope, or the identity header is missing | Send `Content-Type: application/json`, `x-topcoat-identity`, and an envelope such as `{\"args\":[{\"t\":\"Signal\",\"id\":\"...\",\"v\":\"Lady\"}],\"signals\":{}}` |
+| A signal resets after each search | Its identity or restored value changed | Key repeated stateful components with `#[key(item.id)]`; distinguish signal identity from HTML `id` |
 | Private data appears without the page guard | Shard and procedure endpoints are independently callable, so page and layout code never runs | Call `require_auth(cx)` inside every private endpoint and validate arguments |
-| Every keystroke creates a request | Expected at 0.8.1: same-tick changes coalesce and stale requests abort, but debouncing is application logic | Use htmx's `delay:` trigger, or implement debouncing yourself |
+| Every keystroke creates a request | Expected at 0.9.0: same-tick changes coalesce and stale requests abort, but debouncing is application logic | Use htmx's `delay:` trigger, or implement debouncing yourself |
 | A cookie or header panics during streaming | Headers changed after the first emission | Authenticate and mutate cookies before returning the live view |
 | Only the final streamed content appears in a test | `to_bytes` collects the whole body | Assert on fallback text and `data-topcoat-swap` envelopes, or poll frames to observe timing |
+| A connected page never finishes its initial request | Its live body waits for notifications during HTTP rendering | Emit current content and return when `connected(cx)` is false |
+| A connected region keeps sending private data after logout | It reuses a cached initial authorization result | Check the stored session before each private emission and test revocation |
+| Initial slow content requires JavaScript | Default suspense uses a streamed fallback | Select `SuspenseMode::Wait` for the boundary whose initial content must be available without JavaScript |
 
 Lab [08](../02-labs/lab-08.md), plus
 [Shards, procedures, live regions, htmx](../01-concepts/reactivity-options.md).
@@ -141,9 +144,9 @@ Lab [09](../02-labs/lab-09.md).
 | The database looks empty after changing `SLIPWAY_DATABASE_URL` | A different SQLite file was opened | Print or inspect the exact URL the process used |
 | A relation is empty even though the child row exists | The query did not call `.include(...)`, or the child has the wrong foreign key | Add `.include(...)` and check `berth_slug` |
 | A `POST` returns 415 or fails to extract `Form` | Wrong request content type | Send `Content-Type: application/x-www-form-urlencoded` |
-| A procedure rejects a numeric ID | Topcoat 0.8 transports runtime numbers as `f64` | Accept the `f64`, validate it is a non-negative integer, then convert it to the database key |
-| `fontsource_font!` reports incompatible `Asset` types | The workspace still resolves `topcoat-asset` 0.7 alongside Topcoat 0.8 | Pin the direct `topcoat-asset` workspace dependency to 0.8.1 and regenerate the lockfile |
-| A discovered font route is duplicated | Topcoat 0.8 `.discover()` discovers fonts automatically | Remove explicit `.font(...)` registration when using `.discover()` |
+| A procedure rejects a numeric ID | A raw number or `f64` was sent to a typed integer parameter | Keep the `u64` key and serialize `Arguments` through its runtime surrogate |
+| `fontsource_font!` reports incompatible `Asset` types | The direct asset crate and facade resolve different release families | Pin both `topcoat` and `topcoat-asset` to 0.9.0 and refresh the lockfile |
+| A discovered font route is duplicated | `.discover()` already registers fonts | Remove explicit `.font(...)` registration when using `.discover()` |
 
 Lab [10](../02-labs/lab-10.md), plus [How-to: SQLite to PostgreSQL](../03-reference/howto/postgres.md).
 
@@ -157,6 +160,7 @@ Lab [10](../02-labs/lab-10.md), plus [How-to: SQLite to PostgreSQL](../03-refere
 | Rendering panics with "failed to resolve asset" | The loaded manifest came from a different binary, checkout, or profile | Re-run the bundler for the exact binary you will execute |
 | Tailwind omits a class | Dynamically assembled class fragments are invisible to its scanner | Keep class names as literal strings in Rust or `styles.css` |
 | A local component edit vanished | `topcoat ui add card --overwrite` replaced the owned file | Restore the diff, then reapply upstream changes deliberately |
+| `topcoat ui update` is unknown | CLI 0.9.0 has no such command | Use `topcoat ui add --overwrite`, preserving owned changes and merging theme tokens |
 
 Lab [11](../02-labs/lab-11.md).
 
@@ -179,6 +183,7 @@ Lab [12](../02-labs/lab-12.md), plus
 | Symptom | Cause | Fix |
 |---|---|---|
 | `TowerRoute` does not match the bare prefix | A catch-all route does not cover the prefix itself | Register `"/api/v1/{*rest}"`, and add `"/api/v1"` if you serve the bare prefix too |
+| A relative Axum `/health` route returns 404 under `/api/v1` | `TowerRoute` forwards the original URI | Use `StripPrefixLayer` for relative routes, or define full prefixed routes without stripping |
 | The JSON response is empty or has the wrong `Content-Type` | The endpoint did not return an Axum JSON response, or the route is not nested inside the mounted router | Return `axum::Json(...)` and check the nesting |
 | Middleware wraps every route, not just the API path | The layer was applied without a path | Use `.at("/api/v1")` on each `TowerLayer` call |
 | Compilation fails on the bridge | The `tower` feature is off, or dependency versions disagree | Enable `tower` on `topcoat` and keep `axum` and `tower-http` on the workspace pins |
@@ -193,7 +198,7 @@ Lab [13](../02-labs/lab-13.md).
 
 1. Compare your code with that lab's `solution/`, which CI compiles and tests on every push.
 2. Check `COMPATIBILITY.md` for a recorded breakage against the pinned versions.
-3. Read the Topcoat guides at the **release tag**, never `main`. The unreleased API is ahead of 0.8.1
+3. Read the Topcoat guides at the **release tag**, never `main`. The unreleased API is ahead of 0.9.0
    and its examples will not compile here.
 4. Open an issue with the lab number, the exact command, and the full error.
 

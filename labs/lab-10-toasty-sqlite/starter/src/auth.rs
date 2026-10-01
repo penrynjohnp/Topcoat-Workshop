@@ -16,6 +16,7 @@ pub struct AppState {
     pub runtime_script: bool,
     pub load_count: Arc<AtomicUsize>,
     pub db: toasty::Db,
+    pub updates: tokio::sync::broadcast::Sender<()>,
     pub cookie_key: Arc<Key>,
 }
 
@@ -29,6 +30,7 @@ impl AppState {
             runtime_script: false,
             load_count: Arc::new(AtomicUsize::new(0)),
             db,
+            updates: tokio::sync::broadcast::channel(16).0,
             cookie_key,
         }
     }
@@ -91,6 +93,7 @@ async fn remove_session(state: &AppState, hash: &session::TokenHash) -> topcoat:
         .delete()
         .exec(&mut db)
         .await?;
+    state.updates.send(()).ok();
     Ok(())
 }
 

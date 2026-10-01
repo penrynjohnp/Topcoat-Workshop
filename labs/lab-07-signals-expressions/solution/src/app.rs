@@ -20,7 +20,6 @@ pub fn router(state: AppState, assets: Option<AssetBundle>) -> topcoat::router::
     };
 
     let builder = topcoat::router::module_router!()
-        .runtime()
         .cookies()
         .sessions(
             SessionConfig::builder()
@@ -32,7 +31,8 @@ pub fn router(state: AppState, assets: Option<AssetBundle>) -> topcoat::router::
                 .transport(FileTransport::new("mail"))
                 .build(),
         )
-        .app_context(state);
+        .app_context(state)
+        .runtime();
 
     match assets {
         Some(bundle) => builder.assets(bundle).build(),

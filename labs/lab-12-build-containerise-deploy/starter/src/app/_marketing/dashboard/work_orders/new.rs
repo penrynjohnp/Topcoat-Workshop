@@ -1,7 +1,11 @@
 use crate::{
     assets,
     auth::{AppState, require_auth},
-    components::{button::button, input::input as text_input, label::label},
+    components::{
+        button::button,
+        field::{field, field_error, field_label},
+        input::input as text_input,
+    },
     models::Berth,
     shared::managed_berths,
 };
@@ -56,33 +60,43 @@ async fn work_order_form(
                 novalidate="novalidate"
                 class="mt-8 grid gap-5 rounded-2xl border border-cyan-900/10 bg-white/85 p-6 shadow-sm"
             >
-                <div class="grid gap-2">
-                    label(attrs: attributes! { for="work-order-title" }, "Title")
+                field(
+                    field_label(attrs: attributes! { for="work-order-title" }, "Title")
                     text_input(
                         attrs: attributes! {
                             id="work-order-title"
                             name="title"
                             value=(&input.title)
                             aria-invalid=(errors.title.is_some().then_some("true"))
+                            aria-describedby=(errors
+                                .title
+                                .is_some()
+                                .then_some("work-order-title-error"))
                             placeholder="Inspect shore-power pedestal"
                         }
                     )
                     if let Some(error) = errors.title {
-                        <p
-                            class="error text-sm font-medium text-red-700"
-                            data-error="title"
-                        >
+                        field_error(
+                            attrs: attributes! {
+                                id="work-order-title-error"
+                                class="error font-medium"
+                                data-error="title"
+                            },
                             (error)
-                        </p>
+                        )
                     }
-                </div>
+                )
 
-                <div class="grid gap-2">
-                    label(attrs: attributes! { for="work-order-berth" }, "Berth")
+                field(
+                    field_label(attrs: attributes! { for="work-order-berth" }, "Berth")
                     <select
                         id="work-order-berth"
                         name="berth_slug"
                         aria-invalid=(errors.berth.is_some().then_some("true"))
+                        aria-describedby=(errors
+                            .berth
+                            .is_some()
+                            .then_some("work-order-berth-error"))
                         class="h-9 rounded-lg border border-border bg-background px-3 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                         <option value="">"Choose a berth"</option>
@@ -106,14 +120,16 @@ async fn work_order_form(
                         }
                     </select>
                     if let Some(error) = errors.berth {
-                        <p
-                            class="error text-sm font-medium text-red-700"
-                            data-error="berth"
-                        >
+                        field_error(
+                            attrs: attributes! {
+                                id="work-order-berth-error"
+                                class="error font-medium"
+                                data-error="berth"
+                            },
                             (error)
-                        </p>
+                        )
                     }
-                </div>
+                )
 
                 button(
                     attrs: attributes! { type="submit" class="justify-self-start" },

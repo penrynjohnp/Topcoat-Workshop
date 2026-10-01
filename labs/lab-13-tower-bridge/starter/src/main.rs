@@ -3,7 +3,7 @@ use serde::Serialize;
 use topcoat::{
     Result,
     router::{
-        Methods, Router, page,
+        Methods, Router, StripPrefixLayer, page,
         tower::{TowerLayer, TowerRoute},
     },
     view::{View, view},
@@ -35,6 +35,7 @@ fn build_router() -> Router {
             "/api/v1/{*rest}",
             build_api_router(),
         ))
+        .layer(StripPrefixLayer::new("/api/v1"))
         .layer(TowerLayer::new(CompressionLayer::new()).at("/api/v1"))
         .layer(TowerLayer::new(TraceLayer::new_for_http()).at("/api/v1"))
         .build()

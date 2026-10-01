@@ -12,6 +12,7 @@ const WORKFLOW: &str = include_str!("../../.github/workflows/azure-dev.yml");
 
 #[test]
 fn image_keeps_the_release_binary_and_asset_catalog_together() {
+    assert!(DOCKERFILE.contains("cargo install topcoat-cli --version 0.9.0 --locked"));
     assert!(DOCKERFILE.contains("cargo build --release -p slipway-capstone"));
     assert!(DOCKERFILE.contains("topcoat asset bundle --release -p slipway-capstone"));
     assert!(DOCKERFILE.contains("target/release/slipway-capstone"));

@@ -43,15 +43,15 @@ fn shard_route(html: &str) -> (String, String) {
     let marker = "<!--::topcoat::shard::start(\"";
     let start = html.find(marker).expect("shard endpoint marker") + marker.len();
     let rest = &html[start..];
-    let shard_end = rest.find("\", \"").expect("shard endpoint id");
-    let shard_id = &rest[..shard_end];
+    let shard_end = rest.find("\", \"").expect("shard endpoint path");
+    let path = &rest[..shard_end];
     let identity_start = shard_end + 4;
     let identity_end = rest[identity_start..]
         .find("\", [")
         .expect("shard identity")
         + identity_start;
     (
-        format!("/_topcoat/runtime/shards/{shard_id}"),
+        path.to_owned(),
         rest[identity_start..identity_end].to_owned(),
     )
 }

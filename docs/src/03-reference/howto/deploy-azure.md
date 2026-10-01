@@ -95,3 +95,10 @@ By the time `azd provision` finishes, the deployment script above has already gu
 ## Without azd
 
 None of the above is required to run the image. The same Dockerfile from Lab 12 Step 1 runs on Fly.io, a plain VM, or any other container host — see [Lab 12 Step 12](../../02-labs/lab-12.md) for both. The provided off-Azure path uses a persistent SQLite volume and a stable `SLIPWAY_COOKIE_KEY`; this lab's PostgreSQL connector is specifically managed-identity based and does not accept a password connection secret.
+
+The connected work-order example uses process-local notifications.
+Database persistence does not turn those notifications into cross-replica delivery.
+Keep that limitation visible when testing a deployment with multiple replicas.
+
+**See also:** [Lab 12](../../02-labs/lab-12.md), [Lab 13](../../02-labs/lab-13.md),
+[SQLite to PostgreSQL](postgres.md), and [Pin and upgrade Topcoat](upgrade.md).

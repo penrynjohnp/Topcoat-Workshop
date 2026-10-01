@@ -1,8 +1,10 @@
 # Views and markup
 
 Topcoat has no template language. `view!` is a macro that parses HTML at compile time and lowers it
-into ordinary Rust statements that append to a view value. Three consequences follow, and they
+into ordinary Rust that describes a lazy view. Three consequences follow, and they
 explain nearly every surprise the macro produces.
+
+*Guide basis: the v0.9.0 [`view!` guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat-view/macro/docs/view.md).*
 
 ## It really is HTML
 
@@ -39,6 +41,10 @@ JavaScript.
 Control flow works in attribute position too, where each branch emits attributes instead of child
 nodes.
 
+Use `#[key(item.id)]` on loops containing stateful components or live regions.
+Their context identity follows the item when the loop order changes.
+An HTML `id` instead identifies the node used by DOM morphing.
+
 ## Attributes can remove themselves
 
 A literal attribute is always present. An *expression* attribute is omitted entirely when its value
@@ -66,4 +72,5 @@ own data" — the locality-of-behaviour argument in [Lab 03](../02-labs/lab-03.m
 `rustfmt` treats a `view!` body as an opaque token tree and will not touch it. `topcoat fmt` is the
 formatter that understands the markup. Run both; CI runs both.
 
-See also the [`view!` cheat sheet](../03-reference/view-cheatsheet.md).
+**See also:** [Lab 02](../02-labs/lab-02.md), [Lab 03](../02-labs/lab-03.md),
+[`view!` cheat sheet](../03-reference/view-cheatsheet.md), and [Components and composition](components-and-composition.md).

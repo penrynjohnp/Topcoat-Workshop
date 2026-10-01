@@ -13,7 +13,7 @@ use topcoat::{
     Result,
     context::{Cx, app_context},
     router::{Slot, layout, page, request::uri},
-    runtime::{Event, Signal, signal},
+    runtime::{Event, Signal, expr, signal},
     view::{View, component, view},
 };
 
@@ -92,10 +92,42 @@ async fn work_orders(cx: &Cx) -> Result<impl View> {
 //         true => "Hide work orders",
 //         false => "Show work orders",
 //     })
-//
-// Integer literals are rejected for the same reason: every number is an `f64`,
-// so `$(count.get() + 1)` fails and `$(count.get() + 1.0)` compiles.
 // ANCHOR_END: unsupported-expression
+
+// ANCHOR: integer-collection-expressions
+#[component]
+async fn inspection_status(cx: &Cx) -> Result<impl View> {
+    let step = signal(cx, || 0usize);
+    let stages = vec![
+        "Scheduled".to_owned(),
+        "Inspecting".to_owned(),
+        "Checked".to_owned(),
+    ];
+    let current = expr!(step.get() % stages.len());
+    let status = expr!(stages.get(current).unwrap().to_owned());
+    let next = expr!((current + 1) % stages.len());
+
+    Ok(view! {
+        <section data-component="inspection-status">
+            <h2>"Berth inspection"</h2>
+            <p data-inspection-status="true">$(status)</p>
+            <p>
+                "Step "
+                $(current + 1)
+                " of "
+                $(stages.len())
+            </p>
+            <button
+                type="button"
+                data-command="advance-inspection"
+                @click=$(|_event| step.set(next))
+            >
+                "Advance inspection"
+            </button>
+        </section>
+    })
+}
+// ANCHOR_END: integer-collection-expressions
 
 // ANCHOR: server-read-signals
 #[component]
@@ -153,6 +185,7 @@ async fn home() -> Result<impl View> {
             <p>"Berths, vessels and work orders for a small marina."</p>
             <h2>"Featured berth"</h2>
             berth_card(slug: shared::FEATURED)
+            inspection_status()
             server_read_demo()
         },
     )

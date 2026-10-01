@@ -2,7 +2,11 @@
 
 **Target repo:** `penrynjohnp/Topcoat-Workshop`
 **Subject:** [Topcoat](https://github.com/tokio-rs/topcoat) — tokio-rs's server-rendered, full-stack Rust web framework (announced 22 July 2026)
-**Plan date:** 8 September 2026 · **Pinned:** topcoat 0.8.0, topcoat-cli 0.8.0, toasty 0.10.0, Rust stable
+**Original plan date:** 8 September 2026 · **Original pins:** topcoat 0.8.0, topcoat-cli 0.8.0, toasty 0.10.0, Rust stable
+
+**Current target (1 October 2026):** topcoat 0.9.0, topcoat-cli 0.9.0, topcoat-asset 0.9.0, toasty 0.10.0, Rust 1.98.0.
+The upgrade keeps Labs 01-13 and refreshes their existing expression, streaming, UI and deployment lessons.
+Acceptance results are recorded in `COMPATIBILITY.md` only after verification.
 
 **Upgrade status (12 September 2026):** Labs 01–13, the Slipway capstone, the workspace, and the mdBook pass on the 0.8.0 pins.
 
@@ -12,7 +16,7 @@
 
 ### 1.1 What Topcoat is, in one paragraph
 
-Topcoat renders everything on the server. Components are ordinary `async fn`s that can hit the database directly. Reactivity comes from `$(...)` expressions — a type-checked subset of Rust that Topcoat evaluates on the server for first render and *also* cross-compiles to JavaScript so it re-runs in the browser without a round-trip. When the server *is* needed, a `#[shard]` component re-renders on the server and morphs its HTML in place. No WebAssembly, no separate client build, no serialisation boundary. Think "HTMX with a type checker and a component model," sitting on tokio, with Toasty as the intended ORM.
+Topcoat renders pages on the server. Components are ordinary async Rust functions that can query the database directly. Runtime expressions compile to Rust for initial rendering and JavaScript for browser updates. Shards re-render server-owned regions, procedures perform server actions, and connected live regions receive later updates over WebSockets. There is no WebAssembly bundle, separate client build, or separate page-data API. Runtime captures and procedure/shard arguments still cross a typed serialization boundary.
 
 ### 1.2 Who this workshop is for
 
@@ -26,14 +30,14 @@ Every lab should be completable by persona 1 and 2. Module 0 carries a "Rust in 
 
 ### 1.3 The four risks specific to Topcoat and how the workshop handles them
 
-1. **It's early-stage and breaking.** The README says so in bold. The workshop **pins exact crate versions** in every lab's `Cargo.toml`, records the tested `rust-toolchain.toml`, and ships a `COMPATIBILITY.md` with a tested-version matrix. A CI job runs all lab solutions weekly against pinned versions *and* against `latest`, so drift is detected rather than discovered by a learner.
+1. **It's early-stage and breaking.** The workshop pins exact Topcoat versions once in the workspace's `[workspace.dependencies]`; lab manifests opt into them. It records the tested `rust-toolchain.toml` and ships a `COMPATIBILITY.md` matrix. Pinned CI and a separate latest-family drift run detect incompatible changes before a learner does.
 2. **The reactivity runtime is admittedly incomplete.** The workshop teaches it honestly: one module on native `$(...)`/signals/shards, and one on the htmx and Alpine integrations as the pragmatic fallback. Learners come away knowing which to reach for.
 3. **Deployment docs don't exist yet** (it's on the roadmap). We write them — that's a differentiator, and the Azure Container Apps path is one you can author authoritatively.
 4. **No `topcoat new` yet.** Lab 1 covers manual scaffolding; a `scripts/new-lab.sh` template generator stands in for it.
 
 ### 1.4 Upstream has moved since the announcement (checked 8 Sep 2026)
 
-`topcoat` 0.8.0 is the current workshop pin. Since the July post, several roadmap items have landed: `topcoat-mail` (SMTP/file/in-memory transports), `live!`/`emit!` streaming regions with `suspense` and `error_boundary` components, WebSockets, server-sent events, multipart uploads, sitemaps, a Datastar integration alongside htmx/Alpine, a tower bridge (mount tower services and layers — the Axum story), and a `Props` derive. Emailing, streaming SSR, WebSockets and SSE are gone from the roadmap; Localization, WebTransport and Markdown are new on it. The curriculum below folds these in (mail in Lab 06, `live!`/suspense in Lab 08, tower bridge in Lab 13). Re-run this check before starting each phase.
+At this September checkpoint, `topcoat` 0.8.0 was the workshop pin. Since the July post, several roadmap items had landed: mail transports, finite streaming, WebSockets, server-sent events, multipart uploads, sitemaps, Datastar, the Tower bridge, and a `Props` derive. The curriculum included mail in Lab 06, streaming in Lab 08, and Tower in Lab 13. The October 0.9.0 refresh adds typed integer/collection expressions, keyed loop identity, connected server push, suspense wait mode, and owned field components to the existing lessons.
 
 ### 1.5 The capstone app: "Slipway"
 
@@ -90,7 +94,7 @@ Topcoat-Workshop/
 
 ## 3. Curriculum
 
-Total: **12 labs across 6 modules**, roughly 10–12 hours of hands-on time. Designed to run as a 2-day instructor-led workshop or a self-paced course. Each module has a concept page in `docs/`, one or more labs, and a short deck.
+Total: **12 labs across 6 modules, plus optional Lab 13**, roughly 13¾ hours of hands-on time or 14½ hours with the optional lab. Designed for a 2-day instructor-led workshop or self-paced course. Each module has concept pages, labs, and a short deck.
 
 ### Module 0 — Orientation (45 min, no lab)
 
@@ -126,8 +130,8 @@ Signed and encrypted cookies; the session API with bring-your-own storage (start
 **Lab 07 — Signals and `$(...)` expressions** (60 min)
 `signal` declarations, `@click`/`@input` handlers, `:hidden`/`:class` bind attributes, what the dual Rust/JS expression vocabulary does and does not support (deliberately try something unsupported and read the compile error). Build a berth filter toggle and a collapsible work-order panel with zero server calls. Checkpoint: DevTools network tab shows no requests during interaction.
 
-**Lab 08 — Shards and procedures** (75 min)
-`#[shard]` for server re-render on argument change: live search over vessels as the user types. `#[procedure]` for async server functions called from the browser: "mark work order complete." Observe the HTML morph in DevTools. Discuss request storms and debouncing. Finish with `live!`/`emit!`: wrap the slow work-order history in `suspense` so the page streams in, and add an `error_boundary`. Checkpoint: typing "Lady" narrows the list without a page load.
+**Lab 08 — Shards, procedures, and streaming** (90 min)
+Use signal-parameter shards for live vessel search, keyed loops for work-order signal identity, and authenticated procedures for completion. Compare finite `live!`/`emit!` progress, suspense `Stream` versus `Wait`, and connected server-pushed status updates. Checkpoint: search changes only its region, and a second authenticated tab receives completion status without polling. Notifications remain process-local and private emissions recheck the stored session.
 
 **Lab 09 — htmx and Alpine as the pragmatic path** (45 min)
 Rebuild one interaction from Lab 08 with the `topcoat::htmx` helpers (request/response header helpers, partial swaps). Side-by-side comparison page in the docs: native runtime vs htmx vs Alpine — when each is the right call given the runtime's current limits. Checkpoint: both implementations coexist in the app.
@@ -139,8 +143,8 @@ Add Toasty with SQLite. Define `Berth`, `Vessel`, `WorkOrder` models with relati
 
 ### Module 5 — Assets, styling, and UI
 
-**Lab 11 — Asset pipeline, fonts, icons, Tailwind, Topcoat UI** (75 min)
-`asset!` with content-hashed URLs; `fontsource_font!`; `iconify::include!`; the `tailwind` feature and `tailwind::stylesheet!()` with no Node; `topcoat ui` vendoring shadcn-style components into `src/` and editing one to prove you own it. Give Slipway a real look. Checkpoint: `topcoat build` output directory contains hashed assets; changing `card` styling in the vendored file changes every card.
+**Lab 11 — Asset pipeline, fonts, icons, Tailwind, Topcoat UI** (90 min)
+Use content-hashed assets, self-hosted fonts, checked icons, and standalone Tailwind. Vendor owned UI source, retain the marina theme/card customization, and compose accessible form fields without changing server validation. Checkpoint: `cargo build --release -p lab11-solution` plus `topcoat asset bundle --release -p lab11-solution` produces the matching release unit; the owned card edit reaches every berth and field errors stay linked to controls.
 
 ### Module 6 — Production
 
@@ -224,8 +228,8 @@ Topcoat's own repo ships `AGENTS.md` and `CLAUDE.md`, and the announcement expli
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| `ci.yml` | push, PR | `cargo fmt --check`, `topcoat fmt --check`, `cargo clippy -D warnings`, `cargo test --workspace`, build every `starter/` and `solution/` |
-| `drift.yml` | weekly cron | Same build with `cargo update` applied; on failure, opens an issue titled "Topcoat drift: <crate> <old> → <new>" with the error |
+| `ci.yml` | push, PR | Cargo formatting check, Topcoat formatting then a diff check, clippy, workspace build/tests, starter coverage, instruction parity and book-page checks |
+| `drift.yml` | weekly cron | Resolve the latest stable Topcoat/asset family with structured TOML, install matching CLI, stage icons, build/test, and open a drift issue on failure |
 | `docs.yml` | push to `main` | `mdbook build`, linkcheck, deploy to Pages |
 
 `COMPATIBILITY.md` gets a row per tested Topcoat/Toasty/toolchain combination with a date. When drift breaks a lab, the fix PR updates that table.
@@ -263,6 +267,11 @@ Phase 1 is a publishable milestone on its own; announce it in the `#topcoat` Dis
 ---
 
 ## 10. Deploying the capstone: Azure Developer CLI + Azure Container Apps
+
+This section preserves the original deployment design sketch. The implemented, identity-only
+deployment uses the current Lab 12 source and README, including two user-assigned identities,
+PostgreSQL and the ordered Key Vault secret bootstrap. Treat those tested sources as authoritative
+when the original sketch below differs.
 
 This section is the design for Lab 12 and for the `docs/03-reference/howto/deploy-azure.md` how-to. It gives learners a one-command deploy (`azd up`) with nothing hand-clicked in the portal, and it stays consistent with your existing house rules: Bicep-only IaC, managed identity everywhere, no secrets in templates.
 

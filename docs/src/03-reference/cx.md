@@ -3,10 +3,10 @@
 `Cx` is Topcoat's handle for the current request. Pass `&Cx` to small request functions, or declare it
 on a page, layout, component, route, shard, or procedure that needs request-scoped information.
 
-The helpers in this page are the ones used across Labs 05–08. They follow Topcoat v0.8.1's [app
-context](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/app_context.md)
+The helpers in this page are the ones used across Labs 05–08. They follow Topcoat v0.9.0's [app
+context](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat/docs/app_context.md)
 and [functions, not
-middlewares](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/functions_not_middlewares.md)
+middlewares](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat/docs/functions_not_middlewares.md)
 guides.
 
 > [!NOTE]
@@ -18,18 +18,14 @@ guides.
 Signal creation is request-scoped. In a page, component, layout, or shard, call
 `signal(cx, || initial_value)` and pass a signal to a child as `&Signal<T>` when the child needs it:
 
-```rust
-let query = signal(cx, String::new);
-```
-
 The initial value is rendered on the server, then the browser owns the signal. A plain Rust `.get()`
 or `.read()` is a tracked server read; use `.get_untracked()` or `.read_untracked()` when that read
 must not make the body depend on the signal. Validate every signal value read on the server as user
 input. See [How `$(...)` reaches the browser](../01-concepts/dual-expressions.md) for the dual
 expression model.
 
-*Guide basis: the v0.8.1 runtime guide's [Signals](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/runtime.md#signals)
-and [Reading signals on the server](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/runtime.md#reading-signals-on-the-server) sections.*
+*Guide basis: the v0.9.0 runtime guide's [Signals](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat/docs/runtime.md#signals)
+and [Reading signals on the server](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat/docs/runtime.md#reading-signals-on-the-server) sections.*
 
 ## Request
 
@@ -115,6 +111,21 @@ Labs 07–08 carry the same server-side session pattern forward. Signals and `$(
 session into JavaScript. A shard or procedure receives a fresh request `Cx` and must perform its own
 session and authorization checks.
 
+A connected render can outlive its initial authorization result.
+Read the current server-side session record before each private emission.
+Do not reuse a memoized initial user for this check or mutate response cookies after streaming starts.
+
+*Guide basis: the v0.9.0 [live connection lifecycle](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat-view/macro/docs/live.md#long-lived-connections).*
+
+## Identity
+
+Repeated stateful components use `#[key(item.id)]` on their template loop.
+Their signals and live regions keep the same identity when the item moves.
+An unkeyed loop is ambiguous when a component consumes that identity.
+For ordinary Rust helpers, derive a distinct context with `cx.keyed(item.id)`.
+
+*Guide basis: the v0.9.0 [`view!` identity guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat-view/macro/docs/view.md#keys).*
+
 ## App context
 
 App context holds values that are shared by all requests handled by a router: a database pool,
@@ -178,6 +189,12 @@ it:
 Do not treat a redirect or status as authorization by itself. Validate caller-controlled path,
 query, shard, and procedure arguments, then check the current identity before reading or changing
 private data.
+
+Topcoat 0.9.0's `Error` is cheaply cloneable and does not wrap `anyhow::Error`.
+Use `Error::from_anyhow` with the optional `anyhow` feature only when that conversion is needed.
+Owned or mutable downcasts require unique ownership; use `downcast_cloned` when sharing is expected.
+
+*Guide basis: the v0.9.0 [error source](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat-core/src/error.rs).*
 
 ## Quick choice
 

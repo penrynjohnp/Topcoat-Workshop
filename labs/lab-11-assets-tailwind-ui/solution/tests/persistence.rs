@@ -103,6 +103,16 @@ async fn invalid_form_rerenders_values_and_does_not_insert() {
         "{html}"
     );
     assert!(html.contains("Choose a managed berth."), "{html}");
+    for marker in [
+        "data-slot=\"field\"",
+        "role=\"alert\"",
+        "id=\"work-order-title-error\"",
+        "id=\"work-order-berth-error\"",
+        "aria-describedby=\"work-order-title-error\"",
+        "aria-describedby=\"work-order-berth-error\"",
+    ] {
+        assert!(html.contains(marker), "{marker}: {html}");
+    }
     assert!(
         html.contains(r#"value="yard" selected="selected""#),
         "{html}"

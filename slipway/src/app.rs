@@ -39,7 +39,6 @@ pub fn router(state: AppState, assets: Option<AssetBundle>) -> topcoat::router::
     };
 
     let builder = topcoat::router::module_router!()
-        .runtime()
         .discover()
         .cookies()
         .sessions(
@@ -59,7 +58,8 @@ pub fn router(state: AppState, assets: Option<AssetBundle>) -> topcoat::router::
             api_router(),
         ))
         .layer(TowerLayer::new(CompressionLayer::new()).at("/api/v1"))
-        .layer(TowerLayer::new(TraceLayer::new_for_http()).at("/api/v1"));
+        .layer(TowerLayer::new(TraceLayer::new_for_http()).at("/api/v1"))
+        .runtime();
 
     match assets {
         Some(bundle) => builder.assets(bundle).build(),

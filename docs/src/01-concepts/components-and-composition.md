@@ -1,8 +1,8 @@
 # Components and composition
 
-A component is an `async fn` with `#[component]` on it that returns `Result<impl View>`. That is the
-whole idea. There is no base class, no props object, no lifecycle, no re-render loop — the things a
-component can do are the things a Rust function can do, which includes `await`ing a query.
+A component is an `async fn` with `#[component]` that returns `Result<impl View>`.
+You define no component base class or lifecycle callbacks.
+You use ordinary Rust parameters and can await a query inside the function.
 
 ## Arguments are parameters
 
@@ -20,8 +20,11 @@ Three parameter attributes tune the call site:
 | `#[default(expr)]` | custom fallback, evaluated only when the argument is omitted; no `Default` bound needed |
 | `#[into]` | callers may pass anything `Into<T>`, converted outside the body so the component isn't monomorphised per caller |
 
-`key` is reserved: `key:` on a call keys that invocation's identity rather than setting a prop, so no
-component may declare a `key` parameter.
+Give repeated stateful components stable identity with `#[key(item.id)]` on their enclosing loop.
+Topcoat 0.9.0 no longer treats a component's `key:` argument as an identity key.
+For repeated ordinary Rust helpers, pass a derived context with `cx.keyed(item.id)`.
+
+*Guide basis: the v0.9.0 [`view!` keys guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat-view/macro/docs/view.md#keys).*
 
 ## Child content is a parameter too
 
@@ -82,3 +85,6 @@ returns two different `view!` types, as `berth_card` does for its not-found bran
 
 Composition is therefore just function composition: pass arguments, accept children, forward
 attributes, and let each component answer for itself.
+
+**See also:** [Lab 03](../02-labs/lab-03.md), [Lab 08](../02-labs/lab-08.md),
+[Cx API summary](../03-reference/cx.md), and [Functions, not middleware](functions-not-middleware.md).

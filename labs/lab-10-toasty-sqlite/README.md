@@ -77,11 +77,24 @@ Magic links are persistent too, and their tokens are cryptographically random:
 {{#include solution/src/auth.rs:database-magic-links}}
 ```
 
-The existing `#[procedure]` now loads and updates a `WorkOrder`. Topcoat 0.8 runtime numbers use `f64`, so the server validates that surrogate before converting it to Toasty's `u64` key:
+The existing procedure now loads and updates a `WorkOrder` using its `u64` key directly.
+Topcoat 0.9.0 preserves integer precision across the Rust/JavaScript boundary, so no `f64` conversion is needed:
 
 ```rust
 {{#include solution/src/app/_marketing.rs:complete-work-order-procedure}}
 ```
+
+Integer procedure arguments use tagged surrogates containing the type, bit width, and decimal
+string value. A raw JSON number is not this wire format. Generate test payloads through Topcoat's
+`Arguments` and `Surrogated` types:
+
+```rust
+{{#include solution/tests/server_runtime.rs:integer-procedure-arguments}}
+```
+
+The procedure still authorizes the caller and checks that the work order exists.
+The inherited connected status shard reloads database state after a successful completion notification.
+Its notifications remain process-local, even though the records are persistent.
 
 Keep the cookie key stable when testing a restart; the database can preserve a session record, but a newly generated encryption key cannot decrypt an old cookie.
 
@@ -99,7 +112,11 @@ GET and POST pages share one server-rendered form. The POST trims the title, app
 {{#include solution/src/app/_marketing/dashboard/work_orders/new.rs:manual-form-validation}}
 ```
 
-Topcoat validation helpers are still on the roadmap, so this lab deliberately keeps validation explicit. Topcoat 0.8.1 now decodes an empty form or query value as `None` for an `Option<T>`. These two required fields deliberately remain `String`, so an empty submission reaches the explicit `is_empty()` and managed-berth checks below. Invalid input returns HTTP 200, preserves submitted values, and renders both messages; valid input returns 303 with `Location: /dashboard`.
+Topcoat validation helpers are still on the roadmap, so this lab keeps validation explicit.
+Topcoat decodes an empty form or query value as `None` for `Option<T>`.
+These required fields remain `String`, so empty submissions reach the explicit checks.
+Invalid input returns HTTP 200, preserves values, and renders both messages.
+Valid input returns 303 with `Location: /dashboard`.
 
 ```rust
 {{#include solution/tests/persistence.rs:form-validation-test}}
@@ -130,7 +147,7 @@ The final integration test creates a record, authenticates, drops the first app 
 - **A berth relation is empty even though the child row exists.** The query did not call `.include(...)`, or the child has the wrong `berth_slug`.
 - **POST returns 415 or fails to extract `Form`.** Send `Content-Type: application/x-www-form-urlencoded`.
 - **A session row exists but the old browser cookie no longer works.** The cookie encryption key changed across the restart. Persist that key in deployment configuration; never hard-code it or commit it.
-- **The procedure rejects a numeric ID.** Topcoat 0.8 transports runtime numbers as `f64`; accept the surrogate, validate that it is a non-negative integer, then convert it to the database key.
+- **The procedure rejects a numeric ID.** Use the `u64` argument's tagged runtime surrogate, not a raw JSON number or `f64`. The test generates the correct type, width, and decimal-string payload.
 
 ## What's next
 Lab 11 keeps this persistent server-rendered app and adds bundled assets, fonts, icons, Tailwind, and owned Topcoat UI components.

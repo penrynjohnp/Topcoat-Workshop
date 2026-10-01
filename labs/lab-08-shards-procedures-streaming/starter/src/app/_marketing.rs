@@ -81,9 +81,6 @@ async fn work_orders(cx: &Cx) -> Result<impl View> {
 //         true => "Hide work orders",
 //         false => "Show work orders",
 //     })
-//
-// Integer literals are rejected for the same reason: every number is an `f64`,
-// so `$(count.get() + 1)` fails and `$(count.get() + 1.0)` compiles.
 // ANCHOR_END: unsupported-expression
 
 #[page]

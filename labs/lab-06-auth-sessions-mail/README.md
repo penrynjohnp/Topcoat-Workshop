@@ -47,14 +47,14 @@ proving the protection travels with the markup rather than depending on a route-
 chain. Before returning the redirect error, `require_auth` stores the attempted GET or HEAD path in
 a private, signed cookie that expires after ten minutes.
 
-Topcoat 0.8.1 serializes queued cookie changes even when a handler returns an error such as this
+Topcoat 0.9.0 serializes queued cookie changes even when a handler returns an error such as this
 redirect ([tokio-rs/topcoat#408](https://github.com/tokio-rs/topcoat/pull/408)). In 0.8.0 the router
 dropped the `Set-Cookie` header on error responses, so the login flow could not remember where the
 request started.
 
 > [!NOTE]
 > `error::redirect` returns 307, preserving the original method and body, while `error::see_other`
-> returns 303 and follows with GET. In 0.8.1 `SeeOther` implements `Error`, so a view-returning guard
+> returns 303 and follows with GET. In 0.9.0 `SeeOther` implements `Error`, so a view-returning guard
 > can send it through `Err`. The lab keeps 307 in this pass, but a browser auth guard should prefer
 > 303 so a guard that fires during POST does not repost the form body to `/login`.
 

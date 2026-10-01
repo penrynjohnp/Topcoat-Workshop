@@ -3,18 +3,16 @@
 **Time:** 60 min · **Module:** 3 · **Prerequisites:** Lab 06 complete (or copy `labs/lab-06-auth-sessions-mail/solution`)
 
 ## What you'll learn
-- Create browser state with `signal(cx, || initial)` before entering `view!`
-- Pass signal handles to child components as `&Signal<T>`
-- Distinguish client-side `$(...)` reads from tracked and untracked server-side reads
-- Drive the DOM with `@click`/`@input` handlers and `:hidden`/`:class`/`:value` bind attributes
-- Recognise what the shared Rust/JavaScript vocabulary does not support, and read the compile error it produces
+- Create and share signals while distinguishing client reads from tracked and untracked server reads
+- Drive the DOM with handlers and binds, and compose integer and collection expressions
+- Recognise unsupported Rust syntax and use deliberate escape hatches
 
 ## Concepts (read first, 5 min)
- Read the pinned Topcoat v0.8.1 [runtime guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat/docs/runtime.md) and expr! [vocabulary](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.8.1/crates/topcoat-runtime/macro/docs/expr.md). A `$(...)` block is a **runtime expression**: type-checked Rust that Topcoat compiles twice, once to server code that produces the initial HTML and once to JavaScript that ships with the page. Create a signal in the surrounding Rust body with `signal(cx, || initial)`, then capture it in as many runtime expressions as you need. The body needs `cx: &Cx` because Topcoat derives the signal's stable identity from the current page, layout, component, or shard render.
+ Read the pinned Topcoat v0.9.0 [runtime guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat/docs/runtime.md) and expr! [vocabulary](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat-runtime/macro/docs/expr.md). A `$(...)` block is a **runtime expression**: type-checked Rust that Topcoat compiles twice, once to server code that produces the initial HTML and once to JavaScript that ships with the page. Create a signal in the surrounding Rust body with `signal(cx, || initial)`, then capture it in as many runtime expressions as you need. The body needs `cx: &Cx` because Topcoat derives the signal's stable identity from the current page, layout, component, or shard render.
 
 A signal is an ordinary, cheaply cloned handle. Pass it to a child component as `&Signal<T>`. A `.get()` inside `$(...)` is a browser-side reactive read and does not make the server body depend on the signal. A `.get()` in ordinary Rust is a tracked server-side read: changing that signal asks the server to run the page again and morph the returned HTML into place. Use `.get_untracked()` when the server needs the current value without subscribing the body to future changes.
 
-Because a runtime expression must mean the same thing in Rust and JavaScript, only a small vocabulary is supported: `f64` (all numbers, so integer literals are rejected), `bool`, `String`/`&str`, `Option`, `Result`, tuples, and `Signal`, each with a subset of its Rust API. `match`, struct expressions, multi-segment paths, and the `&&`/`||` operators are not in it — spell combinations with `if`/`else` and `let` bindings instead. Anything the vocabulary cannot say is either restructured or escaped to hand-written JavaScript with `raw!`. The filter and disclosure in this lab remain client-only; one focused example intentionally adds a page re-run. `#[shard]` and `#[procedure]` arrive in Lab 08.
+The shared vocabulary includes all Rust integer types, `f64`, booleans, strings, options, results, tuples, signals, vectors, arrays, and slices. Unsuffixed integer literals are `usize`, and arithmetic operands must have matching types. Integer values retain full precision in the browser. `match`, struct expressions, multi-segment paths, and `&&`/`||` remain unsupported. Use `if`/`else` and `let` bindings for combinations. The filter and disclosure remain client-only; one focused example intentionally adds a page rerun. Shards and procedures arrive in Lab 08.
 
 ## Steps
 ### Step 1 — Load and route the runtime
@@ -24,7 +22,7 @@ Interactive pages need the runtime's browser script, and that script is a Topcoa
 {{#include solution/src/app.rs:app-router}}
 ```
 
-Import `RouterBuilderRuntimeExt`, call `.runtime()`, and keep the asset bundle conditional. `main.rs` passes `Some(AssetBundle::load()?)`; tests pass `None`. The layout reads the resulting flag and renders the script tag only when it can actually be served:
+Import `RouterBuilderRuntimeExt`, register application layers before `.runtime()`, and keep the asset bundle conditional. Page reruns POST to the page's own URL with `X-Topcoat-Runtime: true`; the runtime layer restores signals and rewrites them to GET before the inner layers run. `main.rs` passes `Some(AssetBundle::load()?)`; tests pass `None`. The layout renders the script tag only when it can be served:
 
 ```rust
 {{#include solution/src/app/_marketing.rs:runtime-script}}
@@ -97,7 +95,6 @@ The rejection is the point: the expression has to compile to JavaScript as well 
 {{#include solution/src/app/_marketing.rs:unsupported-expression}}
 ```
 
-Integer literals fail the same way, and that surprises people more: every number in an expression is an `f64`, so `$(count.get() + 1)` does not compile while `$(count.get() + 1.0)` does.
 > [!NOTE]
 > **Checkpoint:** you have seen `error: unsupported expression` yourself, and the `if`/`else` spelling is back in place.
 
@@ -108,14 +105,32 @@ The name filter in Step 2 is case-sensitive precisely because `to_lowercase` is 
 > [!NOTE]
 > **Checkpoint:** you can say which of the three you would reach for first, and why `raw!` is last.
 
-### Step 7 — Prove it with tests
+### Step 7 — Compose integer and collection expressions
+Create an inspection step as a `usize` signal. Capture the status names as a vector and compose
+`Expr<T>` values for the current status and the next step:
+
+```rust
+{{#include solution/src/app/_marketing.rs:integer-collection-expressions}}
+```
+
+The vector is a render-time snapshot. Capturing an expression inside another expression keeps
+its signal dependencies reactive. Integer overflow and division by zero panic in both build profiles.
+Call `inspection_status()` from the home page beside the featured berth.
+
+> [!NOTE]
+> **Checkpoint:** open `/` and advance the berth inspection through Scheduled, Inspecting, and Checked. No request appears in the Network tab.
+
+### Step 8 — Prove it with tests
 The reactive markup is server-rendered HTML, so an in-process router test can assert on it: signals serialize as `::topcoat::signal(...)` comments, handlers as `data-topcoat-on:*` attributes, binds as `data-topcoat-bind:*`.
 
 ```rust
 {{#include solution/tests/reactivity.rs:reactivity-integration-test}}
 ```
 
-The router is built with `None` for the bundle, so no asset is rendered and the test needs nothing on disk. The tracked-read test asserts that two signals produce exactly one `::topcoat::dep(...)` marker. The filter test also confirms that no shard or procedure endpoint is involved.
+The router is built with `None` for the bundle, so the test needs no asset directory.
+The home page has the inspection signal and two server-read signals, with one tracked dependency.
+The page-rerun test POSTs restored state through the runtime layer and checks the server readout.
+The filter test confirms that no shard or procedure endpoint is involved.
 > [!NOTE]
 > **Checkpoint:** `cargo test -p lab07-solution --test reactivity` passes.
 
@@ -123,7 +138,7 @@ The router is built with `None` for the bundle, so no asset is rendered and the 
 - Validate and normalize the tracked text before using it in the server-rendered readout. Treat the value as hostile input even though it has the expected Rust type.
 - Make the name filter case-insensitive. The vocabulary has no `to_lowercase`, so either lowercase the captured name at render time and the query with `raw!`, or keep a second signal holding the lowered query.
 - Add a "clear filters" button that resets all three signals in one handler — a handler body can be a block.
-- Show a live count of visible berths. The vocabulary has no `Vec`, so you will need one signal per row, a tracked server read, or a rethink; this previews why Lab 08 reaches for a `#[shard]`.
+- Use a captured vector of berth names and supported collection methods to build a local selection control. Keep server-owned mutations for Lab 08's procedure.
 - Persist the chip state across navigation without browser storage. Hint: a signal's initializer is ordinary Rust and can read the query string from `Cx`.
 
 ## Troubleshooting
@@ -131,7 +146,7 @@ The router is built with `None` for the bundle, so no asset is rendered and the 
 - **A tracked signal changes but no request appears** — add `.runtime()` to the router and confirm the runtime script and matching asset bundle are loaded.
 - **`error: unsupported operator` on `&&` or `||`** — `bool` has `!`, comparisons, `then` and `then_some`, but no logical operators. Use `if`/`else` with `let` bindings.
 - **`error: unsupported expression`** — `match`, struct literals, or multi-segment paths. Restructure, or escape with `raw!`.
-- **Type errors around `1` or `2`** — integer literals are not accepted; write `1.0`.
+- **Type errors around `1` or `2`** — unsuffixed integers are `usize`. Match the signal's type with a suffix such as `1u64`; use `1.0` for `f64` arithmetic.
 - **The page renders but nothing reacts** — the runtime script is missing. Check the router was built with a bundle and that `topcoat dev` finished a build; a bundle from another profile does not describe your binary.
 - **Panic: an asset is not present in the loaded bundle** — binary and bundle came from different builds. Rebuild both, or pass `None` if you are in a test.
 - **`internal compiler error: encountered incremental compilation error`** after uncommenting the `match` — an incremental-cache artifact, not your code. Run `cargo clean -p lab07-solution` and try again.

@@ -2,6 +2,8 @@
 
 Slipway is the finished Topcoat workshop application: the Lab 12 marina manager with Lab 13's Tower bridge. It keeps the server-rendered Topcoat UI, Toasty persistence, authentication, sessions, assets, production container, and Azure deployment, while mounting an Axum JSON API under `/api/v1` with compression and tracing middleware.
 
+It uses Topcoat and CLI 0.9.0 with Toasty 0.10.0.
+
 ## Run locally
 
 From the repository root:
@@ -23,6 +25,12 @@ curl http://127.0.0.1:3000/api/health
 curl http://127.0.0.1:3000/api/v1/health
 cargo test -p slipway-capstone
 ```
+
+The authenticated history page includes a connected work-order status region.
+Completing an order in another tab notifies that region over the runtime WebSocket.
+Choose `/dashboard/history?mode=wait` for initial history content without a JavaScript fallback.
+Notifications are shared by one process's app-state clones, not across replicas.
+The socket test covers update delivery, reconnect state, logout and subscriber cleanup.
 
 ## Deploy with Azure Developer CLI
 

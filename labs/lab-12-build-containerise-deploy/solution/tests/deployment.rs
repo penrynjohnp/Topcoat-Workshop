@@ -1,4 +1,5 @@
 const DOCKERFILE: &str = include_str!("../Dockerfile");
+const STARTER_DOCKERFILE: &str = include_str!("../../starter/Dockerfile");
 const DOCKERIGNORE: &str = include_str!("../../../../.dockerignore");
 const AZURE_YAML: &str = include_str!("../azure.yaml");
 const MAIN_BICEP: &str = include_str!("../infra/main.bicep");
@@ -12,6 +13,8 @@ const WORKFLOW: &str = include_str!("../../../../.github/workflows/azure-dev.yml
 
 #[test]
 fn image_keeps_the_release_binary_and_asset_catalog_together() {
+    assert!(DOCKERFILE.contains("cargo install topcoat-cli --version 0.9.0 --locked"));
+    assert!(STARTER_DOCKERFILE.contains("cargo install topcoat-cli --version 0.9.0 --locked"));
     assert!(DOCKERFILE.contains("cargo build --release -p slipway"));
     assert!(DOCKERFILE.contains("topcoat asset bundle --release -p slipway"));
     assert!(DOCKERFILE.contains("target/release/slipway"));

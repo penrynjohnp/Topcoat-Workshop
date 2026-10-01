@@ -40,6 +40,9 @@ Verify locally:
 - logs use `tracing` and do not print secrets;
 - the image starts without a development watcher.
 
+The builder installs Topcoat CLI 0.9.0, matching the application dependency family.
+Bundle `slipway` and `slipway-capstone` separately and keep each binary with its own catalog.
+
 A successful local release is a prerequisite, not an optional polish step.
 
 ---
@@ -118,6 +121,10 @@ The Tower bridge lets one application use both boundaries:
 - app context shares the database pool.
 
 Use the tool that matches the endpoint. You do not need to choose one framework for every path.
+
+`TowerRoute` forwards the original URI. A relative Axum `/health` route needs explicit
+`StripPrefixLayer` under `/api/v1`; the capstone's full-path route does not.
+Test the actual Topcoat router, not only a separately nested Axum router.
 
 ---
 

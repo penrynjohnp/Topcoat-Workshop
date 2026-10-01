@@ -31,3 +31,6 @@ Lab 10 calls `push_schema()` only when its SQLite file is new:
 That is appropriate for a disposable workshop database. Toasty 0.10.0 does not make repeated schema pushes idempotent on an existing file, and changing production schemas requires ordered migrations. Persistence also extends beyond domain rows: sessions and magic links can use ordinary Toasty models while the browser still receives only an encrypted cookie.
 
 See the pinned [Toasty 0.10.0 documentation](https://docs.rs/toasty/0.10.0/toasty/) for the exact API used by this workshop.
+
+**See also:** [Lab 10](../02-labs/lab-10.md), [Lab 12](../02-labs/lab-12.md),
+[SQLite to PostgreSQL](../03-reference/howto/postgres.md), and [Cx API summary](../03-reference/cx.md).

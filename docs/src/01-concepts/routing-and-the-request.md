@@ -60,3 +60,6 @@ API response and keeps the response contract visible in the handler.
 other values whose lifetime is one request. It is not a global state bag. Lab 05 adds long-lived app
 context and memoization, proving how repeated component calls can share request-scoped work without
 threading data through every prop.
+
+**See also:** [Lab 04](../02-labs/lab-04.md), [Lab 05](../02-labs/lab-05.md),
+[Module routing conventions](../03-reference/module-routing.md), and [Cx API summary](../03-reference/cx.md).

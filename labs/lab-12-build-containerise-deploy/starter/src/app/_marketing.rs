@@ -80,13 +80,8 @@ async fn root_layout(cx: &Cx, slot: Slot<'_>) -> Result<impl View> {
 
 // ANCHOR: complete-work-order-procedure
 #[procedure]
-pub(crate) async fn mark_work_order_complete(cx: &Cx, id: f64) -> Result<bool> {
+pub(crate) async fn mark_work_order_complete(cx: &Cx, id: u64) -> Result<bool> {
     require_auth(cx).await?;
-    if !id.is_finite() || id.fract() != 0.0 || id < 0.0 || id > u64::MAX as f64 {
-        return Ok(false);
-    }
-
-    let id = id as u64;
     if !work_order_exists(cx, id).await? {
         return Err(
             std::io::Error::new(std::io::ErrorKind::InvalidInput, "unknown work order").into(),
@@ -97,13 +92,14 @@ pub(crate) async fn mark_work_order_complete(cx: &Cx, id: f64) -> Result<bool> {
     toasty::update!(order { completed: true })
         .exec(&mut db)
         .await?;
+    app_context::<AppState>(cx).updates.send(()).ok();
     Ok(true)
 }
 // ANCHOR_END: complete-work-order-procedure
 
 #[component]
 async fn work_order_row(cx: &Cx, order: &WorkOrder) -> Result<impl View> {
-    let id = order.id as f64;
+    let id = order.id;
     let completed_initially = order.completed;
     let completed = signal(cx, || completed_initially);
 
@@ -154,8 +150,9 @@ async fn work_orders(cx: &Cx) -> Result<impl View> {
                 )
                 card_content(
                     <ul class="grid gap-3">
+                        #[key(order.id)]
                         for order in orders {
-                            work_order_row(order: &order, key: order.id)
+                            work_order_row(order: &order)
                         }
                     </ul>
                     <div class="mt-6 flex flex-wrap gap-3">
@@ -195,9 +192,6 @@ async fn work_orders(cx: &Cx) -> Result<impl View> {
 //         true => "Hide work orders",
 //         false => "Show work orders",
 //     })
-//
-// Integer literals are rejected for the same reason: every number is an `f64`,
-// so `$(count.get() + 1)` fails and `$(count.get() + 1.0)` compiles.
 // ANCHOR_END: unsupported-expression
 
 #[page]

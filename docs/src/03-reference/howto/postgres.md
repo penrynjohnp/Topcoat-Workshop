@@ -50,3 +50,6 @@ Microsoft Entra-only PostgreSQL Flexible Server needs at least one Entra adminis
 ```
 
 That is a bootstrap shortcut, not least privilege: the identity that runs queries and the identity that administers the server are the same one. A production deployment would register a human or break-glass identity as the administrator and grant the application identity a narrower, non-admin Entra role instead — see [How-to: deploy to Azure Container Apps](deploy-azure.md) for the rest of that identity's responsibilities (ACR pull, Key Vault secret read).
+
+**See also:** [Lab 10](../../02-labs/lab-10.md), [Lab 12](../../02-labs/lab-12.md),
+[What Toasty does](../../01-concepts/toasty.md), and [Deploy to Azure Container Apps](deploy-azure.md).

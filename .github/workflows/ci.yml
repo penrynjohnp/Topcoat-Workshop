@@ -20,7 +20,7 @@ jobs:
         with: { components: "rustfmt, clippy" }
       - uses: Swatinem/rust-cache@v2
       - name: Install topcoat-cli
-        run: cargo install topcoat-cli --version 0.9.0 --locked
+        run: cargo install topcoat-cli --version 0.10.0 --locked
       - name: Stage icon cache once (topcoat-icon build scripts race when run in parallel)
         run: |
           find target/topcoat/cache -type f -empty -delete 2>/dev/null || true
@@ -30,10 +30,33 @@ jobs:
           find target/topcoat/cache -type f -empty -delete 2>/dev/null || true
           cargo build -p lab11-solution
       - run: cargo fmt --all --check
-      - name: topcoat fmt (no --check flag; fail if it changes anything)
-        run: |
-          topcoat fmt $(git ls-files 'labs/**/*.rs' 'slipway/**/*.rs')
-          git diff --exit-code -- '*.rs'
+      - name: Check Topcoat formatting
+        run: topcoat fmt --check $(git ls-files 'labs/**/*.rs' 'slipway/**/*.rs')
       - run: cargo clippy --workspace -- -D warnings
       - run: cargo build --workspace
       - run: cargo test --workspace
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tests/browser/package-lock.json
+      - name: Install topcoat-cli
+        run: cargo install topcoat-cli --version 0.10.0 --locked
+      - name: Stage icon cache before capstone build
+        run: cargo build -p lab11-solution
+      - run: npm ci --prefix tests/browser
+      - run: npx --prefix tests/browser playwright install --with-deps chromium
+      - run: npm test --prefix tests/browser
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-results
+          path: |
+            tests/browser/test-results
+            tests/browser/playwright-report

@@ -4,7 +4,8 @@ use crate::auth::AppState;
 use topcoat::{
     Result,
     context::{app_context, memoize},
-    view::{Attributes, Child, View, ViewExt, class, component, view},
+    runtime::{PrefetchMode, link, link_attrs, signal},
+    view::{Attributes, Child, View, ViewExt, attributes, class, component, view},
 };
 
 // The memoize macro requires the parameter type to be spelled `Cx` but consumes the import.
@@ -196,22 +197,35 @@ pub async fn load_berth(cx: &Cx, slug: &str) -> Option<Berth> {
 // ANCHOR_END: memoized-loader
 
 #[component]
-pub(crate) async fn nav(current_path: &str) -> Result<impl View> {
+pub(crate) async fn nav(cx: &Cx, current_path: &str) -> Result<impl View> {
+    let shared_count = signal(cx, || 0usize);
+    let admin_attrs = link_attrs(cx, "/admin", PrefetchMode::Never);
     Ok(view! {
         <nav aria-label="Main">
             <ul class="nav">
                 for (href, label) in NAV {
+                    let current = href == current_path;
                     <li>
-                        <a
-                            href=(href)
-                            class=(class!("nav-link", "nav-link-active" if href == current_path))
-                            aria-current=((href == current_path).then_some("page"))
-                        >
+                        link(
+                            href: href,
+                            attrs: attributes! {
+                                class=(class!("nav-link", "nav-link-active" if current))
+                                aria-current=(current.then_some("page"))
+                            },
                             (label)
-                        </a>
+                        )
                     </li>
                 }
             </ul>
+            <a class="nav-link" href="/admin" (admin_attrs)>"Admin"</a>
+            <button
+                type="button"
+                data-command="increment-shared-count"
+                @click=$(|_event| shared_count.increment())
+            >
+                "Shared count: "
+                $(shared_count.get())
+            </button>
         </nav>
     })
 }

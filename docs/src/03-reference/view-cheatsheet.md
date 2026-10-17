@@ -1,10 +1,10 @@
 # `view!` cheat sheet
 
 Use this page when you know what markup you want and need the Topcoat syntax. Every example comes
-from the compiled solutions for Labs 02–03 and targets Topcoat 0.9.0.
+from the compiled solutions for Labs 02–03 and targets Topcoat 0.10.0.
 
-The syntax follows the pinned v0.9.0 [`view!`
-guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat-view/macro/docs/view.md).
+The syntax follows the pinned v0.10.0 [`view!`
+guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/view/view.md).
 
 ## Syntax at a glance
 
@@ -81,7 +81,7 @@ to the receiving component; they are not ordinary positional Rust arguments.
 
 > [!NOTE]
 > Use `#[key(item.id)]` on loops that contain stateful components or live regions.
-> Topcoat 0.9.0 no longer uses special component `key:` arguments for identity.
+> Topcoat 0.10.0 no longer uses special component `key:` arguments for identity.
 > An HTML `id` identifies a DOM node; it does not replace the component's context key.
 > Repeated ordinary Rust helpers can receive `&cx.keyed(item.id)`.
 

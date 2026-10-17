@@ -235,25 +235,41 @@ async fn open_runtime_socket(
         response.headers()["sec-websocket-protocol"],
         RUNTIME_PROTOCOL
     );
-    socket
-        .send(Message::Text(
-            serde_json::json!({ "run": run, "shard": identity, "args": [], "signals": {} })
-                .to_string()
-                .into(),
-        ))
-        .await
-        .unwrap();
+    start_connected_render(&mut socket, path, identity, run).await;
     socket
 }
 
-async fn receive_until(socket: &mut RuntimeSocket, expected: &str) -> String {
+async fn start_connected_render(socket: &mut RuntimeSocket, path: &str, identity: &str, run: u64) {
+    let body = serde_json::json!({ "args": [], "signals": {} }).to_string();
+    let request = serde_json::json!({
+        "run": run,
+        "method": "POST",
+        "path": path,
+        "headers": {
+            "content-type": "application/json",
+            "x-topcoat-identity": identity,
+        },
+        "body": body,
+    });
+    socket
+        .send(Message::Text(request.to_string().into()))
+        .await
+        .unwrap();
+}
+
+async fn receive_until(socket: &mut RuntimeSocket, run: u64, expected: &str) -> String {
     tokio::time::timeout(Duration::from_secs(5), async {
         let mut received = String::new();
         loop {
             let message = socket.next().await.unwrap().unwrap();
             if let Message::Text(text) = message {
-                assert!(!text.contains("\"t\":\"error\""), "{text}");
-                received.push_str(&text);
+                let envelope: serde_json::Value = serde_json::from_str(text.as_str()).unwrap();
+                if envelope["run"] != run {
+                    continue;
+                }
+                let frame = &envelope["frame"];
+                assert_ne!(frame["t"], "error", "{frame}");
+                received.push_str(&frame.to_string());
                 if received.contains(expected) {
                     return received;
                 }
@@ -262,6 +278,26 @@ async fn receive_until(socket: &mut RuntimeSocket, expected: &str) -> String {
     })
     .await
     .expect("runtime frame did not arrive")
+}
+
+async fn receive_all_until(socket: &mut RuntimeSocket, runs: &[u64], expected: &str) {
+    tokio::time::timeout(Duration::from_secs(5), async {
+        let mut completed = std::collections::BTreeSet::new();
+        while !runs.iter().all(|run| completed.contains(run)) {
+            let message = socket.next().await.unwrap().unwrap();
+            if let Message::Text(text) = message {
+                let envelope: serde_json::Value = serde_json::from_str(text.as_str()).unwrap();
+                let run = envelope["run"].as_u64().unwrap();
+                let frame = &envelope["frame"];
+                assert_ne!(frame["t"], "error", "{frame}");
+                if runs.contains(&run) && frame.to_string().contains(expected) {
+                    completed.insert(run);
+                }
+            }
+        }
+    })
+    .await
+    .expect("runtime frames did not arrive for every run");
 }
 
 async fn wait_for_subscribers(state: &AppState, expected: usize) {
@@ -310,8 +346,10 @@ async fn connected_status_updates_reconnects_and_rechecks_auth() {
     });
 
     let mut socket = open_runtime_socket(address, &path, &identity, &cookie, 1).await;
-    receive_until(&mut socket, "Completed work orders: 0").await;
-    wait_for_subscribers(&state, 1).await;
+    receive_until(&mut socket, 1, "Completed work orders: 0").await;
+    start_connected_render(&mut socket, &path, &identity, 2).await;
+    receive_until(&mut socket, 2, "Completed work orders: 0").await;
+    wait_for_subscribers(&state, 2).await;
 
     let dashboard = router
         .handle(
@@ -337,12 +375,21 @@ async fn connected_status_updates_reconnects_and_rechecks_auth() {
         )
         .await;
     assert_eq!(saved.status(), StatusCode::OK);
-    receive_until(&mut socket, "Completed work orders: 1").await;
+    receive_all_until(&mut socket, &[1, 2], "Completed work orders: 1").await;
 
+    socket
+        .send(Message::Text(
+            serde_json::json!({ "stop": 1 }).to_string().into(),
+        ))
+        .await
+        .unwrap();
+    wait_for_subscribers(&state, 1).await;
+    state.updates.send(()).unwrap();
+    receive_until(&mut socket, 2, "Completed work orders: 1").await;
     socket.close(None).await.unwrap();
     wait_for_subscribers(&state, 0).await;
     let mut reconnected = open_runtime_socket(address, &path, &identity, &cookie, 2).await;
-    receive_until(&mut reconnected, "Completed work orders: 1").await;
+    receive_until(&mut reconnected, 2, "Completed work orders: 1").await;
 
     let logout = router
         .handle(
@@ -355,7 +402,7 @@ async fn connected_status_updates_reconnects_and_rechecks_auth() {
         )
         .await;
     assert!(logout.status().is_redirection());
-    let expired = receive_until(&mut reconnected, "Your session has expired.").await;
+    let expired = receive_until(&mut reconnected, 2, "Your session has expired.").await;
     assert!(!expired.contains("Completed work orders"), "{expired}");
     wait_for_subscribers(&state, 0).await;
     reconnected.close(None).await.unwrap();

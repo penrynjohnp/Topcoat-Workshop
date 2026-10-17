@@ -6,7 +6,7 @@ Update the workspace and CLI pins, validate the existing toolchain, and record w
 Change Toasty, Rust, or mdBook separately only when the upgrade requires it.
 
 > [!WARNING]
-> Read the guides from the release tag that you are testing, such as [`v0.9.0`](https://github.com/tokio-rs/topcoat/tree/v0.9.0), not `main`. The unreleased API can already differ from the version in this workshop.
+> Read the guides from the release tag that you are testing, such as [`v0.10.0`](https://github.com/tokio-rs/topcoat/tree/v0.10.0), not `main`. The unreleased API can already differ from the version in this workshop.
 
 ## 1. Establish a clean baseline
 
@@ -57,14 +57,13 @@ Run the same checks as CI, in an order that exposes inexpensive failures first:
 
 ```bash
 cargo fmt --all --check
-topcoat fmt $(git ls-files 'labs/**/*.rs' 'slipway/**/*.rs')
-git diff --exit-code -- '*.rs'
+topcoat fmt --check $(git ls-files 'labs/**/*.rs' 'slipway/**/*.rs')
 cargo clippy --workspace -- -D warnings
 cargo build --workspace
 cargo test --workspace
 ```
 
-`topcoat fmt` has no `--check` flag in the pinned CLI. It formats in place, so the following `git diff` is the check. If the formatter changes source, inspect the diff and keep the formatting change only when it is part of the upgrade.
+Topcoat CLI 0.10.0 supports `topcoat fmt --check`, which verifies macro formatting without editing files. Keep it separate from `cargo fmt`: rustfmt formats surrounding Rust syntax, while Topcoat formats supported macro bodies.
 
 If you ran `cargo clean`, stage the icon cache before parallel workspace builds, as CI does:
 

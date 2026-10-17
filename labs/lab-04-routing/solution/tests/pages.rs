@@ -59,8 +59,21 @@ async fn slug_path_parameter_renders_the_requested_berth() {
 }
 
 #[tokio::test]
+async fn module_parameter_decodes_the_requested_segment() {
+    let (status, _, html) = get("/berths/a%31").await;
+    assert_eq!(status, StatusCode::OK);
+    assert!(html.contains("data-berth=\"a1\""), "{html}");
+}
+
+#[tokio::test]
 async fn unknown_slug_is_not_found() {
     let (status, _, _) = get("/berths/does-not-exist").await;
+    assert_eq!(status, StatusCode::NOT_FOUND);
+}
+
+#[tokio::test]
+async fn module_name_is_not_served_as_a_static_route_segment() {
+    let (status, _, _) = get("/berths/id").await;
     assert_eq!(status, StatusCode::NOT_FOUND);
 }
 

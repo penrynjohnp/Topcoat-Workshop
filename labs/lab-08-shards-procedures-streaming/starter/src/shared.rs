@@ -141,6 +141,8 @@ pub(crate) async fn nav(current_path: &str) -> Result<impl View> {
     Ok(view! {
         <nav aria-label="Main">
             <ul class="nav">
+                // TODO(lab-08): Use runtime links for these safe page destinations while
+                // preserving href fallback and current-page styling from Lab 07.
                 for (href, label) in NAV {
                     <li>
                         <a

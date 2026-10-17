@@ -22,8 +22,9 @@ underscore makes a group that contributes no served segment. Function names do n
 
 ## Path parameters
 
-A dynamic segment is declared with `path_param!` in the module that contributes it. `path_param!(id)`
-turns `app/berths/id.rs` into `/berths/{id}` and generates the `Id` type. The handler reads the
+A dynamic module segment is declared with `module_param!`. `module_param!(id)` turns
+`app/berths/id.rs` into `/berths/{id}` and generates the `Id` type. Use `path_param!` to declare a
+parameter for an explicit route path or without changing a module's segment. The handler reads the
 percent-decoded `&str` from `Cx`:
 
 ```rust

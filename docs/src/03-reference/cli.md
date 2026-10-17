@@ -1,16 +1,14 @@
 # CLI commands
 
-This page records the complete `--help` surface of **Topcoat CLI 0.9.0**, the version pinned by this
-workshop. The CLI has four working command groups: `dev`, `fmt`, `asset`, and `ui`.
-The command tables and unsupported-command diagnostics are checked against the installed 0.9.0 binary.
+This page records the `--help` surface of **Topcoat CLI 0.10.0**, the version pinned by this
+workshop. The CLI has four command groups: `dev`, `fmt`, `asset`, and `ui`.
+The command tables are checked against the installed 0.10.0 binary.
 
 > [!WARNING]
-> Topcoat CLI 0.9.0 has **no top-level `--version` flag**. `topcoat --version` fails with
-> `error: unexpected argument '--version' found`. The formatter alone exposes
-> `topcoat fmt --version`, which prints `topcoat-fmt 0.9.0`.
+> `topcoat --version` and `topcoat -V` print the CLI version.
 
 > [!NOTE]
-> There is still no `topcoat build` command in 0.9.0. `topcoat build` fails with
+> There is no `topcoat build` command in 0.10.0. `topcoat build` fails with
 > `error: unrecognized subcommand 'build'` and suggests `ui`, which is unrelated. Use Cargo to build
 > the binary, then use `topcoat asset bundle` with the same package, binary, and profile selection.
 
@@ -29,6 +27,7 @@ Usage is `topcoat <COMMAND>`.
 | Flag | Meaning |
 |---|---|
 | `-h`, `--help` | Print top-level help. |
+| `-V`, `--version` | Print the CLI version. |
 
 ## `topcoat dev`
 
@@ -44,6 +43,8 @@ Usage is `topcoat dev [OPTIONS]`.
 
 `dev` rebuilds the selected target and serves it for development. The workshop normally selects the
 package explicitly from the workspace, for example with `-p lab11-solution`.
+The 0.10.0 CLI honors Cargo's `default-run`, works again through `cargo topcoat`, preserves build
+environment settings, and streams development reloads without losing current form state.
 
 `--release` and `--profile` both select a profile. Use one profile consistently when the application
 loads a generated asset bundle.
@@ -57,18 +58,13 @@ Usage is `topcoat fmt [OPTIONS] [FILES]...`.
 | `[FILES]...` | Paths | Format the named Rust files. |
 | `--stdin` | — | Read Rust source from standard input and write formatted source to standard output. |
 | `--macros` | `<MACROS>` | Format only the comma-separated macro names supplied. The default is every supported macro. |
+| `--check` | — | Check formatting without writing files or emitting formatted source. |
+| `--rustfmt` | — | Run rustfmt before formatting macro bodies; requires rustfmt on `PATH` and an explicit edition in root `rustfmt.toml`. |
 | `-h`, `--help` | — | Print help. |
-| `-V`, `--version` | — | Print the formatter version. This is subcommand-specific, not a top-level CLI version flag. |
+| `-V`, `--version` | — | Print the formatter version. |
 
-> [!WARNING]
-> `topcoat fmt` has **no `--check` flag** in 0.9.0. `topcoat fmt --check` fails with
-> `error: unexpected argument '--check' found` and then suggests `tip: to pass '--check' as a value,
-> use '-- --check'`. Ignore that tip. It only offers to treat `--check` as a *file path*, so
-> `topcoat fmt -- --check` looks for a file named `--check` rather than enabling a check mode. CI
-> must run the formatter and then fail if `git diff --exit-code -- '*.rs'` reports a change.
-
-Run `cargo fmt` as well. Rustfmt treats a macro body as opaque tokens; `topcoat fmt` understands the
-markup inside supported Topcoat macros.
+Run `cargo fmt` and `topcoat fmt --check` as separate checks. Rustfmt treats a macro body as opaque
+tokens; `topcoat fmt` understands the markup inside supported Topcoat macros.
 
 ## `topcoat asset`
 
@@ -141,7 +137,9 @@ any other project code.
 
 There is no `topcoat ui update` command in the published CLI.
 Refresh deliberately with `topcoat ui add --overwrite`, selecting the package and registry.
-Preserve local component customizations and merge theme tokens separately.
+`topcoat ui add --all` adds every registry component and skips installed files by default; with
+`--overwrite` it replaces them too. Use `--all` in a disposable package, and inspect any overwrite
+before accepting it. Preserve local component customizations and merge theme tokens separately.
 
 ### `topcoat ui init`
 
@@ -163,6 +161,7 @@ Usage is `topcoat ui add [OPTIONS] <COMPONENTS>...`.
 | `<COMPONENTS>...` | Names | Add one or more components, such as `button card`. |
 | `-r`, `--registry` | `<REGISTRY>` | Select a registry crate. The built-in default registry is used when omitted. |
 | `-o`, `--overwrite` | — | Replace an existing component file. Review the diff because local edits are overwritten. |
+| `-a`, `--all` | — | Add every component the registry offers, skipping installed components unless combined with `--overwrite`. |
 | `-p`, `--package` | `<SPEC>` | Select the package whose root contains `components.toml`. |
 | `-h`, `--help` | — | Print help. |
 
@@ -197,17 +196,15 @@ Usage is `topcoat ui remove [OPTIONS] <COMPONENTS>...`.
 `topcoat asset help` and `topcoat ui help` print their group help. Add a nested command name after
 `help` to request that command's help.
 
-The normal `--help` form is available on every working command listed above. `topcoat help --help`
-is not a separate supported help page in 0.9.0; use `topcoat --help` instead.
+The normal `--help` form is available on every working command listed above. `topcoat --version`
+prints the CLI release.
 
-## Missing commands and flags in 0.9.0
+## Missing commands and flags in 0.10.0
 
-The `Result` column quotes the 0.9.0 binary verbatim.
+The `Result` column quotes the 0.10.0 binary verbatim.
 
 | Attempt | Result | Use instead |
 |---|---|---|
-| `topcoat --version` | `error: unexpected argument '--version' found` | Check the workspace pin and use `topcoat fmt --version` only as a formatter-binary check. |
-| `topcoat fmt --check` | `error: unexpected argument '--check' found`, with `tip: to pass '--check' as a value, use '-- --check'` | Run `topcoat fmt` and then `git diff --exit-code -- '*.rs'`. The tip is misleading: it would pass `--check` as a file name. |
 | `topcoat build` | `error: unrecognized subcommand 'build'`, with `tip: a similar subcommand exists: 'ui'` | Run `cargo build`, followed by `topcoat asset bundle` when assets are used. The suggested `ui` command is unrelated. |
 | `topcoat ui update` | `error: unrecognized subcommand 'update'` | Use `topcoat ui add --overwrite --package PACKAGE --registry topcoat COMPONENT`, then review owned changes. |
 

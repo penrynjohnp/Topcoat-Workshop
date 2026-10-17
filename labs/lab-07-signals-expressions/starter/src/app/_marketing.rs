@@ -13,6 +13,7 @@ use topcoat::{
     Result,
     context::{Cx, app_context},
     router::{Slot, layout, page, request::uri},
+    // TODO(lab-07): import `runtime::signal` for the layout navigation counter.
     view::{View, component, view},
 };
 
@@ -91,6 +92,8 @@ async fn home() -> Result<impl View> {
             <p>"Berths, vessels and work orders for a small marina."</p>
             <h2>"Featured berth"</h2>
             berth_card(slug: shared::FEATURED)
+            // TODO(lab-07): add a small #[record] signal, show its fields through
+            // a tuple expression, and verify that "é".len() has type usize.
             server_read_demo()
         },
     )

@@ -121,6 +121,8 @@ pub(crate) async fn nav(current_path: &str) -> Result<impl View> {
     Ok(view! {
         <nav aria-label="Main">
             <ul class="nav">
+                // TODO(lab-10): Carry forward Lab 07's runtime links for safe navigation.
+                // Keep auth actions and mutating destinations as ordinary anchors/forms.
                 for (href, label) in NAV {
                     <li>
                         <a

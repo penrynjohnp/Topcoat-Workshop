@@ -2,12 +2,12 @@ use crate::shared::{self, berth_card};
 use topcoat::{
     Result,
     context::Cx,
-    router::{page, path_param},
+    router::{module_param, page, path_param},
     view::{View, view},
 };
 
 // ANCHOR: path-param
-path_param!(id);
+module_param!(id);
 
 #[page]
 async fn detail(cx: &Cx) -> Result<impl View> {

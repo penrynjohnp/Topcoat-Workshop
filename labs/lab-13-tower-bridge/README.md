@@ -25,7 +25,7 @@ The capstone instead defines an already-prefixed Axum route and does not strip i
 
 `TowerRoute::any` is shorthand for `TowerRoute::new(Methods::Any, ...)`.
 This example keeps the general constructor to make method selection visible.
-Read the tagged [Tower guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat-router/docs/tower.md).
+Read the tagged [Tower guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/router/tower.md).
 
 > [!NOTE]
 > **Checkpoint:** the app builds, and `curl http://127.0.0.1:3000/api/v1/health` returns `{"status":"ok"}`.

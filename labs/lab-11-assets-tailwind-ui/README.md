@@ -8,9 +8,11 @@
 - Vendor Topcoat UI components into your source tree and restyle every use from one owned file
 
 ## Concepts (read first, 5 min)
-Read [Assets, styling, and owned UI](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/docs/src/01-concepts/assets-styling-ui.md) and the pinned [Topcoat 0.9.0 asset guide](https://docs.rs/topcoat/0.9.0/topcoat/asset/index.html). An `asset!` handle is not file contents. It embeds a declaration in the compiled binary. The bundler scans that exact binary, copies or downloads the declared files, gives each output a content-derived filename, and writes a manifest that resolves handles to URLs. The binary and bundle are therefore one release unit. A consequence worth knowing before you debug a missing file: the declaration only survives while some code path uses the handle, so a handle you declare and never render can be optimised out of the binary and the bundler then skips it. `.assets(...)` serves everything it did find under `/_topcoat/assets`.
+Read [Assets, styling, and owned UI](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/docs/src/01-concepts/assets-styling-ui.md) and the pinned [Topcoat 0.10.0 asset guide](https://docs.rs/topcoat/0.10.0/topcoat/asset/index.html). An `asset!` handle is not file contents. It embeds a declaration in the compiled binary. The bundler scans that exact binary, copies or downloads the declared files, gives each output a content-derived filename, and writes a manifest that resolves handles to URLs. The binary and bundle are therefore one release unit. A consequence worth knowing before you debug a missing file: the declaration only survives while some code path uses the handle, so a handle you declare and never render can be optimised out of the binary and the bundler then skips it. `.assets(...)` serves everything it did find under `/_topcoat/assets`.
 
 Tailwind, Fontsource, and Iconify join that same pipeline. A Cargo build script runs Topcoat's standalone Tailwind integration and stages icon metadata; no Node, PostCSS, Vite, or client application appears. Topcoat UI follows a different ownership model from a component dependency: the CLI copies ordinary Rust source into this crate. You can inspect and change it, and Tailwind scans those local class strings with the rest of the app.
+
+The solution carries forward Lab 07's safe runtime navigation and retains the owned navigation styling.
 
 ## Steps
 ### Step 1 — Enable build-time integrations
@@ -20,7 +22,7 @@ Enable `font-fontsource`, `icon-iconify`, `tailwind`, and `ui` alongside the inh
 {{#include solution/build.rs:asset-build-script}}
 ```
 
-Topcoat 0.9.0 downloads its pinned standalone Tailwind CLI — version `4.3.2` — on the first build and caches it in the shared Topcoat cache at `topcoat/cache/tailwind` under Cargo's target directory, so every package in the workspace reuses one copy. This is a Rust/Cargo build step, not an npm step. For an offline or sandboxed build, `BuildConfig::executable("tailwindcss")` uses a preinstalled CLI and downloads nothing; `version_checksum("4.3.2", "sha256:…")` verifies the download instead, and only `sha256` is supported.
+Topcoat 0.10.0 downloads its pinned standalone Tailwind CLI — version `4.3.2` — on the first build and caches it in the shared Topcoat cache at `topcoat/cache/tailwind` under Cargo's target directory, so every package in the workspace reuses one copy. This is a Rust/Cargo build step, not an npm step. For an offline or sandboxed build, `BuildConfig::executable("tailwindcss")` uses a preinstalled CLI and downloads nothing; `version_checksum("4.3.2", "sha256:…")` verifies the download instead, and only `sha256` is supported.
 
 > [!NOTE]
 > **Checkpoint:** `cargo check -p lab11-solution` succeeds, and no `package.json` or `node_modules` directory exists.
@@ -66,9 +68,12 @@ The generated install state is committed with the app:
 
 These modules are not wrappers around a hidden runtime package. They are your components now. Re-running `topcoat ui add card --overwrite` replaces local changes, so inspect the diff before accepting an upstream version.
 
-CLI 0.9.0 has no `topcoat ui update` command. Use `topcoat ui add --overwrite --package lab11-solution --registry topcoat COMPONENT` for an intentional refresh.
+CLI 0.10.0 has no `topcoat ui update` command. Use `topcoat ui add --overwrite --package lab11-solution --registry topcoat COMPONENT` for an intentional refresh.
 Merge customized source and theme tokens rather than overwriting the marina card or palette.
 Registry hashes describe the upstream baseline, so customized files remain marked as modified.
+To explore everything a registry offers without expanding this curated app, use a disposable Cargo
+package and run `topcoat ui add --all`; existing files are skipped. Adding `--overwrite` replaces
+those files too, so inspect the diff and do not use it on owned workshop components.
 
 > [!NOTE]
 > **Checkpoint:** `topcoat ui list --package lab11-solution --installed` lists `button`, `card`, `field`, `input`, and `label`.
@@ -131,7 +136,7 @@ This tests the pipeline rather than guessing at a filename. A second page test e
 > **Checkpoint:** `cargo test -p lab11-solution --test assets --test pages` passes.
 
 ### Step 9 — Bundle the release profile
-Topcoat CLI 0.9.0 has no `topcoat build` command. Build with Cargo and bundle with the same profile: `cargo build --release -p lab11-solution`, then `topcoat asset bundle --release -p lab11-solution`. The normal output is `target/release/assets/` beside `target/release/lab11-solution`.
+Topcoat CLI 0.10.0 has no `topcoat build` command. Build with Cargo and bundle with the same profile: `cargo build --release -p lab11-solution`, then `topcoat asset bundle --release -p lab11-solution`. The normal output is `target/release/assets/` beside `target/release/lab11-solution`.
 
 Do not copy a debug asset directory beside a release binary. An asset's ID derives from the path it was declared with, and a build script writes into `OUT_DIR`, whose path covers the target directory, the profile, and a per-build hash. `tailwind::stylesheet!()` is one such asset, so a debug bundle cannot describe a release binary even when the generated CSS is byte-identical — and a bundle built in another checkout cannot describe this one.
 
@@ -151,7 +156,7 @@ Do not copy a debug asset directory beside a release binary. An asset's ID deriv
 - **Rendering panics with “failed to resolve asset.”** The loaded manifest came from a different binary, checkout, or profile. Re-run the bundler for the binary you will execute.
 - **Tailwind omits a class.** Keep class names as literal strings in Rust or `styles.css`; dynamically assembled fragments are invisible to its scanner.
 - **A local card edit vanished.** `topcoat ui add card --overwrite` replaced the owned file. Restore the diff, then reapply upstream changes deliberately.
-- **`topcoat build` is unknown.** That command does not exist in CLI 0.9.0. Use Cargo plus `topcoat asset bundle` with matching profile flags.
+- **`topcoat build` is unknown.** That command does not exist in CLI 0.10.0. Use Cargo plus `topcoat asset bundle` with matching profile flags.
 - **A declared asset is missing from the bundle.** The bundler scans the compiled binary, and a declaration whose handle is never used can be optimised out before it gets there. Render the handle, or hold it somewhere the compiler cannot discard.
 
 ## What's next

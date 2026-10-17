@@ -12,6 +12,8 @@ Read [How-to: deploy to Azure Container Apps](https://github.com/penrynjohnp/Top
 
 `azd` is the second half: it wraps Bicep provisioning, a Docker build/push, and a Container Apps deploy behind three commands, and it reads `azure.yaml` to know your service is `language: docker` rather than a Rust-aware language plugin (there isn't one). No resource in `infra/` is reached with an ACR admin user, a database password, or a connection string with a secret in it — but it takes **two** user-assigned managed identities to get there, not one. The app's own identity (ACR pull, Key Vault *read*, PostgreSQL Entra administrator) is what the running container uses at every request. A second, narrowly-scoped bootstrap identity exists purely so a Bicep deployment script can create the cookie-signing secret in Key Vault *before* the app resource is even submitted — Container Apps validates `keyVaultUrl` secret references at deploy time and fails the whole deployment if the target secret doesn't exist yet, so that secret cannot wait for a postprovision hook that only runs after the app is created. The one exception the workshop is explicit about: Toasty 0.10's PostgreSQL driver takes a single access token at connect time and has no renewable-token callback, so authenticating it with a managed identity is an experimental pattern here, not an established one — read the warning in Step 4 before you rely on it past a workshop.
 
+The solution keeps the safe runtime navigation introduced in Lab 07; it does not change server-side rendering or the binary-and-bundle release unit.
+
 ## Steps
 
 ### Step 1 — Build a release image with matching assets
@@ -225,7 +227,7 @@ Not every audience wants Bicep and `azd`. The same image from Step 1 runs anywhe
 - **New database connections start failing hours after a successful deploy, but existing ones still work.** This is the Step 4 warning: the managed-identity access token Toasty is holding has expired and it has no callback to refresh it. Restart the revision (`az containerapp revision restart`) to force a fresh token on the next connect; this is a known limitation of Toasty 0.10.0, not a misconfiguration.
 - **`azd provision` fails deploying the `app` module with a missing Key Vault secret reference.** `secret-bootstrap.bicep`'s own RBAC-propagation retry loop (Step 7) can still lose a race on a very fresh subscription — it gives up after six 15-second attempts. Re-run `azd provision`; the script is idempotent and the `app` module's `dependsOn` guarantees it never runs before the secret exists.
 - **`azd down` succeeds but a re-`azd up` fails with a Key Vault name conflict.** Use `azd down --purge` — without it, the vault is soft-deleted and its name stays reserved for its retention period.
-- **`topcoat build` is unknown.** As in Lab 11, CLI 0.9.0 has no such command; the Dockerfile uses `cargo build --release` followed by `topcoat asset bundle --release`, matching profiles.
+- **`topcoat build` is unknown.** As in Lab 11, CLI 0.10.0 has no such command; the Dockerfile uses `cargo build --release` followed by `topcoat asset bundle --release`, matching profiles.
 
 ## What's next
 Slipway is now a deployed, production-configured app with no secrets in source control. The optional Lab 13 goes one direction further — mounting an Axum router for a JSON API under `/api/v1` through Topcoat's tower bridge, inside this same container.

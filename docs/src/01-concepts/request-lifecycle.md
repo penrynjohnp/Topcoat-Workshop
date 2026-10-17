@@ -4,12 +4,12 @@ A Topcoat request stays on the server from routing through HTML generation. You 
 short chain: the router selects a page, Topcoat creates a request context, layouts and components
 compose the response, and `view!` describes the HTML sent to the browser.
 
-The routing and view descriptions here follow the pinned v0.9.0 [getting started
-guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat/docs/getting_started.md)
-and the release README. The request-context and app-context sections follow the v0.9.0 [app context
-guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat/docs/app_context.md)
+The routing and view descriptions here follow the pinned v0.10.0 [getting started
+guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/getting_started.md)
+and the release README. The request-context and app-context sections follow the v0.10.0 [app context
+guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/context.md)
 and [functions, not middlewares
-guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat/docs/functions_not_middlewares.md).
+guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/router.md).
 
 ```mermaid
 flowchart LR
@@ -36,7 +36,7 @@ turn page data into a separate client API.
 The request enters the `Router` with an HTTP method and path. You can register pages, layouts, and
 routes explicitly, or let `module_router!().discover()` derive the route tree from compiled Rust
 modules. A file such as `app/_marketing/berths/id.rs` contributes a logical route beneath the
-`_marketing` group, while `path_param!(id)` makes `id` a dynamic segment.
+`_marketing` group, while `module_param!(id)` makes `id` a dynamic segment.
 
 The module tree is part of the route definition, not a directory scan. Rust must compile the module,
 and Topcoat's discovery collects the annotated page, layout, or route. Lab 04 moves Slipway from

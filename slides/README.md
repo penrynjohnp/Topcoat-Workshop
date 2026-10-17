@@ -3,8 +3,9 @@
 These decks are written in [Marp](https://marp.app/) Markdown. There is one deck for each workshop
 module, and each deck follows the corresponding concept pages and labs.
 
-The decks target Topcoat 0.9.0. Module 3 includes integer/collection expressions, keyed identity,
-connected server push and suspense wait mode. Module 5 includes accessible field composition.
+The decks target Topcoat 0.10.0. Module 3 includes records and tuples, UTF-8 byte lengths, runtime
+navigation, multiplexed connected runs, keyed identity, server push and suspense wait mode.
+Module 5 includes accessible field composition and owned-UI registry discovery.
 Use the current lab READMEs for the updated workshop timings.
 
 ## Prerequisites

@@ -2,11 +2,11 @@ use crate::shared::{self, load_berth};
 use topcoat::{
     Result,
     context::Cx,
-    router::{page, path_param},
+    router::{module_param, page, path_param},
     view::{View, component, view},
 };
 
-path_param!(id);
+module_param!(id);
 
 // ANCHOR: memoized-components
 #[component]

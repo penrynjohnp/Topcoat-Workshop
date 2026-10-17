@@ -4,7 +4,7 @@ Topcoat has no template language. `view!` is a macro that parses HTML at compile
 into ordinary Rust that describes a lazy view. Three consequences follow, and they
 explain nearly every surprise the macro produces.
 
-*Guide basis: the v0.9.0 [`view!` guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat-view/macro/docs/view.md).*
+*Guide basis: the v0.10.0 [`view!` guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/view/view.md).*
 
 ## It really is HTML
 

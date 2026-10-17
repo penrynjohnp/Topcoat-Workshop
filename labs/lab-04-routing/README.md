@@ -86,7 +86,7 @@ async fn detail(cx: &Cx) -> Result<impl View> {
 ```
 
 For the final module form, the path string disappears. The file `app/berths/id.rs` is a dynamic
-module: `path_param!(id)` turns its segment into `{id}`, so its `#[page]` serves `/berths/{id}`. The
+module: `module_param!(id)` turns its segment into `{id}`, so its `#[page]` serves `/berths/{id}`. The
 parameter is a decoded `&str`, which fits Slipway's existing slugs (`a1`, `b7`). It is deliberately
 not a function argument; handler arguments are reserved for `Cx` and body extractors.
 > [!NOTE]
@@ -167,7 +167,7 @@ src/
 ```
 
 `_marketing` is omitted from served URLs; `berths` contributes `/berths`; `id` becomes `{id}` because
-of `path_param!(id)`; `api/health` contributes `/api/health`. Function names do not determine URLs.
+of `module_param!(id)`; `api/health` contributes `/api/health`. Function names do not determine URLs.
 > [!NOTE]
 > **Checkpoint:** remove all manual `.page(...)`, `.layout(...)` and `.route(...)` calls from the
 > final router. `cargo test -p lab04-solution` still finds every route.
@@ -219,7 +219,8 @@ unknown slug, and JSON health response. This is the checkpoint for the complete 
 - **`path parameter "id" was not found`** → the handler was called for a route that did not declare
   the matching parameter, or the declaration name and `{id}` placeholder differ.
 - **`/berths/a1` is 404** → confirm `path_param!(id)` is in `app/berths/id.rs`, `find_berth` uses the
-  decoded slug, and the module is declared.
+  decoded slug, and the module is declared. Under module routing, use
+  `module_param!(id)` to define the dynamic segment; `path_param!` alone only declares a parameter.
 - **Health returns text instead of JSON** → return `Json(Health { ... })`, not a bare string; the
   wrapper controls serialization and the content type.
 - **The page shell appears twice** → do not keep the Lab 03 component document shell and the router

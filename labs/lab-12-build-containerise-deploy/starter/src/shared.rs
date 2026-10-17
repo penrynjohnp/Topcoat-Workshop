@@ -125,6 +125,7 @@ pub(crate) async fn nav(current_path: &str) -> Result<impl View> {
     Ok(view! {
         <nav aria-label="Main">
             <ul class="nav flex flex-wrap items-center gap-1">
+                // TODO(lab-12): Carry forward safe runtime links with ordinary href fallbacks.
                 for (href, label) in NAV {
                     <li>
                         <a

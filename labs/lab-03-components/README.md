@@ -15,7 +15,7 @@ A Topcoat component is an ordinary `async fn` with `#[component]` on it, returni
 function parameters, and calling one inside `view!` uses named-argument syntax —
 `berth_card(slug: "a1")`. A parameter called `child` of type
 `Child<'_>` receives whatever extra nodes the caller wrote inside the call, which is how a component
-wraps content it knows nothing about. Topcoat 0.9.0 uses keyed loops for repeated component identity,
+wraps content it knows nothing about. Topcoat 0.10.0 uses keyed loops for repeated component identity,
 not a special `key:` argument on a component call.
 
 Because a component is an `async fn` running on the server, it can *fetch what it renders*. That is
@@ -236,7 +236,7 @@ Try the remaining parameter attributes on `berth_card`:
 - `#[into]` — callers may pass anything that converts via `Into`, converted outside the function body
   so the component is not monomorphised per caller.
 
-Read the pinned [`view!` keys guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat-view/macro/docs/view.md#keys).
+Read the pinned [`view!` keys guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/view/view.md#keys).
 Repeated stateful components use `#[key(item.id)]` on their enclosing loop.
 Lab 08 applies this to a work-order row's signal. An HTML `id` identifies the DOM node, not the
 component context. Ordinary repeated Rust helpers use `cx.keyed(item.id)` when they need distinct identity.
@@ -264,7 +264,7 @@ component context. Ordinary repeated Rust helpers use `cx.keyed(item.id)` when t
   twice.
 - **Attribute order changes between renders** — expected. Spreading an `Attributes` value routes that
   element's attributes through a map, and the [`Attributes`
-  type](https://docs.rs/topcoat/0.9.0/topcoat/view/struct.Attributes.html) is documented as map-like:
+  type](https://docs.rs/topcoat/0.10.0/topcoat/view/struct.Attributes.html) is documented as map-like:
   each key appears at most once, and you must not rely on render order. Note that this caveat comes
   from `Attributes`, not from `view!` generally — the `view!` guide says rendered markup follows
   source order, and it is *component body execution* order that is unspecified. Assert on the set of

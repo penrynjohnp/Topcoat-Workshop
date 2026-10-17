@@ -12,6 +12,8 @@ Read [What Toasty does](https://github.com/penrynjohnp/Topcoat-Workshop/blob/mai
 
 This lab uses `push_schema()` only to bootstrap a fresh workshop database. Toasty 0.10.0 does not make that call idempotent for an existing SQLite file, so startup checks whether the file already exists before connecting. That is convenient for a prototype, not a migration strategy. Schema changes in a real service need ordered migrations and operational review.
 
+The solution carries forward Lab 07's runtime links for safe page navigation. Keep auth actions and mutating destinations on ordinary anchors or forms.
+
 ## Steps
 ### Step 1 — Add Toasty and define relations
 The workspace pins Toasty once, and both Lab 10 crates opt into that workspace dependency. Define the three domain models plus persisted session and magic-link records:
@@ -78,7 +80,7 @@ Magic links are persistent too, and their tokens are cryptographically random:
 ```
 
 The existing procedure now loads and updates a `WorkOrder` using its `u64` key directly.
-Topcoat 0.9.0 preserves integer precision across the Rust/JavaScript boundary, so no `f64` conversion is needed:
+Topcoat 0.10.0 preserves integer precision across the Rust/JavaScript boundary, so no `f64` conversion is needed:
 
 ```rust
 {{#include solution/src/app/_marketing.rs:complete-work-order-procedure}}

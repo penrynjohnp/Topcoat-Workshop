@@ -2,12 +2,12 @@ use crate::shared::{self, berth_card};
 use topcoat::{
     Result,
     context::Cx,
-    router::{page, path_param},
+    router::{module_param, page, path_param},
     view::{View, view},
 };
 
 // ANCHOR: path-param
-path_param!(id);
+module_param!(id);
 
 // TODO(lab-05): split the detail into title, summary, and note components.
 // Each component should call the same memoized load_berth(cx, slug) helper.

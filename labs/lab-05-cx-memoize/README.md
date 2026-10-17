@@ -8,7 +8,7 @@
 - Deduplicate repeated data loads with `#[memoize]`
 
 ## Concepts (read first, 5 min)
-Read [Routing and the request](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/docs/src/01-concepts/routing-and-the-request.md) and the Topcoat app-context docs (`docs/app_context.md` in the crate). This lab builds on the same Slipway app from Lab 04. The key distinction is that `Cx` is request-scoped and short-lived, while app context is created once at router startup and shared across every request. A page can ask for the current path, the matched slug, and an app-scoped database or config object without threading those values through every component manually.
+Read [Routing and the request](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/docs/src/01-concepts/routing-and-the-request.md) and the pinned [Topcoat context guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/context.md). This lab builds on the same Slipway app from Lab 04. The key distinction is that `Cx` is request-scoped and short-lived, while app context is created once at router startup and shared across every request. A page can ask for the current path, the matched slug, and an app-scoped database or config object without threading those values through every component manually.
 
 Memoization is the next step: when multiple components need the same data during one request, `#[memoize]` ensures the underlying async fetch runs once and the result is reused. This keeps request helpers composable and avoids hidden repeated work. In Topcoat, the cache is intentionally tied to a single request, so no value leaks across users or across unrelated requests.
 

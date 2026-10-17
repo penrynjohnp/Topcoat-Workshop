@@ -23,13 +23,13 @@ async fn berth_filter_ships_signals_handlers_and_binds() {
     let (status, html) = get("/berths").await;
     assert_eq!(status, StatusCode::OK);
 
-    // Three signals are serialized into the page: query, show_occupied, show_vacant.
-    assert_eq!(html.matches("::topcoat::signal(").count(), 3, "{html}");
+    // Four signals are serialized: the shared layout count and three filters.
+    assert_eq!(html.matches("::topcoat::signal(").count(), 4, "{html}");
     // The input writes into the query signal and reads it back.
     assert!(html.contains("data-topcoat-on:input="), "{html}");
     assert!(html.contains("data-topcoat-bind:value="), "{html}");
-    // Both status chips toggle a bool signal and bind their class.
-    assert_eq!(html.matches("data-topcoat-on:click=").count(), 2, "{html}");
+    // The layout counter and both status chips have click handlers.
+    assert_eq!(html.matches("data-topcoat-on:click=").count(), 3, "{html}");
     assert_eq!(
         html.matches("data-topcoat-bind:class=").count(),
         2,
@@ -58,10 +58,20 @@ async fn tracked_server_read_emits_one_dependency_marker() {
     let (status, html) = get("/").await;
     assert_eq!(status, StatusCode::OK);
 
-    assert_eq!(html.matches("::topcoat::signal(").count(), 3, "{html}");
+    assert_eq!(html.matches("::topcoat::signal(").count(), 5, "{html}");
     assert_eq!(html.matches("::topcoat::dep(").count(), 1, "{html}");
     assert!(html.contains("data-server-read=\"tracked\""), "{html}");
     assert!(html.contains("data-server-read=\"untracked\""), "{html}");
+}
+
+#[tokio::test]
+async fn navigation_uses_runtime_links_with_safe_prefetch_modes() {
+    let (status, html) = get("/").await;
+    assert_eq!(status, StatusCode::OK);
+    assert!(html.contains("href=\"/\""), "{html}");
+    assert!(html.contains("data-topcoat-link=\"intent\""), "{html}");
+    assert!(html.contains("href=\"/admin\""), "{html}");
+    assert!(html.contains("data-topcoat-link=\"never\""), "{html}");
 }
 
 #[tokio::test]
@@ -78,6 +88,25 @@ async fn integer_and_collection_expressions_render_initial_status() {
         "{html}"
     );
     assert!(html.contains("&quot;t&quot;:&quot;usize&quot;"), "{html}");
+}
+
+#[tokio::test]
+async fn records_tuples_and_utf8_byte_lengths_render() {
+    let (status, html) = get("/").await;
+    assert_eq!(status, StatusCode::OK);
+    assert!(
+        html.contains("data-component=\"record-tuple-demo\""),
+        "{html}"
+    );
+    assert!(
+        html.contains("-->Scheduled<!--::topcoat::expr::end-->"),
+        "{html}"
+    );
+    assert!(html.contains("turn "), "{html}");
+    assert!(html.contains("-->1<!--::topcoat::expr::end-->"), "{html}");
+    assert!(html.contains("data-utf8-bytes=\"2\""), "{html}");
+    assert!(html.contains("UTF-8 bytes: 2"), "{html}");
+    assert!(html.contains("data-command=\"advance-record\""), "{html}");
 }
 
 #[tokio::test]

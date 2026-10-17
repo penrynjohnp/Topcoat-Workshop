@@ -18,6 +18,7 @@ Ask one question first: does the browser already have the answer?
 | Mechanism | Update owner | Best for |
 |---|---|---|
 | `signal` + `$(...)` | Browser | toggles and filters over rendered data |
+| `runtime::link` | Browser navigation to server-rendered pages | navigation without a full reload, preserving shared signals |
 | `#[shard]` | Server | new markup from server data |
 | `#[procedure]` | Server | an action or value without a markup swap |
 | `live!` / `suspense` | HTTP or a connected WebSocket | progressive delivery and server updates |
@@ -57,7 +58,8 @@ flowchart LR
 
 The expression vocabulary is deliberately smaller than all of Rust. The compiler tells you when you leave it.
 
-Topcoat 0.9.0 supports all Rust integer types, vectors, arrays and slices.
+Topcoat 0.10.0 supports records and tuples in runtime expressions, as well as all Rust integer types,
+vectors, arrays and slices. String lengths are UTF-8 byte counts with type `usize`.
 Unsuffixed integers are `usize`; database IDs remain `u64` without an `f64` conversion.
 Composed expressions retain signal dependencies. Captured collections remain render-time snapshots.
 
@@ -73,6 +75,9 @@ Composed expressions retain signal dependencies. Captured collections remain ren
 
 Read the emitted endpoint URL rather than constructing an internal prefix.
 Use HTML IDs for moved DOM nodes and `#[key(item.id)]` for repeated stateful component identity.
+
+Connected pages and shards share one WebSocket per document. The socket multiplexes independent
+render runs; stop or update one run without restarting its siblings.
 
 ---
 

@@ -8,11 +8,11 @@
 - Recognise unsupported Rust syntax and use deliberate escape hatches
 
 ## Concepts (read first, 5 min)
- Read the pinned Topcoat v0.9.0 [runtime guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat/docs/runtime.md) and expr! [vocabulary](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat-runtime/macro/docs/expr.md). A `$(...)` block is a **runtime expression**: type-checked Rust that Topcoat compiles twice, once to server code that produces the initial HTML and once to JavaScript that ships with the page. Create a signal in the surrounding Rust body with `signal(cx, || initial)`, then capture it in as many runtime expressions as you need. The body needs `cx: &Cx` because Topcoat derives the signal's stable identity from the current page, layout, component, or shard render.
+ Read the pinned Topcoat v0.10.0 [runtime guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/runtime.md) and expr! [vocabulary](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/runtime/expr.md). A `$(...)` block is a **runtime expression**: type-checked Rust that Topcoat compiles twice, once to server code that produces the initial HTML and once to JavaScript that ships with the page. Create a signal in the surrounding Rust body with `signal(cx, || initial)`, then capture it in as many runtime expressions as you need. The body needs `cx: &Cx` because Topcoat derives the signal's stable identity from the current page, layout, component, or shard render.
 
 A signal is an ordinary, cheaply cloned handle. Pass it to a child component as `&Signal<T>`. A `.get()` inside `$(...)` is a browser-side reactive read and does not make the server body depend on the signal. A `.get()` in ordinary Rust is a tracked server-side read: changing that signal asks the server to run the page again and morph the returned HTML into place. Use `.get_untracked()` when the server needs the current value without subscribing the body to future changes.
 
-The shared vocabulary includes all Rust integer types, `f64`, booleans, strings, options, results, tuples, signals, vectors, arrays, and slices. Unsuffixed integer literals are `usize`, and arithmetic operands must have matching types. Integer values retain full precision in the browser. `match`, struct expressions, multi-segment paths, and `&&`/`||` remain unsupported. Use `if`/`else` and `let` bindings for combinations. The filter and disclosure remain client-only; one focused example intentionally adds a page rerun. Shards and procedures arrive in Lab 08.
+The shared vocabulary includes all Rust integer types, `f64`, booleans, strings, options, results, tuples, records, signals, vectors, arrays, and slices. Unsuffixed integer literals are `usize`, and arithmetic operands must have matching types. Integer values retain full precision in the browser. `match`, multi-segment paths, and `&&`/`||` remain unsupported. Use `if`/`else` and `let` bindings for combinations. The filter and disclosure remain client-only; one focused example intentionally adds a page rerun. Shards and procedures arrive in Lab 08.
 
 ## Steps
 ### Step 1 — Load and route the runtime
@@ -117,6 +117,14 @@ The vector is a render-time snapshot. Capturing an expression inside another exp
 its signal dependencies reactive. Integer overflow and division by zero panic in both build profiles.
 Call `inspection_status()` from the home page beside the featured berth.
 
+Topcoat v0.10.0 also supports `#[record]` values and tuple construction and field access in runtime
+expressions. The example keeps its browser-visible record small and demonstrates that string
+`len()` returns the UTF-8 byte count as `usize`:
+
+```rust
+{{#include solution/src/app/_marketing.rs:record-tuple-expressions}}
+```
+
 > [!NOTE]
 > **Checkpoint:** open `/` and advance the berth inspection through Scheduled, Inspecting, and Checked. No request appears in the Network tab.
 
@@ -134,6 +142,28 @@ The filter test confirms that no shard or procedure endpoint is involved.
 > [!NOTE]
 > **Checkpoint:** `cargo test -p lab07-solution --test reactivity` passes.
 
+### Step 9 — Navigate between server-rendered pages
+Use `runtime::link` for the safe Home and Berths destinations. It keeps ordinary
+`href` fallback behavior while navigating without a full document reload when
+the runtime is active. `Intent` is the default prefetch mode; protected links
+should use `link_attrs(cx, href, PrefetchMode::Never)`. `Never` disables
+prefetch, not runtime navigation. Keep login requests, verification links,
+downloads, and external destinations as ordinary anchors or forms.
+
+The navigation component also owns a small signal. Because the same component
+appears in the shared layout on both pages, its value survives runtime
+navigation between them. A page-local signal does not; neither behavior implies
+persistence after a document reload.
+
+```rust
+{{#include solution/src/shared.rs:runtime-navigation}}
+```
+
+> [!NOTE]
+> **Checkpoint:** confirm the safe links have `data-topcoat-link="intent"`, the
+> protected link has `data-topcoat-link="never"`, and navigation preserves the
+> shared counter without reloading the document.
+
 ## Stretch goals
 - Validate and normalize the tracked text before using it in the server-rendered readout. Treat the value as hostile input even though it has the expected Rust type.
 - Make the name filter case-insensitive. The vocabulary has no `to_lowercase`, so either lowercase the captured name at render time and the query with `raw!`, or keep a second signal holding the lowered query.
@@ -145,7 +175,7 @@ The filter test confirms that no shard or procedure endpoint is involved.
 - **`expected view node` at `signal name = value;`** — that was the pre-0.8 syntax. Import `signal`, accept `cx: &Cx`, and create the signal before `view!` with `let name = signal(cx, || value);`.
 - **A tracked signal changes but no request appears** — add `.runtime()` to the router and confirm the runtime script and matching asset bundle are loaded.
 - **`error: unsupported operator` on `&&` or `||`** — `bool` has `!`, comparisons, `then` and `then_some`, but no logical operators. Use `if`/`else` with `let` bindings.
-- **`error: unsupported expression`** — `match`, struct literals, or multi-segment paths. Restructure, or escape with `raw!`.
+- **`error: unsupported expression`** — `match` or multi-segment paths. `#[record]` enables supported named-field records; tuples support construction and field access. Restructure other expressions, or escape with `raw!`.
 - **Type errors around `1` or `2`** — unsuffixed integers are `usize`. Match the signal's type with a suffix such as `1u64`; use `1.0` for `f64` arithmetic.
 - **The page renders but nothing reacts** — the runtime script is missing. Check the router was built with a bundle and that `topcoat dev` finished a build; a bundle from another profile does not describe your binary.
 - **Panic: an asset is not present in the loaded bundle** — binary and bundle came from different builds. Rebuild both, or pass `None` if you are in a test.

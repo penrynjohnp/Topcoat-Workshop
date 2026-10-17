@@ -4,8 +4,9 @@
 your route tree, declare every child with `mod`, and omit path strings from handlers whose paths
 should be derived.
 
-This reference maps every convention exercised in Lab 04. It follows Topcoat v0.9.0's
-[`module_router!` reference](https://docs.rs/topcoat/0.9.0/topcoat/router/macro.module_router.html).
+This reference maps every convention exercised in Lab 04. It follows Topcoat v0.10.0's
+[router guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/router.md) and
+[`module_router!` reference](https://docs.rs/topcoat/0.10.0/topcoat/router/macro.module_router.html).
 
 ## Convention table
 
@@ -19,7 +20,8 @@ This reference maps every convention exercised in Lab 04. It follows Topcoat v0.
 | A `#[layout]` uses its module's logical path and wraps descendant pages. | `root_layout` in `app::_marketing` | Wraps `/`, `/berths`, and `/berths/{id}`; it does not wrap sibling groups. |
 | A pathless `#[page]` uses its enclosing module path and serves `GET`. | `home` in `app::_marketing` | `GET /` |
 | A handler's function name does not add or rename a segment. | `list` in the `berths` module | `GET /berths`, not `/berths/list`. |
-| `path_param!(name)` replaces the enclosing module's static segment with a parameter. | `path_param!(id)` in `berths::id` | `/berths/{id}` |
+| `module_param!(name)` declares a parameter and replaces the enclosing module's static segment. | `module_param!(id)` in `berths::id` | `/berths/{id}` |
+| `path_param!(name)` declares a parameter without changing its enclosing module segment. | `path_param!(id)` with `#[page("./{id}")]` in `berths.rs` | `/berths/{id}` |
 | `path_param::<GeneratedType>(cx)` reads that request's decoded segment. | `path_param::<Id>(cx)` | The decoded `{id}` value as `&str`. |
 | A pathless `#[route(METHOD)]` uses the module path and only the declared method. | `#[route(GET)]` in `api::health` | `GET /api/health` |
 | `mod child;` makes a route module reachable by Rust and therefore discoverable. | `mod _marketing`, `mod berths`, `mod id`, `mod api`, `mod health` | The corresponding descendants are registered. Without the declaration, the file adds no route. |
@@ -63,7 +65,7 @@ handler declared as `#[page("./")]` reverses the canonical form: it serves the m
 slash, and the default policy redirects the slashless request to it. The policy does not affect the
 root `/`, catch-all routes, or a pair of routes that explicitly declares both forms.
 
-*Guide basis: Topcoat v0.9.0 [router paths](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat/docs/router.md#paths), [relative module routes](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat-router/docs/module_router.md#relative-paths), and [`TrailingSlash`](https://docs.rs/topcoat/0.9.0/topcoat/router/enum.TrailingSlash.html).*
+*Guide basis: Topcoat v0.10.0 [router guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/router.md), [`module_param!`](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/router/module_param.md), and [`TrailingSlash`](https://docs.rs/topcoat/0.10.0/topcoat/router/enum.TrailingSlash.html).*
 
 ## Groups, layouts, and the root page
 
@@ -81,7 +83,7 @@ without adding a visible prefix to either subtree.
 ## Static and dynamic segments
 
 Each regular module adds one static segment. `berths.rs` therefore serves `/berths`. Its child module
-would normally add `/id`, but `path_param!(id)` changes that module segment into `{id}`:
+would normally add `/id`, but `module_param!(id)` changes that module segment into `{id}`:
 
 ```rust
 {{#include ../../../labs/lab-04-routing/solution/src/app/_marketing/berths/id.rs:path-param}}
@@ -119,7 +121,8 @@ Read a pathless handler from the outside in:
 2. Follow the compiled `mod` declarations to the handler.
 3. Remove group segments whose names begin with `_`.
 4. Convert regular module names to kebab-case.
-5. Replace modules declaring `path_param!` with their parameter placeholders.
+5. Replace modules declaring `module_param!` with their parameter placeholders; `path_param!`
+   alone never changes a module segment.
 6. Read the HTTP method from `#[page]` or `#[route(...)]`.
 7. Apply layouts from matching logical ancestor modules.
 

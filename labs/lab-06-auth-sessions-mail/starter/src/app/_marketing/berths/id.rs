@@ -2,12 +2,12 @@ use crate::shared::{self, berth_card};
 use topcoat::{
     Result,
     context::Cx,
-    router::{page, path_param},
+    router::{module_param, page, path_param},
     view::{View, view},
 };
 
 // ANCHOR: path-param
-path_param!(id);
+module_param!(id);
 
 // TODO(lab-06): add login, verify, logout, and admin modules under `_marketing`.
 // TODO(lab-06): protect the work-orders component with require_auth(cx), not middleware.

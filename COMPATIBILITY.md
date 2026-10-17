@@ -4,6 +4,7 @@ Topcoat is pre-1.0 and ships breaking changes. Every lab pins the versions below
 
 | Tested | topcoat | topcoat-cli | toasty | Rust | Labs passing | Notes |
 |---|---|---|---|---|---|---|
+| 2026-10-16 | 0.10.0 | 0.10.0 | 0.10.0 | stable (1.98.0) | 01-13 | Workspace clippy, build, and tests pass; both Rust formatters and the mdBook/linkcheck pass. Seven pinned Playwright checks cover Lab 07, Lab 08, and Slipway. All three release bundles and Docker images build; Lab 12 and capstone containers serve pages and bundled assets against local SQLite. No Azure resources were deployed. See the 0.10.0 upgrade notes below. |
 | 2026-10-01 | 0.9.0 | 0.9.0 | 0.10.0 | stable (1.98.0) | 01-13 | All labs pass on the 0.9.0 pins. See the 0.9.0 upgrade notes below for the behavior changes absorbed by the workshop. |
 | 2026-09-17 | 0.8.1 | 0.8.1 | 0.10.0 | stable (1.98.0) | 01-13 | Superseded by the 0.9.0 row above. Patch upgrade from 0.8.0: `cargo build --workspace` and `cargo test --workspace` pass. Router 0.8.1 adds configurable trailing-slash handling, relative `./` module routes, and `SeeOther` as an error. In 0.8.0, cookie-jar changes were dropped when a handler returned an error; 0.8.1 fixes this in tokio-rs/topcoat#408, so cookies queued before redirect errors are serialized into `Set-Cookie`. |
 | 2026-09-12 | 0.8.0 | 0.8.0 | 0.10.0 | stable (1.98.0) | 01-13 | Finalized: all labs pass their build and test checks on Topcoat 0.8.0. |
@@ -14,6 +15,15 @@ Topcoat is pre-1.0 and ships breaking changes. Every lab pins the versions below
 1. Bump versions in the workspace `Cargo.toml` (`[workspace.dependencies]`) and `scripts/setup.sh`.
 2. `cargo build --workspace && cargo test --workspace`.
 3. Fix breakages lab by lab; each fix PR adds a row here.
+
+## 0.10.0 upgrade notes
+
+- For module-derived captures, `path_param!(id)` declares a parameter but no longer makes the module segment dynamic. Use `module_param!(id)`; keep `path_param!` for explicit handler routes and `path_param::<Id>(cx)` as the accessor.
+- Runtime-expression string lengths now return `usize`, including non-ASCII strings whose lengths count UTF-8 bytes. `#[record]` enables named-field records, and tuples support construction and field access.
+- `runtime::link` opts safe destinations into server-rendered navigation without a document reload. Prefetch defaults to `Intent`; protected destinations can use `Never`, which disables prefetch but not navigation. Keep auth actions on ordinary anchors or forms.
+- Connected runtime requests are multiplexed by run ID. Requests describe the HTTP method, path, headers, and body; responses carry `{ "run", "frame" }`, and `{ "stop": run }` cancels one render. The workshop tests match frames to their run rather than assuming arrival order.
+- Topcoat CLI 0.10.0 adds top-level `--version`, `topcoat fmt --check`, and `topcoat ui add --all`. Optional `topcoat fmt --rustfmt` requires rustfmt and an explicit edition in the root `rustfmt.toml`.
+- The tagged public guides moved to the top-level `docs/` tree. Check behavior against the `v0.10.0` release tag, not `main`.
 
 ## Docs toolchain
 

@@ -87,7 +87,7 @@ Copying source is a trade-off: you gain ownership and take responsibility for ma
 
 # Fields do not replace server validation
 
-Topcoat 0.9.0 adds owned field components:
+Topcoat 0.10.0 adds owned field components:
 
 - `field` groups a control with its supporting content;
 - `field_label` targets the control's ID;
@@ -96,6 +96,8 @@ Topcoat 0.9.0 adds owned field components:
 - the server still validates and preserves submitted values.
 
 Refresh with `topcoat ui add --overwrite`, not `topcoat ui update`.
+Use `topcoat ui add --all` only in a disposable package to explore a registry; it skips installed
+files unless combined with `--overwrite`.
 Preserve custom card classes and merge theme tokens deliberately.
 
 ---

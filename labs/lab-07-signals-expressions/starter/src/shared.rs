@@ -88,6 +88,9 @@ pub async fn load_berth(cx: &Cx, slug: &str) -> Option<Berth> {
 
 #[component]
 pub(crate) async fn nav(current_path: &str) -> Result<impl View> {
+    // TODO(lab-07): use runtime::link for safe public destinations and preserve
+    // current-page styling; use link_attrs(..., PrefetchMode::Never) for protected
+    // destinations. Keep authentication actions as ordinary anchors.
     Ok(view! {
         <nav aria-label="Main">
             <ul class="nav">

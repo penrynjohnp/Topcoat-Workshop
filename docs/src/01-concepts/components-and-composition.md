@@ -21,10 +21,10 @@ Three parameter attributes tune the call site:
 | `#[into]` | callers may pass anything `Into<T>`, converted outside the body so the component isn't monomorphised per caller |
 
 Give repeated stateful components stable identity with `#[key(item.id)]` on their enclosing loop.
-Topcoat 0.9.0 no longer treats a component's `key:` argument as an identity key.
+Topcoat 0.10.0 no longer treats a component's `key:` argument as an identity key.
 For repeated ordinary Rust helpers, pass a derived context with `cx.keyed(item.id)`.
 
-*Guide basis: the v0.9.0 [`view!` keys guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.9.0/crates/topcoat-view/macro/docs/view.md#keys).*
+*Guide basis: the v0.10.0 [`view!` keys guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/view/view.md#keys).*
 
 ## Child content is a parameter too
 

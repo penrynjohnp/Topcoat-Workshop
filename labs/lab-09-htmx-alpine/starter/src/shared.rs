@@ -179,6 +179,8 @@ pub(crate) async fn nav(current_path: &str) -> Result<impl View> {
     Ok(view! {
         <nav aria-label="Main">
             <ul class="nav">
+                // TODO(lab-09): Keep safe navigation on Topcoat runtime links; compare the
+                // search interactions here with the htmx and Alpine implementations.
                 for (href, label) in NAV {
                     <li>
                         <a

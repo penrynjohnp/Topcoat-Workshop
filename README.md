@@ -9,9 +9,10 @@ Thirteen labs build one application from a static page to a containerised deploy
 Container Apps. Every `solution/` is compiled and tested in CI against the pinned versions in
 [COMPATIBILITY.md](COMPATIBILITY.md) — Topcoat is pre-1.0 and its API changes between minor versions.
 
-The current target is **Topcoat and CLI 0.9.0**, with Toasty 0.10.0 and Rust 1.98.0.
-The reactivity lessons cover typed integer/collection expressions, keyed identity, connected server
-push, and suspense wait mode. Owned UI lessons include accessible form-field composition.
+The current target is **Topcoat and CLI 0.10.0**, with Toasty 0.10.0 and Rust 1.98.0.
+The reactivity lessons cover records and tuples, UTF-8 byte lengths, safe runtime navigation,
+shared WebSocket runs, keyed identity, connected server push, and suspense wait mode. Owned UI
+lessons include accessible form-field composition.
 
 ## Who this is for
 

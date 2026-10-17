@@ -4,9 +4,10 @@
 **Subject:** [Topcoat](https://github.com/tokio-rs/topcoat) — tokio-rs's server-rendered, full-stack Rust web framework (announced 22 July 2026)
 **Original plan date:** 8 September 2026 · **Original pins:** topcoat 0.8.0, topcoat-cli 0.8.0, toasty 0.10.0, Rust stable
 
-**Current target (1 October 2026):** topcoat 0.9.0, topcoat-cli 0.9.0, topcoat-asset 0.9.0, toasty 0.10.0, Rust 1.98.0.
-The upgrade keeps Labs 01-13 and refreshes their existing expression, streaming, UI and deployment lessons.
-Acceptance results are recorded in `COMPATIBILITY.md` only after verification.
+**Current target:** topcoat 0.10.0, topcoat-cli 0.10.0, topcoat-asset 0.10.0, toasty 0.10.0, Rust 1.98.0.
+The upgrade keeps Labs 01-13 and refreshes routing, runtime expressions, navigation, connected rendering,
+CLI guidance, documentation, slides, and deployment tooling. Acceptance results are recorded in
+`COMPATIBILITY.md` only after verification.
 
 **Upgrade status (12 September 2026):** Labs 01–13, the Slipway capstone, the workspace, and the mdBook pass on the 0.8.0 pins.
 
@@ -37,7 +38,7 @@ Every lab should be completable by persona 1 and 2. Module 0 carries a "Rust in 
 
 ### 1.4 Upstream has moved since the announcement (checked 8 Sep 2026)
 
-At this September checkpoint, `topcoat` 0.8.0 was the workshop pin. Since the July post, several roadmap items had landed: mail transports, finite streaming, WebSockets, server-sent events, multipart uploads, sitemaps, Datastar, the Tower bridge, and a `Props` derive. The curriculum included mail in Lab 06, streaming in Lab 08, and Tower in Lab 13. The October 0.9.0 refresh adds typed integer/collection expressions, keyed loop identity, connected server push, suspense wait mode, and owned field components to the existing lessons.
+At this September checkpoint, `topcoat` 0.8.0 was the workshop pin. Since the July post, several roadmap items had landed: mail transports, finite streaming, WebSockets, server-sent events, multipart uploads, sitemaps, Datastar, the Tower bridge, and a `Props` derive. The curriculum included mail in Lab 06, streaming in Lab 08, and Tower in Lab 13. The October 0.9.0 refresh added typed integer/collection expressions, keyed loop identity, connected server push, suspense wait mode, and owned field components. The v0.10.0 refresh adds module-parameter routing, `#[record]` and tuple expressions, `usize` UTF-8 byte lengths, runtime navigation with prefetch modes, and multiplexed connected render runs. It also updates the CLI checks and the complete teaching surface to the release-tagged guides.
 
 ### 1.5 The capstone app: "Slipway"
 

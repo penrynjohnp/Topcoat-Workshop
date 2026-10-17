@@ -103,13 +103,13 @@ async fn berth_filter_ships_signals_handlers_and_binds() {
     let (status, html) = get("/berths").await;
     assert_eq!(status, StatusCode::OK);
 
-    // Three signals are serialized into the page: query, show_occupied, show_vacant.
-    assert_eq!(html.matches("::topcoat::signal(").count(), 3, "{html}");
+    // The shared navigation counter and three filters are serialized.
+    assert_eq!(html.matches("::topcoat::signal(").count(), 4, "{html}");
     // The input writes into the query signal and reads it back.
     assert!(html.contains("data-topcoat-on:input="), "{html}");
     assert!(html.contains("data-topcoat-bind:value="), "{html}");
-    // Both status chips toggle a bool signal and bind their class.
-    assert_eq!(html.matches("data-topcoat-on:click=").count(), 2, "{html}");
+    // The nav counter and both status chips have click handlers.
+    assert_eq!(html.matches("data-topcoat-on:click=").count(), 3, "{html}");
     assert_eq!(
         html.matches("data-topcoat-bind:class=").count(),
         2,
@@ -207,7 +207,7 @@ async fn work_orders_ship_procedure_handlers_for_an_authenticated_user() {
         2,
         "{html}"
     );
-    assert_eq!(html.matches("data-topcoat-on:click=").count(), 2, "{html}");
+    assert_eq!(html.matches("data-topcoat-on:click=").count(), 3, "{html}");
     assert_eq!(
         html.matches("data-topcoat-bind:disabled=").count(),
         2,

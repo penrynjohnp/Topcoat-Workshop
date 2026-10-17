@@ -13,7 +13,7 @@ use topcoat::{
     Result,
     context::{Cx, app_context},
     router::{Slot, layout, page, request::uri},
-    runtime::{Event, Signal, expr, signal},
+    runtime::{Event, Signal, expr, record, signal},
     view::{View, component, view},
 };
 
@@ -129,6 +129,52 @@ async fn inspection_status(cx: &Cx) -> Result<impl View> {
 }
 // ANCHOR_END: integer-collection-expressions
 
+// ANCHOR: record-tuple-expressions
+#[record]
+#[derive(Clone)]
+struct Inspection {
+    label: String,
+    turns: usize,
+}
+
+#[component]
+async fn record_tuple_demo(cx: &Cx) -> Result<impl View> {
+    let inspection = signal(cx, || Inspection {
+        label: "Scheduled".to_owned(),
+        turns: 1,
+    });
+    let display = expr!((inspection.get().label.to_owned(), inspection.get().turns));
+    let vessel_name = "é".to_owned();
+    let utf8_bytes = expr!(vessel_name.len());
+
+    Ok(view! {
+        <section data-component="record-tuple-demo">
+            <h2>"Record and tuple"</h2>
+            <p data-inspection-summary="true">
+                $(display.0)
+                " · turn "
+                $(display.1)
+            </p>
+            <p :data-utf8-bytes=$(utf8_bytes)>
+                "UTF-8 bytes: "
+                $(utf8_bytes)
+            </p>
+            <button
+                type="button"
+                data-command="advance-record"
+                @click=$(|_event| {
+                    let label = inspection.get().label;
+                    let turns = inspection.get().turns;
+                    inspection.set(Inspection { label, turns: turns + 1 });
+                })
+            >
+                "Advance"
+            </button>
+        </section>
+    })
+}
+// ANCHOR_END: record-tuple-expressions
+
 // ANCHOR: server-read-signals
 #[component]
 #[rustfmt::skip]
@@ -186,6 +232,7 @@ async fn home() -> Result<impl View> {
             <h2>"Featured berth"</h2>
             berth_card(slug: shared::FEATURED)
             inspection_status()
+            record_tuple_demo()
             server_read_demo()
         },
     )

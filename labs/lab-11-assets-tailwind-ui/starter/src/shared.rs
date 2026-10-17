@@ -121,6 +121,7 @@ pub(crate) async fn nav(current_path: &str) -> Result<impl View> {
     Ok(view! {
         <nav aria-label="Main">
             <ul class="nav">
+                // TODO(lab-11): Keep Lab 07's runtime links and retain the owned nav styling.
                 for (href, label) in NAV {
                     <li>
                         <a

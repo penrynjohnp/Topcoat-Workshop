@@ -6,18 +6,20 @@ explains the surrounding concept.
 
 Everything here is specific to the versions in
 [`COMPATIBILITY.md`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/COMPATIBILITY.md):
-Topcoat and Topcoat CLI 0.10.0, Toasty 0.10.0. Topcoat is pre-1.0, so check that file before assuming
+Topcoat and Topcoat CLI 0.11.0, Toasty 0.10.0. Topcoat is pre-1.0, so check that file before assuming
 an error is your mistake.
 
 ## Toolchain and CLI
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `topcoat: command not found` | The CLI is not installed, or `~/.cargo/bin` is not on `PATH` | `cargo install topcoat-cli --version 0.10.0 --locked`, then confirm `PATH` |
+| `topcoat: command not found` | The CLI is not installed, or `~/.cargo/bin` is not on `PATH` | `cargo install topcoat-cli --version 0.11.0 --locked`, then confirm `PATH` |
 | A compile error names a missing import | Topcoat's facade crate re-exports through feature-gated modules, so a path can exist only when its feature is on | Compare your `use topcoat::{...}` block with that lab's solution, and check the crate's enabled features |
 | `topcoat --version` | Prints the installed CLI version | Compare it with `COMPATIBILITY.md` |
+| `rustc 1.99` or newer is required, or `topcoat-*` fails to compile on an older toolchain | Topcoat 0.11.0 requires Rust 1.99, and an older toolchain overrides `rust-toolchain.toml` | Run `rustup update`, remove any `rustup override` for the checkout, and confirm `rustc --version` reports 1.99.1 |
+| The CLI warns that the project depends on a different `topcoat` version | Since 0.11.0, the CLI compares itself with the `topcoat` version in `Cargo.lock` | Install the pinned CLI with `cargo install topcoat-cli --version 0.11.0 --locked` |
 | `topcoat fmt --check` reports differences | The source does not match Topcoat's macro formatter | Run `topcoat fmt <files>` to apply formatting, then rerun the check |
-| `topcoat build` is unknown | That command does not exist in CLI 0.10.0 | Use `cargo build` plus `topcoat asset bundle`, with matching profile flags on both |
+| `topcoat build` is unknown | That command does not exist in CLI 0.11.0 | Use `cargo build` plus `topcoat asset bundle`, with matching profile flags on both |
 | A build fails reading an empty Iconify cache file, usually right after `cargo clean` | `topcoat-icon`'s build script stages its cache non-atomically, so parallel workspace builds can read a half-written file | Stage one crate first: `find target/topcoat/cache -type f -empty -delete` then `cargo build -p lab11-solution`, then build the workspace. CI does exactly this |
 
 See [CLI commands](../03-reference/cli.md) for the full `--help` surface and
@@ -112,7 +114,7 @@ Lab [07](../02-labs/lab-07.md), plus [How `$(...)` reaches the browser](../01-co
 |---|---|---|
 | A shard or procedure route returns 404 | The endpoint is not registered, or the caller reconstructed an obsolete prefix | Use discovery or `.route(handler)` and consume its emitted URL/path |
 | A page rerun or connection is unavailable | `.runtime()` or the matching runtime script/bundle is missing | Register application layers before `.runtime()` and serve the matching bundle |
-| A shard `POST` returns 415 or 400 | The body is not the v0.10.0 runtime envelope, or the identity header is missing | Send `Content-Type: application/json`, `x-topcoat-identity`, and an envelope such as `{\"args\":[{\"t\":\"Signal\",\"id\":\"...\",\"v\":\"Lady\"}],\"signals\":{}}` |
+| A shard `POST` returns 415 or 400 | The body is not the v0.11.0 runtime envelope, or the identity header is missing | Send `Content-Type: application/json`, `x-topcoat-identity`, and an envelope such as `{\"args\":[{\"t\":\"Signal\",\"id\":\"...\",\"v\":\"Lady\"}],\"signals\":{}}` |
 | A signal resets after each search | Its identity or restored value changed | Key repeated stateful components with `#[key(item.id)]`; distinguish signal identity from HTML `id` |
 | Private data appears without the page guard | Shard and procedure endpoints are independently callable, so page and layout code never runs | Call `require_auth(cx)` inside every private endpoint and validate arguments |
 | Every keystroke creates a request | Same-tick changes coalesce and stale requests abort, but debouncing is application logic | Use htmx's `delay:` trigger, or implement debouncing yourself |
@@ -141,12 +143,12 @@ Lab [09](../02-labs/lab-09.md).
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Startup says a table already exists | `push_schema()` ran against an existing file, and it is not idempotent at 0.10.0 | Delete `slipway.db` while learning; use real migrations before changing a deployed schema |
+| Startup says a table already exists | `push_schema()` ran against an existing file, and it is not idempotent in Toasty 0.10.0 | Delete `slipway.db` while learning; use real migrations before changing a deployed schema |
 | The database looks empty after changing `SLIPWAY_DATABASE_URL` | A different SQLite file was opened | Print or inspect the exact URL the process used |
 | A relation is empty even though the child row exists | The query did not call `.include(...)`, or the child has the wrong foreign key | Add `.include(...)` and check `berth_slug` |
 | A `POST` returns 415 or fails to extract `Form` | Wrong request content type | Send `Content-Type: application/x-www-form-urlencoded` |
 | A procedure rejects a numeric ID | A raw number or `f64` was sent to a typed integer parameter | Keep the `u64` key and serialize `Arguments` through its runtime surrogate |
-| `fontsource_font!` reports incompatible `Asset` types | The direct asset crate and facade resolve different release families | Pin both `topcoat` and `topcoat-asset` to 0.10.0 and refresh the lockfile |
+| `fontsource_font!` reports incompatible `Asset` types | The direct asset crate and facade resolve different release families | Pin both `topcoat` and `topcoat-asset` to 0.11.0 and refresh the lockfile |
 | A discovered font route is duplicated | `.discover()` already registers fonts | Remove explicit `.font(...)` registration when using `.discover()` |
 
 Lab [10](../02-labs/lab-10.md), plus [How-to: SQLite to PostgreSQL](../03-reference/howto/postgres.md).
@@ -161,7 +163,7 @@ Lab [10](../02-labs/lab-10.md), plus [How-to: SQLite to PostgreSQL](../03-refere
 | Rendering panics with "failed to resolve asset" | The loaded manifest came from a different binary, checkout, or profile | Re-run the bundler for the exact binary you will execute |
 | Tailwind omits a class | Dynamically assembled class fragments are invisible to its scanner | Keep class names as literal strings in Rust or `styles.css` |
 | A local component edit vanished | `topcoat ui add card --overwrite` replaced the owned file | Restore the diff, then reapply upstream changes deliberately |
-| `topcoat ui update` is unknown | CLI 0.10.0 has no such command | Use `topcoat ui add --overwrite`, preserving owned changes and merging theme tokens |
+| `topcoat ui update` is unknown | CLI 0.11.0 has no such command | Use `topcoat ui add --overwrite`, preserving owned changes and merging theme tokens |
 
 Lab [11](../02-labs/lab-11.md).
 
@@ -199,7 +201,7 @@ Lab [13](../02-labs/lab-13.md).
 
 1. Compare your code with that lab's `solution/`, which CI compiles and tests on every push.
 2. Check `COMPATIBILITY.md` for a recorded breakage against the pinned versions.
-3. Read the Topcoat guides at the **release tag**, never `main`. The unreleased API is ahead of 0.10.0
+3. Read the Topcoat guides at the **release tag**, never `main`. The unreleased API is ahead of 0.11.0
    and its examples will not compile here.
 4. Open an issue with the lab number, the exact command, and the full error.
 

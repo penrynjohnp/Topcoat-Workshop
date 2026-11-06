@@ -80,7 +80,7 @@ Magic links are persistent too, and their tokens are cryptographically random:
 ```
 
 The existing procedure now loads and updates a `WorkOrder` using its `u64` key directly.
-Topcoat 0.10.0 preserves integer precision across the Rust/JavaScript boundary, so no `f64` conversion is needed:
+Topcoat 0.11.0 preserves integer precision across the Rust/JavaScript boundary, so no `f64` conversion is needed:
 
 ```rust
 {{#include solution/src/app/_marketing.rs:complete-work-order-procedure}}

@@ -4,7 +4,8 @@ Topcoat is pre-1.0 and ships breaking changes. Every lab pins the versions below
 
 | Tested | topcoat | topcoat-cli | toasty | Rust | Labs passing | Notes |
 |---|---|---|---|---|---|---|
-| 2026-10-16 | 0.10.0 | 0.10.0 | 0.10.0 | stable (1.98.0) | 01-13 | Workspace clippy, build, and tests pass; both Rust formatters and the mdBook/linkcheck pass. Seven pinned Playwright checks cover Lab 07, Lab 08, and Slipway. All three release bundles and Docker images build; Lab 12 and capstone containers serve pages and bundled assets against local SQLite. No Azure resources were deployed. See the 0.10.0 upgrade notes below. |
+| 2026-11-06 | 0.11.0 | 0.11.0 | 0.10.0 | 1.99.1 | 01-13 | Topcoat 0.11.0 requires Rust 1.99, so `rust-toolchain.toml` and the Dockerfile base images move from 1.98.0 to 1.99.1. Labs 01-10 and 13 pass `cargo clippy -- -D warnings` and `cargo test` without source changes; `cargo fmt --check` and Topcoat CLI 0.11.0 `topcoat fmt --check` (444 inputs) pass, and the mdBook builds with linkcheck2 and no unresolved includes. Labs 11 and 12 and the Slipway capstone, whose icon and font build scripts need jsDelivr, pass workspace clippy, build, and tests in CI, and the pinned Playwright checks pass. Docker images were not rebuilt and no Azure resources were deployed. Toasty stays on 0.10.0 because it is versioned independently. See the 0.11.0 upgrade notes below. |
+| 2026-10-16 | 0.10.0 | 0.10.0 | 0.10.0 | stable (1.98.0) | 01-13 | Superseded by the 0.11.0 row above. Workspace clippy, build, and tests pass; both Rust formatters and the mdBook/linkcheck pass. Seven pinned Playwright checks cover Lab 07, Lab 08, and Slipway. All three release bundles and Docker images build; Lab 12 and capstone containers serve pages and bundled assets against local SQLite. No Azure resources were deployed. See the 0.10.0 upgrade notes below. |
 | 2026-10-01 | 0.9.0 | 0.9.0 | 0.10.0 | stable (1.98.0) | 01-13 | All labs pass on the 0.9.0 pins. See the 0.9.0 upgrade notes below for the behavior changes absorbed by the workshop. |
 | 2026-09-17 | 0.8.1 | 0.8.1 | 0.10.0 | stable (1.98.0) | 01-13 | Superseded by the 0.9.0 row above. Patch upgrade from 0.8.0: `cargo build --workspace` and `cargo test --workspace` pass. Router 0.8.1 adds configurable trailing-slash handling, relative `./` module routes, and `SeeOther` as an error. In 0.8.0, cookie-jar changes were dropped when a handler returned an error; 0.8.1 fixes this in tokio-rs/topcoat#408, so cookies queued before redirect errors are serialized into `Set-Cookie`. |
 | 2026-09-12 | 0.8.0 | 0.8.0 | 0.10.0 | stable (1.98.0) | 01-13 | Finalized: all labs pass their build and test checks on Topcoat 0.8.0. |
@@ -15,6 +16,17 @@ Topcoat is pre-1.0 and ships breaking changes. Every lab pins the versions below
 1. Bump versions in the workspace `Cargo.toml` (`[workspace.dependencies]`) and `scripts/setup.sh`.
 2. `cargo build --workspace && cargo test --workspace`.
 3. Fix breakages lab by lab; each fix PR adds a row here.
+
+## 0.11.0 upgrade notes
+
+- Topcoat 0.11.0 requires Rust 1.99 or newer. The workshop pins 1.99.1 in `rust-toolchain.toml` and in the `rust:1.99.1-bookworm` builder images for Lab 12 and Slipway.
+- `topcoat`, `topcoat-asset`, and the CLI move together to 0.11.0. `topcoat-htmx` follows the facade to 0.11.0, and the lockfile adds `topcoat-l10n`. Toasty remains 0.10.0.
+- Rerendering no longer replaces text the user has typed into an input. Every workshop `:value` binding reads a signal (`$(query.get())` and similar), so no lab relied on a rerender to reset an input. To force a reset, bind to a signal-reading expression or call `Expr::dynamic`.
+- `dropdown_menu` now uses the browser popover feature and `element_id(cx)` instead of `<details>`. No lab installs `dropdown_menu`; if you add it, follow the upstream upgrade guide and replace `group-open:` classes.
+- `?` converts `&topcoat::Error` into `topcoat::Error`, so `#[memoize(as_ref)]` functions returning `Result` can propagate errors directly. The workshop's memoized loaders return `Option`, so no change was needed.
+- Without file arguments, `topcoat fmt` now skips Git-ignored files and `target/`. CI already passes tracked files explicitly.
+- New, optional features not used by the labs: `l10n` localization with Fluent (`l10n-fluent`, `l10n-number`, `l10n-datetime`), `topcoat l10n check`, `topcoat new`, `element_id(cx)`, Topcoat UI `popover` and `navigation_menu`, and the CLI's version-mismatch warning (silence with `TOPCOAT_NO_VERSION_CHECK`).
+- Check behavior against the `v0.11.0` release tag, not `main`.
 
 ## 0.10.0 upgrade notes
 

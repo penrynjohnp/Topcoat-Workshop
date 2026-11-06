@@ -3,9 +3,9 @@
 `Cx` is Topcoat's handle for the current request. Pass `&Cx` to small request functions, or declare it
 on a page, layout, component, route, shard, or procedure that needs request-scoped information.
 
-The helpers in this page are the ones used across Labs 05–08. They follow Topcoat v0.10.0's
-[context guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/context.md)
-and [router guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/router.md).
+The helpers in this page are the ones used across Labs 05–08. They follow Topcoat v0.11.0's
+[context guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/context.md)
+and [router guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/router.md).
 
 > [!NOTE]
 > `Cx` is request-scoped. Values registered as app context outlive requests, but the `&Cx` used to
@@ -22,8 +22,8 @@ must not make the body depend on the signal. Validate every signal value read on
 input. See [How `$(...)` reaches the browser](../01-concepts/dual-expressions.md) for the dual
 expression model.
 
-*Guide basis: the v0.10.0 runtime guide's [Signals](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/runtime.md#signals)
-and [Reading signals on the server](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/runtime.md#reading-signals-on-the-server) sections.*
+*Guide basis: the v0.11.0 runtime guide's [Signals](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/runtime.md#signals)
+and [Reading signals on the server](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/runtime.md#reading-signals-on-the-server) sections.*
 
 ## Request
 
@@ -113,7 +113,7 @@ A connected render can outlive its initial authorization result.
 Read the current server-side session record before each private emission.
 Do not reuse a memoized initial user for this check or mutate response cookies after streaming starts.
 
-*Guide basis: the v0.10.0 [live connection lifecycle](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/view/live.md#long-lived-connections).*
+*Guide basis: the v0.11.0 [live connection lifecycle](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/view/live.md#long-lived-connections).*
 
 ## Identity
 
@@ -122,7 +122,7 @@ Their signals and live regions keep the same identity when the item moves.
 An unkeyed loop is ambiguous when a component consumes that identity.
 For ordinary Rust helpers, derive a distinct context with `cx.keyed(item.id)`.
 
-*Guide basis: the v0.10.0 [`view!` identity guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/view/view.md#keys).*
+*Guide basis: the v0.11.0 [`view!` identity guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/view/view.md#keys).*
 
 ## App context
 
@@ -188,11 +188,11 @@ Do not treat a redirect or status as authorization by itself. Validate caller-co
 query, shard, and procedure arguments, then check the current identity before reading or changing
 private data.
 
-Topcoat 0.10.0's `Error` is cheaply cloneable and does not wrap `anyhow::Error`.
+Topcoat 0.11.0's `Error` is cheaply cloneable and does not wrap `anyhow::Error`.
 Use `Error::from_anyhow` with the optional `anyhow` feature only when that conversion is needed.
 Owned or mutable downcasts require unique ownership; use `downcast_cloned` when sharing is expected.
 
-*Guide basis: the v0.10.0 [error source](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/crates/topcoat-core/src/error.rs).*
+*Guide basis: the v0.11.0 [error source](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/crates/topcoat-core/src/error.rs).*
 
 ## Quick choice
 

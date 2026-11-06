@@ -18,18 +18,19 @@ These rules apply to every page under `docs/src/` other than the lab pages above
 - Diagrams are Mermaid fenced blocks (```` ```mermaid ````). No images.
 - Every page ends with a **See also** line linking the relevant lab pages (`../02-labs/lab-NN.md`) and any related concept or reference page.
 - Voice: second person, present tense, short paragraphs, one idea per sentence. No filler introductions.
-- Every claim about how Topcoat behaves is checked against the v0.10.0 guides under `docs/` in tokio-rs/topcoat (at the tag, never `main`). Where a page explains internals (`$(...)` cross-compilation, shards, `live!`), say which guide each section draws on.
+- Every claim about how Topcoat behaves is checked against the v0.11.0 guides under `docs/` in tokio-rs/topcoat (at the tag, never `main`). Where a page explains internals (`$(...)` cross-compilation, shards, `live!`), say which guide each section draws on.
 - After writing or editing any page: run `mdbook build docs`, confirm the output has no ` ERROR ` lines and that `grep -rl '{{#include' docs/book/html` returns nothing, then `rm -rf docs/book`.
 
 ## Topcoat facts to respect
 - Server-rendered. Never suggest browser storage, a client bundle, or a separate API layer for page data.
 - Reactivity: `signal` + `$(...)` for client-only state; `#[shard]` for server re-render; `#[procedure]` for server calls; `live!`/`suspense` for streaming. Prefer these over htmx unless the lab is about htmx.
 - Auth and request-scoped concerns are `async fn f(cx: &Cx)` functions, not middleware.
-- Versions are pinned in `COMPATIBILITY.md`. The API surface changes between minor versions — check https://docs.rs/topcoat for the pinned version before writing code. Read guides under `docs/` in tokio-rs/topcoat at the release tag (for this workshop, `https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/...`), **never `main`** — `main` is ahead of the published crate and its examples may not compile against the pin.
+- Versions are pinned in `COMPATIBILITY.md`. The API surface changes between minor versions — check https://docs.rs/topcoat for the pinned version before writing code. Read guides under `docs/` in tokio-rs/topcoat at the release tag (for this workshop, `https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/...`), **never `main`** — `main` is ahead of the published crate and its examples may not compile against the pin.
 - Assets: `topcoat asset bundle --release` writes `target/release/assets/`; binary and bundle must come from the same build.
 - `topcoat-icon`'s build script stages the Iconify cache non-atomically; parallel builds can read an empty file. CI stages one crate first (`cargo build -p lab11-solution`); do the same locally after `cargo clean`.
-- Topcoat CLI 0.10.0 supports top-level `--version`, `topcoat fmt --check`, `topcoat fmt --rustfmt`, and `topcoat ui add --all`; the combined formatter requires an edition in root `rustfmt.toml`. Refresh owned UI with `topcoat ui add --overwrite`; the published CLI has no `topcoat ui update` command.
-- For reactivity labs, read the v0.10.0 `docs/runtime/expr.md`, `docs/runtime/record.md`, and `docs/runtime/link.md` guides. Records and tuples are available in runtime expressions; keep protected runtime links at `PrefetchMode::Never` and action URLs as ordinary anchors or forms.
+- Topcoat CLI 0.11.0 supports top-level `--version`, `topcoat fmt --check`, `topcoat fmt --rustfmt`, `topcoat ui add --all`, `topcoat new`, and `topcoat l10n check`; the combined formatter requires an edition in root `rustfmt.toml`. Without file arguments, `topcoat fmt` skips Git-ignored files and `target/`, so CI passes paths explicitly. Refresh owned UI with `topcoat ui add --overwrite`; the published CLI has no `topcoat ui update` command.
+- Topcoat 0.11.0 requires Rust 1.99 or newer; the workspace pins Rust in `rust-toolchain.toml` and the Dockerfile base images. Rerendering no longer resets inputs the user has edited; to force a reset, bind `:value` to an expression that reads a signal or use `Expr::dynamic`. Dropdown menus use `element_id(cx)` with `target`/`id`, not `<details>`.
+- For reactivity labs, read the v0.11.0 `docs/runtime/expr.md`, `docs/runtime/record.md`, and `docs/runtime/link.md` guides. Records and tuples are available in runtime expressions; keep protected runtime links at `PrefetchMode::Never` and action URLs as ordinary anchors or forms.
 
 ## Conventions
 - `cargo fmt` and `topcoat fmt` on every Rust file; `cargo clippy -D warnings` clean.

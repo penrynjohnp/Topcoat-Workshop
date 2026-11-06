@@ -1,14 +1,16 @@
 # CLI commands
 
-This page records the `--help` surface of **Topcoat CLI 0.10.0**, the version pinned by this
-workshop. The CLI has four command groups: `dev`, `fmt`, `asset`, and `ui`.
-The command tables are checked against the installed 0.10.0 binary.
+This page records the `--help` surface of **Topcoat CLI 0.11.0**, the version pinned by this
+workshop. The CLI has six commands or command groups: `new`, `dev`, `fmt`, `asset`, `l10n`, and `ui`.
+The command tables are checked against the installed 0.11.0 binary. Version 0.11.0 adds `new` and `l10n`.
 
 > [!WARNING]
-> `topcoat --version` and `topcoat -V` print the CLI version.
+> `topcoat --version` and `topcoat -V` print the CLI version. Since 0.11.0, every command warns when
+> the workspace's `Cargo.lock` resolves an incompatible `topcoat` version, and it suggests the matching
+> `cargo install topcoat-cli@... --locked`. Set `TOPCOAT_NO_VERSION_CHECK` to silence the warning.
 
 > [!NOTE]
-> There is no `topcoat build` command in 0.10.0. `topcoat build` fails with
+> There is no `topcoat build` command in 0.11.0. `topcoat build` fails with
 > `error: unrecognized subcommand 'build'` and suggests `ui`, which is unrelated. Use Cargo to build
 > the binary, then use `topcoat asset bundle` with the same package, binary, and profile selection.
 
@@ -18,9 +20,11 @@ Usage is `topcoat <COMMAND>`.
 
 | Subcommand | Purpose |
 |---|---|
+| `topcoat new` | Create a new Topcoat application. |
 | `topcoat dev` | Start a development server. |
 | `topcoat fmt` | Format Topcoat `view!`-family macro bodies. |
 | `topcoat asset` | Inspect, bundle, or clean assets embedded in a built binary. |
+| `topcoat l10n` | Check the app's Fluent translations. |
 | `topcoat ui` | Initialize and manage owned UI component source files. |
 | `topcoat help` | Print top-level help, or dispatch help through a command group. |
 
@@ -28,6 +32,29 @@ Usage is `topcoat <COMMAND>`.
 |---|---|
 | `-h`, `--help` | Print top-level help. |
 | `-V`, `--version` | Print the CLI version. |
+
+## `topcoat new`
+
+Usage is `topcoat new [OPTIONS] [PATH]`. The workshop does not use it because every lab ships its
+starter crate, but it is the quickest way to start your own project after the workshop.
+
+| Argument or flag | Value | Meaning |
+|---|---|---|
+| `[PATH]` | Directory | Create the application here. You are asked for it if omitted. |
+| `--name` | `<NAME>` | Set the Cargo package name. The default is the directory name. |
+| `--recommended` | — | Use the recommended choice for every option not given as a flag: module routing, Toasty with SQLite, the browser runtime, Tailwind CSS, Topcoat UI, Iconify, a Fontsource font, and a todo example. |
+| `--minimal` | — | Use the smallest setup for every option not given as a flag: module routing and a plain stylesheet. |
+| `--routing` | `<STYLE>` | Choose how request paths are assigned to handlers. |
+| `--database`, `--database-backend` | `<INTEGRATION>`, `<BACKEND>` | Choose the database integration, such as `none`, and its backend. The default backend is `sqlite`. |
+| `--interaction` | `<APPROACH>` | Choose the browser interaction approach, such as `htmx`. |
+| `--tailwind`, `--no-tailwind` | — | Style pages with Tailwind CSS or a plain stylesheet. |
+| `--icons`, `--icon-set` | `<SOURCE>`, `<SET>` | Choose the icon source and Iconify set. The default set is `lucide`. |
+| `--font`, `--font-family` | `<SOURCE>`, `<FAMILY>` | Choose the font source and Fontsource family. |
+| `--ui`, `--no-ui` | — | Install or skip Topcoat UI components. UI requires Tailwind and Iconify. |
+| `--example`, `--no-example` | — | Include or skip the todo example. |
+| `--no-interactive` | — | Never ask questions; fail if a choice is missing. Use it in scripts. |
+| `--no-git` | — | Do not initialize a Git repository. |
+| `-h`, `--help` | — | Print help. |
 
 ## `topcoat dev`
 
@@ -43,8 +70,10 @@ Usage is `topcoat dev [OPTIONS]`.
 
 `dev` rebuilds the selected target and serves it for development. The workshop normally selects the
 package explicitly from the workspace, for example with `-p lab11-solution`.
-The 0.10.0 CLI honors Cargo's `default-run`, works again through `cargo topcoat`, preserves build
+Since 0.10.0, the CLI honors Cargo's `default-run`, works again through `cargo topcoat`, preserves build
 environment settings, and streams development reloads without losing current form state.
+Since 0.11.0, `dev` also restarts the app when only bundled assets change, rebuilds when a new `.ftl`
+file appears, and runs the translation check after each build.
 
 `--release` and `--profile` both select a profile. Use one profile consistently when the application
 loads a generated asset bundle.
@@ -62,6 +91,9 @@ Usage is `topcoat fmt [OPTIONS] [FILES]...`.
 | `--rustfmt` | — | Run rustfmt before formatting macro bodies; requires rustfmt on `PATH` and an explicit edition in root `rustfmt.toml`. |
 | `-h`, `--help` | — | Print help. |
 | `-V`, `--version` | — | Print the formatter version. |
+
+Without `[FILES]`, `topcoat fmt` skips files ignored by Git and Cargo's `target` directory since 0.11.0.
+Pass paths explicitly to format ignored files. The workshop CI passes the tracked lab and Slipway files.
 
 Run `cargo fmt` and `topcoat fmt --check` as separate checks. Rustfmt treats a macro body as opaque
 tokens; `topcoat fmt` understands the markup inside supported Topcoat macros.
@@ -119,6 +151,23 @@ Usage is `topcoat asset clean [OPTIONS]`.
 
 `clean` also deletes the asset build cache. Use it when diagnosing stale generated assets, then
 rebuild the binary before bundling again.
+
+## `topcoat l10n`
+
+Usage is `topcoat l10n check [OPTIONS]`. It builds the selected package, then checks its Fluent
+translations against the `t!` calls in the binary.
+
+| Flag | Value | Meaning |
+|---|---|---|
+| `--bin` | `<BIN>` | Build the named binary target. |
+| `-p`, `--package` | `<PACKAGE>` | Build the named workspace package. |
+| `-r`, `--release` | — | Build with Cargo's `release` profile. |
+| `--profile` | `<NAME>` | Build with the named Cargo profile. |
+| `-h`, `--help` | — | Print help. |
+
+It reports missing messages and attributes, missing variables, and references to missing messages
+or terms as errors, and unused messages and arguments as warnings. Errors exit nonzero, so the
+command can run in CI. The workshop labs do not enable the `l10n-fluent` feature.
 
 ## `topcoat ui`
 
@@ -193,15 +242,15 @@ Usage is `topcoat ui remove [OPTIONS] <COMPONENTS>...`.
 ## Help dispatch
 
 `topcoat help` prints the same top-level command list as `topcoat --help`. The nested forms
-`topcoat asset help` and `topcoat ui help` print their group help. Add a nested command name after
+`topcoat asset help`, `topcoat l10n help`, and `topcoat ui help` print their group help. Add a nested command name after
 `help` to request that command's help.
 
 The normal `--help` form is available on every working command listed above. `topcoat --version`
 prints the CLI release.
 
-## Missing commands and flags in 0.10.0
+## Missing commands and flags in 0.11.0
 
-The `Result` column quotes the 0.10.0 binary verbatim.
+The `Result` column quotes the 0.11.0 binary verbatim.
 
 | Attempt | Result | Use instead |
 |---|---|---|

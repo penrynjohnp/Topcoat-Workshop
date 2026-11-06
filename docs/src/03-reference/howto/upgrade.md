@@ -6,7 +6,7 @@ Update the workspace and CLI pins, validate the existing toolchain, and record w
 Change Toasty, Rust, or mdBook separately only when the upgrade requires it.
 
 > [!WARNING]
-> Read the guides from the release tag that you are testing, such as [`v0.10.0`](https://github.com/tokio-rs/topcoat/tree/v0.10.0), not `main`. The unreleased API can already differ from the version in this workshop.
+> Read the guides from the release tag that you are testing, such as [`v0.11.0`](https://github.com/tokio-rs/topcoat/tree/v0.11.0), not `main`. The unreleased API can already differ from the version in this workshop.
 
 ## 1. Establish a clean baseline
 
@@ -32,11 +32,16 @@ Update the CLI pin in all installation paths:
 - [Lab 12's starter Dockerfile](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/labs/lab-12-build-containerise-deploy/starter/Dockerfile) keeps the learner scaffold on the same CLI release.
 - [Slipway's Dockerfile](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/slipway/Dockerfile) installs it for the capstone release image.
 
+When a Topcoat release raises its minimum Rust version, as 0.11.0 does with Rust 1.99, update the Rust pin together:
+
+- [`rust-toolchain.toml`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/rust-toolchain.toml) sets the local toolchain channel.
+- The `FROM docker.io/library/rust:X.Y.Z-bookworm` lines in Lab 12's starter and solution Dockerfiles and Slipway's Dockerfile set the image toolchain.
+
 Use a repository search to find stale copies rather than assuming these are the only locations:
 
 ```bash
-rg -n 'topcoat-cli|topcoat =|topcoat-asset|toasty =|mdbook@|mdbook-mermaid@|mdbook-linkcheck2@' \
-  Cargo.toml scripts .github .devcontainer labs slipway COMPATIBILITY.md
+rg -n 'topcoat-cli|topcoat =|topcoat-asset|toasty =|channel =|library/rust:|mdbook@|mdbook-mermaid@|mdbook-linkcheck2@' \
+  Cargo.toml rust-toolchain.toml scripts .github .devcontainer labs slipway COMPATIBILITY.md
 ```
 
 The docs toolchain is a set. Change `mdbook`, `mdbook-mermaid`, and `mdbook-linkcheck2` together in [`docs.yml`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/.github/workflows/docs.yml) and the devcontainer. Keep [`docs/book.toml`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/docs/book.toml) compatible with that set. For example, mdBook 0.5 uses its built-in GitHub alert syntax and this book uses the `linkcheck2` output backend; do not reintroduce an older admonition or linkcheck setup without testing the whole set.
@@ -63,7 +68,7 @@ cargo build --workspace
 cargo test --workspace
 ```
 
-Topcoat CLI 0.10.0 supports `topcoat fmt --check`, which verifies macro formatting without editing files. Keep it separate from `cargo fmt`: rustfmt formats surrounding Rust syntax, while Topcoat formats supported macro bodies.
+Topcoat CLI 0.11.0 supports `topcoat fmt --check`, which verifies macro formatting without editing files. Keep it separate from `cargo fmt`: rustfmt formats surrounding Rust syntax, while Topcoat formats supported macro bodies. Since 0.11.0, `topcoat fmt` without file arguments skips Git-ignored files and `target/`; CI passes the tracked lab and Slipway files explicitly.
 
 If you ran `cargo clean`, stage the icon cache before parallel workspace builds, as CI does:
 

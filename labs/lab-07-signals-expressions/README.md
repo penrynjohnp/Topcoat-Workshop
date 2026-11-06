@@ -8,7 +8,7 @@
 - Recognise unsupported Rust syntax and use deliberate escape hatches
 
 ## Concepts (read first, 5 min)
- Read the pinned Topcoat v0.10.0 [runtime guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/runtime.md) and expr! [vocabulary](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.10.0/docs/runtime/expr.md). A `$(...)` block is a **runtime expression**: type-checked Rust that Topcoat compiles twice, once to server code that produces the initial HTML and once to JavaScript that ships with the page. Create a signal in the surrounding Rust body with `signal(cx, || initial)`, then capture it in as many runtime expressions as you need. The body needs `cx: &Cx` because Topcoat derives the signal's stable identity from the current page, layout, component, or shard render.
+ Read the pinned Topcoat v0.11.0 [runtime guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/runtime.md) and expr! [vocabulary](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/runtime/expr.md). A `$(...)` block is a **runtime expression**: type-checked Rust that Topcoat compiles twice, once to server code that produces the initial HTML and once to JavaScript that ships with the page. Create a signal in the surrounding Rust body with `signal(cx, || initial)`, then capture it in as many runtime expressions as you need. The body needs `cx: &Cx` because Topcoat derives the signal's stable identity from the current page, layout, component, or shard render.
 
 A signal is an ordinary, cheaply cloned handle. Pass it to a child component as `&Signal<T>`. A `.get()` inside `$(...)` is a browser-side reactive read and does not make the server body depend on the signal. A `.get()` in ordinary Rust is a tracked server-side read: changing that signal asks the server to run the page again and morph the returned HTML into place. Use `.get_untracked()` when the server needs the current value without subscribing the body to future changes.
 
@@ -117,7 +117,7 @@ The vector is a render-time snapshot. Capturing an expression inside another exp
 its signal dependencies reactive. Integer overflow and division by zero panic in both build profiles.
 Call `inspection_status()` from the home page beside the featured berth.
 
-Topcoat v0.10.0 also supports `#[record]` values and tuple construction and field access in runtime
+Topcoat v0.11.0 also supports `#[record]` values and tuple construction and field access in runtime
 expressions. The example keeps its browser-visible record small and demonstrates that string
 `len()` returns the UTF-8 byte count as `usize`:
 

@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1.7
 
-FROM docker.io/library/rust:1.98.0-bookworm AS builder
+FROM docker.io/library/rust:1.99.1-bookworm AS builder
 WORKDIR /workspace
-RUN cargo install topcoat-cli --version 0.10.0 --locked
+RUN cargo install topcoat-cli --version 0.11.0 --locked
 COPY . .
 # TODO(lab-12): Build the release binary and bundle assets from that same build.
 RUN cargo build --release -p lab12-starter && \

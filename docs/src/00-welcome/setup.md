@@ -2,7 +2,7 @@
 
 Set up the pinned Rust and Topcoat toolchain before Lab 01. You can work directly on Linux or macOS, use Windows through WSL, or open the repository in a devcontainer or GitHub Codespace.
 
-The workshop currently targets Topcoat and Topcoat CLI 0.10.0, Toasty 0.10.0, and the versions recorded in [`COMPATIBILITY.md`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/COMPATIBILITY.md). Topcoat is pre-1.0, so keep the repository checkout and its pins together.
+The workshop currently targets Topcoat and Topcoat CLI 0.11.0, Toasty 0.10.0, Rust 1.99.1, and the versions recorded in [`COMPATIBILITY.md`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/COMPATIBILITY.md). Topcoat is pre-1.0, so keep the repository checkout and its pins together. Topcoat 0.11.0 requires Rust 1.99 or newer; `rust-toolchain.toml` selects 1.99.1 automatically through rustup.
 
 ## The setup script
 
@@ -12,7 +12,7 @@ From the repository root, run:
 ./scripts/setup.sh
 ```
 
-The script checks for `rustup`, reports the active toolchain, installs or refreshes `topcoat-cli` 0.10.0 with `--locked`, notes whether the `sqlite3` command is available, and builds Lab 01's solution as a smoke test:
+The script checks for `rustup`, reports the active toolchain, installs or refreshes `topcoat-cli` 0.11.0 with `--locked`, notes whether the `sqlite3` command is available, and builds Lab 01's solution as a smoke test:
 
 ```bash
 {{#include ../../../scripts/setup.sh}}
@@ -28,8 +28,9 @@ A missing `sqlite3` command is only a note at this stage. Lab 10 uses SQLite, so
 `topcoat dev` updates the existing page while preserving matching form controls and signal values.
 Keep identities stable when checking an interaction across a source edit.
 A manual reload resets signal state. Script, base-URL, or doctype changes trigger a full reload.
+Since 0.11.0, `topcoat dev` also restarts the app when only bundled assets such as a stylesheet change, and hot reload keeps working after client-side navigation.
 
-*Guide basis: the tagged [v0.10.0 release notes](https://github.com/tokio-rs/topcoat/releases/tag/v0.10.0).*
+*Guide basis: the tagged [v0.10.0](https://github.com/tokio-rs/topcoat/releases/tag/v0.10.0) and [v0.11.0](https://github.com/tokio-rs/topcoat/releases/tag/v0.11.0) release notes.*
 
 ## Linux
 
@@ -102,7 +103,7 @@ Run the Azure CLI and `azd` in the same environment as the deployment commands. 
 
 The repository includes a `.devcontainer/devcontainer.json`. Open the repository in VS Code with the Dev Containers extension, choose **Reopen in Container**, and wait for `postCreateCommand` to finish.
 
-The container provides Rust, Node.js LTS, Azure CLI, `azd`, and Docker-in-Docker. Its post-create command installs Chromium for Marp slide export, `sqlite3`, Topcoat CLI 0.10.0, mdBook 0.5.4, mdbook-mermaid 0.17.1, and mdbook-linkcheck2 0.13.0:
+The container provides Rust, Node.js LTS, Azure CLI, `azd`, and Docker-in-Docker. Its post-create command installs Chromium for Marp slide export, `sqlite3`, Topcoat CLI 0.11.0, mdBook 0.5.4, mdbook-mermaid 0.17.1, and mdbook-linkcheck2 0.13.0:
 
 ```json
 {{#include ../../../.devcontainer/devcontainer.json}}
@@ -178,7 +179,7 @@ azd up
 
 `azd up` provisions the Bicep resources, builds the Docker image, pushes it to ACR, and deploys a Container Apps revision. The app's managed identity and the bootstrap identity are created by Bicep; do not add passwords or secret values to the templates.
 
-Before running `azd up`, make sure Docker can build locally and that you understand the production configuration. The image binds `HOST=0.0.0.0`; the release binary and `topcoat asset bundle --release` output must come from the same build. The Azure path uses managed identity for PostgreSQL and Key Vault. Toasty's 0.10.0 PostgreSQL token has no refresh callback, so the Lab 12 deployment is an experimental workshop path; read the [SQLite-to-PostgreSQL how-to](../03-reference/howto/postgres.md) before relying on it.
+Before running `azd up`, make sure Docker can build locally and that you understand the production configuration. The image binds `HOST=0.0.0.0`; the release binary and `topcoat asset bundle --release` output must come from the same build. The Azure path uses managed identity for PostgreSQL and Key Vault. Toasty's 0.11.0 PostgreSQL token has no refresh callback, so the Lab 12 deployment is an experimental workshop path; read the [SQLite-to-PostgreSQL how-to](../03-reference/howto/postgres.md) before relying on it.
 
 To verify and clean up:
 

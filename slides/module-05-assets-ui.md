@@ -87,7 +87,7 @@ Copying source is a trade-off: you gain ownership and take responsibility for ma
 
 # Fields do not replace server validation
 
-Topcoat 0.10.0 adds owned field components:
+Topcoat 0.10.0 added owned field components:
 
 - `field` groups a control with its supporting content;
 - `field_label` targets the control's ID;

@@ -4,9 +4,10 @@
 **Subject:** [Topcoat](https://github.com/tokio-rs/topcoat) — tokio-rs's server-rendered, full-stack Rust web framework (announced 22 July 2026)
 **Original plan date:** 8 September 2026 · **Original pins:** topcoat 0.8.0, topcoat-cli 0.8.0, toasty 0.10.0, Rust stable
 
-**Current target:** topcoat 0.10.0, topcoat-cli 0.10.0, topcoat-asset 0.10.0, toasty 0.10.0, Rust 1.98.0.
-The upgrade keeps Labs 01-13 and refreshes routing, runtime expressions, navigation, connected rendering,
-CLI guidance, documentation, slides, and deployment tooling. Acceptance results are recorded in
+**Current target:** topcoat 0.11.0, topcoat-cli 0.11.0, topcoat-asset 0.11.0, toasty 0.10.0, Rust 1.99.1.
+The 0.11.0 upgrade keeps Labs 01-13 and raises the Rust pin to the 1.99 minimum required by Topcoat 0.11.0. It refreshes
+CLI guidance, documentation, slides, and deployment tooling for localization, `topcoat new`, `element_id`, popovers,
+and preserved edits in rerendered inputs. Acceptance results are recorded in
 `COMPATIBILITY.md` only after verification.
 
 **Upgrade status (12 September 2026):** Labs 01–13, the Slipway capstone, the workspace, and the mdBook pass on the 0.8.0 pins.

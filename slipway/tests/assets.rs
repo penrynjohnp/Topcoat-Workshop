@@ -4,7 +4,7 @@ use std::{
 };
 
 use slipway_capstone::assets::SLIPWAY_MARK;
-use topcoat::asset::AssetConfig;
+use topcoat::{asset::AssetConfig, context::Cx};
 use topcoat_asset::{Bundler, BundlerConfig};
 
 // ANCHOR: hashed-asset-test
@@ -23,7 +23,7 @@ fn local_asset_resolves_to_a_content_hashed_url() {
         .bundle(&binary, &bundle_dir)
         .unwrap();
     let bundle = topcoat::asset::AssetBundle::load_dir(&bundle_dir).unwrap();
-    let url = AssetConfig::hosted_at("/_topcoat/assets", bundle).resolve(SLIPWAY_MARK);
+    let url = AssetConfig::hosted_at("/_topcoat/assets", bundle).resolve(&Cx::new(), SLIPWAY_MARK);
 
     let file = url.strip_prefix("/_topcoat/assets/slipway-mark-").unwrap();
     let hash = file.strip_suffix(".svg").unwrap();

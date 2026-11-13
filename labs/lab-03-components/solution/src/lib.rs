@@ -115,7 +115,7 @@ async fn layout(
 /// The site navigation. Lab 05 reads the current path from `Cx` instead of
 /// taking it as an argument.
 #[component]
-async fn site_nav(current_path: &str) -> Result<impl View> {
+async fn site_nav(cx: &Cx, current_path: &str) -> Result<impl View> {
     Ok(view! {
         <nav aria-label="Main">
             <ul class="nav">
@@ -145,7 +145,7 @@ async fn site_footer(cx: &Cx) -> Result<impl View> {
 
 /// A status badge.
 #[component]
-async fn status_badge(status: &Status) -> Result<impl View> {
+async fn status_badge(cx: &Cx, status: &Status) -> Result<impl View> {
     Ok(view! {
         match status {
             Status::Vacant => {
@@ -227,7 +227,7 @@ async fn berth_card(
 /// The berth list. It fetches its own berths and delegates each card, so the
 /// pages that use it pass nothing at all.
 #[component]
-async fn berth_list() -> Result<impl View> {
+async fn berth_list(cx: &Cx) -> Result<impl View> {
     let berths = berths();
 
     Ok(view! {
@@ -246,7 +246,7 @@ async fn berth_list() -> Result<impl View> {
 
 // ANCHOR: pages
 #[page("/")]
-async fn home() -> Result<impl View> {
+async fn home(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         layout(
             title: "Slipway",
@@ -266,7 +266,7 @@ async fn berths_page(cx: &Cx) -> Result<impl View> {
 }
 
 #[page("/berths/featured")]
-async fn featured_berth_page() -> Result<impl View> {
+async fn featured_berth_page(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         layout(
             title: "Featured berth",

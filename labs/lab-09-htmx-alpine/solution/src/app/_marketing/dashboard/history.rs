@@ -2,7 +2,7 @@ use crate::auth::{AppState, current_user_uncached, require_auth};
 use std::time::Duration;
 use topcoat::{
     Result,
-    context::{Cx, app_context},
+    context::{Cx, context},
     router::{page, request::uri},
     runtime::{connected, shard},
     view::{SuspenseMode, View, component, emit, error_boundary, live, suspense, view},
@@ -13,7 +13,7 @@ use topcoat::{
 async fn work_order_status(cx: &Cx) -> Result<impl View> {
     require_auth(cx).await?;
     Ok(live! {
-        let state: &AppState = app_context(cx);
+        let state: &AppState = context(cx);
         let mut updates = state.updates.subscribe();
         loop {
             if current_user_uncached(cx).await.is_none() {
@@ -45,7 +45,7 @@ async fn work_order_status(cx: &Cx) -> Result<impl View> {
 
 // ANCHOR: live-progress
 #[component]
-async fn loading_progress() -> Result<impl View> {
+async fn loading_progress(cx: &Cx) -> Result<impl View> {
     Ok(live! {
         emit! { <p data-progress="starting">"Opening the history log…"</p> }?;
         tokio::time::sleep(Duration::from_millis(10)).await;
@@ -57,7 +57,7 @@ async fn loading_progress() -> Result<impl View> {
 // ANCHOR_END: live-progress
 
 #[component]
-async fn work_order_history(fail: bool) -> Result<impl View> {
+async fn work_order_history(cx: &Cx, fail: bool) -> Result<impl View> {
     tokio::time::sleep(Duration::from_millis(20)).await;
     if fail {
         return Err(std::io::Error::other("history store unavailable").into());

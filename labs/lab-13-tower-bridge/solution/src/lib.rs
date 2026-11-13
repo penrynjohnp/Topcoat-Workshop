@@ -3,6 +3,7 @@ use axum::{Json, Router as AxumRouter, routing::get};
 use serde::Serialize;
 use topcoat::{
     Result,
+    context::Cx,
     router::{
         Methods, Router, RouterBuilderDiscoverExt, StripPrefixLayer, page,
         tower::{TowerLayer, TowerRoute},
@@ -40,7 +41,7 @@ pub fn build_router() -> Router {
 
 // ANCHOR: tower-bridge-home
 #[page("/")]
-pub async fn home() -> Result<impl View> {
+pub async fn home(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <!DOCTYPE html>
         <html>

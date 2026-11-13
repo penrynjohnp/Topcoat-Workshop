@@ -4,9 +4,9 @@
 your route tree, declare every child with `mod`, and omit path strings from handlers whose paths
 should be derived.
 
-This reference maps every convention exercised in Lab 04. It follows Topcoat v0.11.0's
-[router guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/router.md) and
-[`module_router!` reference](https://docs.rs/topcoat/0.11.0/topcoat/router/macro.module_router.html).
+This reference maps every convention exercised in Lab 04. It follows Topcoat v0.12.1's
+[router guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/router.md) and
+[`module_router!` reference](https://docs.rs/topcoat/0.12.1/topcoat/router/macro.module_router.html).
 
 ## Convention table
 
@@ -22,7 +22,7 @@ This reference maps every convention exercised in Lab 04. It follows Topcoat v0.
 | A handler's function name does not add or rename a segment. | `list` in the `berths` module | `GET /berths`, not `/berths/list`. |
 | `module_param!(name)` declares a parameter and replaces the enclosing module's static segment. | `module_param!(id)` in `berths::id` | `/berths/{id}` |
 | `path_param!(name)` declares a parameter without changing its enclosing module segment. | `path_param!(id)` with `#[page("./{id}")]` in `berths.rs` | `/berths/{id}` |
-| `path_param::<GeneratedType>(cx)` reads that request's decoded segment. | `path_param::<Id>(cx)` | The decoded `{id}` value as `&str`. |
+| Both macros generate an accessor named after the parameter that reads that request's decoded segment. | `id(cx)` | The decoded `{id}` value as `&str`. |
 | A pathless `#[route(METHOD)]` uses the module path and only the declared method. | `#[route(GET)]` in `api::health` | `GET /api/health` |
 | `mod child;` makes a route module reachable by Rust and therefore discoverable. | `mod _marketing`, `mod berths`, `mod id`, `mod api`, `mod health` | The corresponding descendants are registered. Without the declaration, the file adds no route. |
 | A path string on `#[page]`, `#[layout]`, or `#[route]` disables derivation for that item. | Used during Lab 04's manual-routing steps, then removed from the final solution. | The explicit path wins; the final table above applies only to pathless handlers. |
@@ -65,7 +65,7 @@ handler declared as `#[page("./")]` reverses the canonical form: it serves the m
 slash, and the default policy redirects the slashless request to it. The policy does not affect the
 root `/`, catch-all routes, or a pair of routes that explicitly declares both forms.
 
-*Guide basis: Topcoat v0.11.0 [router guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/router.md), [`module_param!`](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/router/module_param.md), and [`TrailingSlash`](https://docs.rs/topcoat/0.11.0/topcoat/router/enum.TrailingSlash.html).*
+*Guide basis: Topcoat v0.12.1 [router guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/router.md), [`module_param!`](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/router/module_param.md), and [`TrailingSlash`](https://docs.rs/topcoat/0.12.1/topcoat/router/enum.TrailingSlash.html).*
 
 ## Groups, layouts, and the root page
 
@@ -89,12 +89,13 @@ would normally add `/id`, but `module_param!(id)` changes that module segment in
 {{#include ../../../labs/lab-04-routing/solution/src/app/_marketing/berths/id.rs:path-param}}
 ```
 
-The macro generates the Pascal-cased accessor type `Id`. An untyped declaration returns the
-percent-decoded segment as `&str` and cannot fail during parsing. The page still validates that the
+Since Topcoat 0.12 the macro generates an accessor function `id(cx)`, replacing the old
+`path_param::<Id>(cx)` lookup. An untyped declaration returns the percent-decoded segment as `&str` and cannot fail during parsing. The page still validates that the
 slug identifies a real berth and returns `404` when it does not.
 
-For a parsed parameter, declare a type such as `path_param!(id: u64, error = bad_request)`. The
-accessor then parses with `FromStr`, and the declared error policy controls a failed parse. Lab 04
+For a parsed parameter, declare a type such as `path_param!(id: u64 else bad_request)`. The
+accessor then parses with `FromStr`. Without `else`, it returns the parse error; with `else`, a
+failed parse becomes a router error, so `id(cx)?` works in a handler. Lab 04
 uses the untyped form because berth slugs are strings.
 
 A module contributes one segment and can declare one path parameter. Nest dynamic modules when a

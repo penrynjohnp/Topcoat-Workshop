@@ -18,11 +18,11 @@ Start from the question, not the mechanism.
 | Alpine AJAX | browser decides, server answers | the page already uses Alpine and you want AJAX in the same idiom |
 | Datastar | server pushes | the server drives updates, often over a long-lived stream |
 
-*Guide basis: the v0.11.0 [runtime guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/runtime.md),
-[`live!` guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/view/live.md), and the
-[htmx](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/htmx.md),
-[Alpine AJAX](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/alpine_ajax.md), and
-[Datastar](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/datastar.md) integration guides.*
+*Guide basis: the v0.12.1 [runtime guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/runtime.md),
+[`live!` guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/view/live.md), and the
+[htmx](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/htmx.md),
+[Alpine AJAX](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/alpine_ajax.md), and
+[Datastar](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/datastar.md) integration guides.*
 
 ## Signals stay in the browser
 
@@ -41,8 +41,8 @@ That makes a signal the wrong tool when the answer requires server data. A captu
 snapshot from the render that produced it. [How `$(...)` reaches the browser](dual-expressions.md)
 covers the mechanics.
 
-*Guide basis: the v0.11.0 runtime guide's [Signals](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/runtime.md#signals)
-and [Shards](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/runtime.md#shards) sections, plus the v0.11.0 [`expr!` vocabulary guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/runtime/expr.md).*
+*Guide basis: the v0.12.1 runtime guide's [Signals](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/runtime.md#signals)
+and [Shards](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/runtime.md#shards) sections, plus the v0.12.1 [`expr!` vocabulary guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/runtime/expr.md).*
 
 ## Runtime navigation keeps page rendering on the server
 
@@ -60,7 +60,7 @@ ordinary anchors or forms. Use `link_attrs` when you need to preserve a custom a
 {{#include ../../../labs/lab-07-signals-expressions/solution/src/shared.rs:runtime-navigation}}
 ```
 
-*Guide basis: the v0.11.0 [runtime navigation guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/runtime/link.md).*
+*Guide basis: the v0.12.1 [runtime navigation guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/runtime/link.md).*
 
 ## Shards re-render markup on the server
 
@@ -121,12 +121,12 @@ fragment, not a page:
 {{#include ../../../labs/lab-08-shards-procedures-streaming/solution/tests/server_runtime.rs:shard-partial-response-test}}
 ```
 
-In v0.11.0 the runtime coalesces changes made in one tick and aborts a stale request when a newer one
+In v0.12.1 the runtime coalesces changes made in one tick and aborts a stale request when a newer one
 starts, so the latest arguments win. It does not debounce a pause between keystrokes — that is
 application logic, and it is exactly what htmx gives you declaratively.
 
-*Guide basis: the v0.11.0 [`#[shard]` guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/runtime/shard.md)
-and the [runtime guide — Shards](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/runtime.md#shards).*
+*Guide basis: the v0.12.1 [`#[shard]` guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/runtime/shard.md)
+and the [runtime guide — Shards](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/runtime.md#shards).*
 
 ## Procedures call the server without replacing markup
 
@@ -146,8 +146,8 @@ Errors are deliberately opaque to the caller: an `Err` becomes an error response
 expression fails without a value. When the UI must show *why* something failed, return the outcome as
 data — an `Ok` type of `Result<T, String>` — rather than relying on the error.
 
-*Guide basis: the v0.11.0 [`#[procedure]` guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/runtime/procedure.md)
-and the [runtime guide — Procedures](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/runtime.md#procedures).*
+*Guide basis: the v0.12.1 [`#[procedure]` guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/runtime/procedure.md)
+and the [runtime guide — Procedures](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/runtime.md#procedures).*
 
 > [!WARNING]
 > Shards and procedures are public HTTP endpoints. A request to one runs that function alone, so
@@ -181,7 +181,7 @@ Order matters here. Authenticate, read sessions, and set headers *before* the re
 streaming, because a status code or cookie cannot change once the first emission has left. A failure
 after that point belongs to an in-page boundary, not to an error status.
 
-*Guide basis: the v0.11.0 [`live!` guide](https://docs.rs/topcoat/0.11.0/topcoat/view/macro.live.html),
+*Guide basis: the v0.12.1 [`live!` guide](https://docs.rs/topcoat/0.12.1/topcoat/view/macro.live.html),
 including its `suspense` and `error_boundary` sections.*
 
 ## Connected regions receive server push
@@ -204,7 +204,7 @@ Lab 08 uses one process-local broadcast channel shared by its `AppState` clones.
 The database-backed versions send notifications after the write succeeds.
 This is not cross-replica fanout or a durable event log.
 
-*Guide basis: the v0.11.0 [`live!` long-lived connection guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/view/live.md#long-lived-connections).*
+*Guide basis: the v0.12.1 [`live!` long-lived connection guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/view/live.md#long-lived-connections).*
 
 ## htmx moves the decision into markup
 
@@ -242,7 +242,7 @@ states are free. The shard wins on type safety: `vessel_results(query: $(query))
 the compiler, while `hx-target="#vessel-results-htmx"` is a string that fails silently if you rename
 the element. Neither is a default.
 
-*Guide basis: the v0.11.0 [htmx integration guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/htmx.md),
+*Guide basis: the v0.12.1 [htmx integration guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/htmx.md),
 which documents the request accessors and the `IntoResponseParts` responders.*
 
 ## Alpine AJAX has no server-side steering
@@ -259,7 +259,7 @@ nowhere to say so, which is why Topcoat's integration offers request accessors a
 Choose it when the page already uses Alpine for local state and you want its AJAX in the same idiom.
 Choose htmx when the server needs to steer the swap.
 
-*Guide basis: the v0.11.0 [Alpine AJAX integration guide](https://docs.rs/topcoat/0.11.0/topcoat/alpine_ajax/index.html).*
+*Guide basis: the v0.12.1 [Alpine AJAX integration guide](https://docs.rs/topcoat/0.12.1/topcoat/alpine_ajax/index.html).*
 
 ## Datastar lets the server push
 
@@ -279,7 +279,7 @@ when you call `connected(cx)`.
 Datastar has no lab in this workshop, so there is no compiled example to include. Treat this section
 as orientation and read the guide before reaching for it.
 
-*Guide basis: the v0.11.0 [Datastar integration guide](https://docs.rs/topcoat/0.11.0/topcoat/datastar/index.html)
+*Guide basis: the v0.12.1 [Datastar integration guide](https://docs.rs/topcoat/0.12.1/topcoat/datastar/index.html)
 and the router's server-sent events guide it builds on.*
 
 ## Choosing in practice
@@ -299,7 +299,7 @@ Mixing is normal. Lab 09 runs a shard and an htmx route side by side in one app,
 component, and a single page may hold signals, a shard, and a live region at once.
 
 > [!NOTE]
-> Updated 2026-10-01: the client reactivity runtime is explicitly experimental in v0.11.0 and documented as limited.
+> Updated 2026-11-10: the client reactivity runtime is explicitly experimental in v0.12.1 ("highly experimental" in the runtime guide) and documented as limited.
 > Expect both additions and breaking changes; check [Compatibility](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/COMPATIBILITY.md)
 > before relying on a behaviour described here.
 

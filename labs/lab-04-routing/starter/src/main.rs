@@ -7,6 +7,7 @@
 
 use topcoat::{
     Result,
+    context::Cx,
     router::{RouterBuilderDiscoverExt, page},
     view::{Attributes, Child, View, ViewExt, attributes, class, component, view},
 };
@@ -82,7 +83,12 @@ pub fn find_berth(slug: &str) -> Option<Berth> {
 /// The whole HTML document. Pages pass their own markup as child content, so
 /// the shell lives in exactly one place.
 #[component]
-async fn layout(title: &str, current_path: &str, #[default] child: Child<'_>) -> Result<impl View> {
+async fn layout(
+    cx: &Cx,
+    title: &str,
+    current_path: &str,
+    #[default] child: Child<'_>,
+) -> Result<impl View> {
     Ok(view! {
         <!DOCTYPE html>
         <html lang="en">
@@ -110,7 +116,7 @@ async fn layout(title: &str, current_path: &str, #[default] child: Child<'_>) ->
 /// The site navigation. Lab 05 reads the current path from `Cx` instead of
 /// taking it as an argument.
 #[component]
-async fn site_nav(current_path: &str) -> Result<impl View> {
+async fn site_nav(cx: &Cx, current_path: &str) -> Result<impl View> {
     Ok(view! {
         <nav aria-label="Main">
             <ul class="nav">
@@ -132,7 +138,7 @@ async fn site_nav(current_path: &str) -> Result<impl View> {
 
 /// The site footer.
 #[component]
-async fn site_footer() -> Result<impl View> {
+async fn site_footer(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <footer class="footer"><p>"Slipway Marina · Built with Topcoat"</p></footer>
     })
@@ -140,7 +146,7 @@ async fn site_footer() -> Result<impl View> {
 
 /// A status badge.
 #[component]
-async fn status_badge(status: &Status) -> Result<impl View> {
+async fn status_badge(cx: &Cx, status: &Status) -> Result<impl View> {
     Ok(view! {
         match status {
             Status::Vacant => {
@@ -170,6 +176,7 @@ async fn status_badge(status: &Status) -> Result<impl View> {
 /// and `child` gives it an optional footer slot.
 #[component]
 async fn berth_card(
+    cx: &Cx,
     slug: &str,
     #[default] attrs: Attributes,
     #[default] child: Child<'_>,
@@ -221,7 +228,7 @@ async fn berth_card(
 /// The berth list. It fetches its own berths and delegates each card, so the
 /// pages that use it pass nothing at all.
 #[component]
-async fn berth_list() -> Result<impl View> {
+async fn berth_list(cx: &Cx) -> Result<impl View> {
     let berths = berths();
 
     Ok(view! {
@@ -240,7 +247,7 @@ async fn berth_list() -> Result<impl View> {
 
 // ANCHOR: pages
 #[page("/")]
-async fn home() -> Result<impl View> {
+async fn home(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         layout(
             title: "Slipway",
@@ -253,14 +260,14 @@ async fn home() -> Result<impl View> {
 }
 
 #[page("/berths")]
-async fn berths_page() -> Result<impl View> {
+async fn berths_page(cx: &Cx) -> Result<impl View> {
     Ok(view! { layout(title: "Berths", current_path: "/berths", berth_list()) })
 }
 
 // TODO(lab-04): move this and the other handlers into `app/` modules and
 // switch the final router to `module_router!()`.
 #[page("/berths/featured")]
-async fn featured_berth_page() -> Result<impl View> {
+async fn featured_berth_page(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         layout(
             title: "Featured berth",
@@ -283,9 +290,10 @@ async fn featured_berth_page() -> Result<impl View> {
 
 // TODO(lab-04) step 1: build a manual Router::builder() with explicit
 // `.layout(...)`, `.page(...)`, and `.route(...)` registrations.
-// TODO(lab-04) step 2: add `cx: &Cx` to a handler; request-scoped values live in Cx.
-// TODO(lab-04) step 3: declare `path_param!(id)` and read it with
-// `path_param::<Id>(cx)` for `/berths/{id}`.
+// TODO(lab-04) step 2: read request-scoped values through the `cx: &Cx` every
+// handler already takes.
+// TODO(lab-04) step 3: declare `path_param!(id)` and read it with `id(cx)`
+// for `/berths/{id}`.
 // TODO(lab-04) step 4: add `#[route(GET)]` health returning `Json<Health>`.
 // TODO(lab-04) step 5: replace the component layout with router `#[layout]` + `Slot`.
 // TODO(lab-04) step 6: declare the module tree and use `module_router!()`.

@@ -3,12 +3,13 @@ mod verify;
 
 use topcoat::{
     Result,
+    context::Cx,
     router::{page, request::uri},
     view::{View, view},
 };
 
 #[page]
-async fn login(cx: &topcoat::context::Cx) -> Result<impl View> {
+async fn login(cx: &Cx) -> Result<impl View> {
     let email = uri(cx)
         .query()
         .and_then(|query| query.strip_prefix("email="))

@@ -2,7 +2,7 @@ use crate::shared::{self, berth_card};
 use topcoat::{
     Result,
     context::Cx,
-    router::{module_param, page, path_param},
+    router::{module_param, page},
     view::{View, view},
 };
 
@@ -13,7 +13,7 @@ module_param!(id);
 // Each component should call the same memoized load_berth(cx, slug) helper.
 #[page]
 async fn detail(cx: &Cx) -> Result<impl View> {
-    let id = path_param::<Id>(cx);
+    let id = id(cx);
     if shared::find_berth(id).is_none() {
         return Err(topcoat::router::error::not_found().into());
     }

@@ -25,7 +25,7 @@ The capstone instead defines an already-prefixed Axum route and does not strip i
 
 `TowerRoute::any` is shorthand for `TowerRoute::new(Methods::Any, ...)`.
 This example keeps the general constructor to make method selection visible.
-Read the tagged [Tower guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/router/tower.md).
+Read the tagged [Tower guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/router/tower.md).
 
 > [!NOTE]
 > **Checkpoint:** the app builds, and `curl http://127.0.0.1:3000/api/v1/health` returns `{"status":"ok"}`.
@@ -55,6 +55,7 @@ Check the mounted JSON, method handling, missing API paths, and the ordinary Top
 - Add a second `/api/v1/vessels` endpoint that returns a tiny JSON list from a static `Vec`.
 - Wrap the API with a timeout or request-id layer and confirm the middleware shows up in the response headers or logs.
 - Explore whether the Topcoat app can embed a `TowerService` fallback for the remaining unmatched routes in a later project.
+- Further learning: read the tagged [OpenAPI guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/openapi.md). Topcoat's `openapi` feature describes Topcoat `#[route]` handlers through `with(Operation::new()...)`; a `TowerRoute` has no such hook, so it cannot describe the Axum handlers under `/api/v1`. Decide which side should own the API contract: move the endpoint to a Topcoat `#[route]` (as in the Lab 04 stretch goal) or document it with Axum-side tooling.
 
 ## Troubleshooting
 - **The mounted `/health` returns 404.** `TowerRoute` forwards `/api/v1/health`; add `StripPrefixLayer` for a relative Axum route, or define the full prefixed route without stripping it.

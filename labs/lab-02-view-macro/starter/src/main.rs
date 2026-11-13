@@ -5,6 +5,7 @@
 
 use topcoat::{
     Result,
+    context::Cx,
     router::{Router, RouterBuilderDiscoverExt, page},
     view::{View, component, view},
 };
@@ -76,7 +77,7 @@ async fn main() {
 }
 
 #[component]
-async fn site_nav(current_path: &str) -> Result<impl View> {
+async fn site_nav(cx: &Cx, current_path: &str) -> Result<impl View> {
     // Both go away once the loop and the conditional attribute are in place.
     let _ = (current_path, NAV);
 
@@ -97,14 +98,14 @@ async fn site_nav(current_path: &str) -> Result<impl View> {
 }
 
 #[component]
-async fn site_footer() -> Result<impl View> {
+async fn site_footer(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <footer class="footer"><p>"Slipway Marina · Built with Topcoat"</p></footer>
     })
 }
 
 #[component]
-async fn status_badge(status: &Status) -> Result<impl View> {
+async fn status_badge(cx: &Cx, status: &Status) -> Result<impl View> {
     // TODO(lab-02) step 4: replace this with a `match status { ... }` inside
     // `view!`, giving each variant its own label. `Status::Occupied { vessel }`
     // should render "Occupied by " followed by the vessel name.
@@ -114,7 +115,7 @@ async fn status_badge(status: &Status) -> Result<impl View> {
 }
 
 #[component]
-async fn berth_list(berths: Vec<Berth>) -> Result<impl View> {
+async fn berth_list(cx: &Cx, berths: Vec<Berth>) -> Result<impl View> {
     // Goes away once the `for` loop below renders the real data.
     let _ = berths;
 
@@ -140,7 +141,7 @@ async fn berth_list(berths: Vec<Berth>) -> Result<impl View> {
 }
 
 #[page("/")]
-async fn home() -> Result<impl View> {
+async fn home(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <!DOCTYPE html>
         <html lang="en">
@@ -166,7 +167,7 @@ async fn home() -> Result<impl View> {
 }
 
 #[page("/berths")]
-async fn berths_page() -> Result<impl View> {
+async fn berths_page(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <!DOCTYPE html>
         <html lang="en">

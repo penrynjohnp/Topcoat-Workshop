@@ -14,11 +14,17 @@ Authentication is a rendering concern as well as a routing concern. A page or co
 
 ## Steps
 ### Step 1 — Configure cookies, sessions, and mail
-Start from the Lab 05 solution. Install cookie support, the pinned session API, and the file mail transport on the module router:
+Start from the Lab 05 solution. Add the cookie layer, a session lifetime, and the file mail transport to the module router:
 
 ```rust
 {{#include solution/src/app.rs:app-router}}
 ```
+
+Since Topcoat 0.12 the router builder has no feature-specific methods such as `.cookies()`,
+`.sessions(...)` or `.mail(...)`. Cookies are a router *layer* (`CookieLayer`), because they must
+parse the request and write `Set-Cookie` on the response. Sessions and mail are plain *context
+values* added with `.with(...)`: `SessionLifetime` sets how long a session lives (the default is 30
+days), and `Mailer` wraps the transport that `send` uses. Your `AppState` goes in the same way.
 
 The default session cookie is opaque, secure, HTTP-only, and SameSite=Lax. For application cookies, Topcoat also provides signed and encrypted jar adapters; keep keys in application state and never hard-code production secrets.
 > [!NOTE]
@@ -47,14 +53,15 @@ proving the protection travels with the markup rather than depending on a route-
 chain. Before returning the redirect error, `require_auth` stores the attempted GET or HEAD path in
 a private, signed cookie that expires after ten minutes.
 
-Topcoat 0.11.0 serializes queued cookie changes even when a handler returns an error such as this
-redirect ([tokio-rs/topcoat#408](https://github.com/tokio-rs/topcoat/pull/408)). In 0.8.0 the router
+Topcoat serializes queued cookie changes even when a handler returns an error such as this
+redirect ([tokio-rs/topcoat#408](https://github.com/tokio-rs/topcoat/pull/408)); in 0.12.1 the
+`CookieLayer` does this. In 0.8.0 the router
 dropped the `Set-Cookie` header on error responses, so the login flow could not remember where the
 request started.
 
 > [!NOTE]
 > `error::redirect` returns 307, preserving the original method and body, while `error::see_other`
-> returns 303 and follows with GET. In 0.11.0 `SeeOther` implements `Error`, so a view-returning guard
+> returns 303 and follows with GET. `SeeOther` implements `Error`, so a view-returning guard
 > can send it through `Err`. The lab keeps 307 in this pass, but a browser auth guard should prefer
 > 303 so a guard that fires during POST does not repost the form body to `/login`.
 
@@ -63,13 +70,17 @@ request started.
 > and a short-lived `return_to` cookie in the same error response.
 
 ### Step 4 — Send and consume a magic link
-Request a link for an email address. The handler creates a one-time token, sends a `mail!` message
-through `FileTransport`, and exposes the link for local inspection. Verification consumes the token,
+Request a link for an email address. The handler creates a one-time token, builds a message with
+`Mail::builder()`, renders its HTML body from a `view!` with `.html(cx, ...)`, and sends it through
+the `FileTransport` registered with `Mailer`. It then exposes the link for local inspection. Verification consumes the token,
 starts a fresh session, and redirects to the remembered protected path or `/admin` as a fallback:
 
 ```rust
 {{#include solution/src/app/_marketing/login/request.rs:magic-link}}
 ```
+
+Addresses are typed: `Mailbox::named` and `Mailbox::new` validate them, and `to` takes a collection.
+Topcoat 0.12 removed the `mail!` macro; the builder is the one way to declare mail.
 
 Open the generated `.eml` file in `mail/` and copy its `/login/verify?token=...` URL. The token is
 single-use and expires; a production application would persist it in the database and rate-limit
@@ -126,9 +137,10 @@ logout invalidates the session.
 - Add a “sign out everywhere” action that deletes every session record for one user.
 
 ## Troubleshooting
-- **`/admin` returns 500** → sessions or cookies were not registered on the router → add `.cookies().sessions(...)` before `.build()`.
+- **`/admin` panics with "the cookie layer is not installed"** → add `.layer(CookieLayer::new())` to the router before `.build()`.
+- **`no method named cookies`/`sessions`/`mail` on the router builder** → those 0.11 extension methods are gone. Use `.layer(CookieLayer::new())`, `.with(SessionLifetime(...))` and `.with(Mailer::new(...))`.
 - **The session cookie is present but the user is anonymous** → the cookie token hash has no live application record → persist the `Session` returned by `session::start` and check expiry.
-- **The mail directory is empty** → the mail feature/configuration is missing → enable Topcoat's `mail` feature and register `MailConfig` with `FileTransport`.
+- **The mail directory is empty** → the mail feature/configuration is missing → enable Topcoat's `mail` feature and add `.with(Mailer::new(FileTransport::new("mail")))` to the router.
 - **A protected component works on one page but not another** → the guard was placed in the route instead of the component → call `require_auth(cx)` at the component's first line.
 - **A cookie write panics during streaming** → headers already started → set or remove cookies before returning a streaming view.
 

@@ -12,7 +12,7 @@ use crate::{
 };
 use topcoat::{
     Result,
-    context::{Cx, app_context},
+    context::{Cx, context},
     router::{Slot, layout, page, request::uri},
     runtime::procedure,
     view::{View, component, view},
@@ -21,7 +21,7 @@ use topcoat::{
 // ANCHOR: runtime-script
 #[layout]
 async fn root_layout(cx: &Cx, slot: Slot<'_>) -> Result<impl View> {
-    let state: &AppState = app_context(cx);
+    let state: &AppState = context(cx);
     Ok(view! {
         <!DOCTYPE html>
         <html lang="en">
@@ -85,7 +85,7 @@ async fn work_orders(cx: &Cx) -> Result<impl View> {
 
 #[page]
 #[rustfmt::skip]
-async fn home() -> Result<impl View> {
+async fn home(cx: &Cx) -> Result<impl View> {
     Ok(
         view! {
             <p>"Berths, vessels and work orders for a small marina."</p>

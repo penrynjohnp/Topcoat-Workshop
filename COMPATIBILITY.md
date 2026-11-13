@@ -17,6 +17,19 @@ Topcoat is pre-1.0 and ships breaking changes. Every lab pins the versions below
 2. `cargo build --workspace && cargo test --workspace`.
 3. Fix breakages lab by lab; each fix PR adds a row here.
 
+## 0.12.1 upgrade notes
+
+Topcoat 0.12.0 reworked context and macro foundations; 0.12.1 adds OpenAPI and route listing. Check behavior against the `v0.12.0` and `v0.12.1` release tags, not `main`. Rust stays at 1.99.1 and Toasty at 0.10.0.
+
+- **Context comes first.** Every `#[component]`, `#[page]`, `#[route]`, `#[layout]`, `#[layer]`, `#[shard]`, `#[procedure]` and `#[memoize]` function takes `cx: &Cx` as its first parameter, named exactly `cx`. Every lab and the capstone were updated, including the owned UI components in Labs 11-12 and Slipway, which match the upstream registry change. Call sites inside `view!` still omit `cx`. The Labs 05-09 `#[allow(unused_imports)] use topcoat::context::Cx;` workaround is gone.
+- **One context.** `app_context`/`request_context` (and `try_` forms) became `topcoat::context::{context, try_context}`, and the router's `.app_context(state)` became `.with(state)`. A request value wins over a router value of the same type.
+- **Router settings are context values or layers.** `.cookies()` → `.layer(CookieLayer::new())`; `.sessions(SessionConfig...)` → `.with(SessionLifetime(Duration))`; `.mail(MailConfig...)` → `.with(Mailer::new(FileTransport::new("mail")))`; `.runtime()` → `.layer(RuntimeLayer::new())`. The labs register the cookie layer before the runtime layer so the runtime layer, registered last, runs first and its rewritten `GET` reaches the cookie layer. The `RouterBuilderCookieExt`, `RouterBuilderSessionExt`, `RouterBuilderMailExt` and `RouterBuilderRuntimeExt` traits are gone; `RouterBuilderAssetExt` and `RouterBuilderDiscoverExt` remain.
+- **`mail!` and `cookie!` are removed.** Lab 06+ builds the magic-link message with `Mail::builder()`, typed `Mailbox` addresses and `.html(cx, view! { ... }).await?`, then handles the `Result` from `.build()`.
+- **Path parameters.** `module_param!(id)` now generates an accessor, so pages read `id(cx)` instead of `path_param::<Id>(cx)`. Typed parameters use `path_param!(id: u64 else bad_request)` (`else` replaces `error =`), and `href!` takes `name: value` pairs. `#[query_params(error = ...)]` is unchanged.
+- **Tests.** Lab 08's identity fixture uses `.layer(RuntimeLayer::new())`. No assertions changed.
+- **CLI.** `topcoat-cli` 0.12.1 is pinned in CI, `scripts/setup.sh`, the devcontainer and the Lab 12/Slipway Dockerfiles. `topcoat fmt` now also formats Topcoat attribute macros. The command set is otherwise unchanged; there is still no `topcoat build` or `topcoat ui update`.
+- **Not used by the labs:** route `with(...)` context, `Metadata` (`metadata` feature), `Compression`/`OriginPolicy`/`BodyLimit` settings, `Router::routes()`, and OpenAPI (`openapi` feature + `schemars`). OpenAPI is an optional stretch goal in Lab 04 and a further-learning stretch goal in Lab 13 (Topcoat OpenAPI cannot describe `TowerRoute` handlers); no lab enables the feature.
+
 ## 0.11.0 upgrade notes
 
 - Topcoat 0.11.0 requires Rust 1.99 or newer. The workshop pins 1.99.1 in `rust-toolchain.toml` and in the `rust:1.99.1-bookworm` builder images for Lab 12 and Slipway.

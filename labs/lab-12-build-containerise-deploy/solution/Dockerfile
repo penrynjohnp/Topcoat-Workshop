@@ -3,7 +3,7 @@
 # ANCHOR: release-container
 FROM docker.io/library/rust:1.99.1-bookworm AS builder
 WORKDIR /workspace
-RUN cargo install topcoat-cli --version 0.11.0 --locked
+RUN cargo install topcoat-cli --version 0.12.1 --locked
 COPY . .
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/workspace/target \

@@ -1,6 +1,7 @@
 use serde::Serialize;
 use topcoat::{
     Result,
+    context::Cx,
     router::{content::Json, route},
 };
 
@@ -11,6 +12,6 @@ pub(crate) struct Health {
 
 // ANCHOR: health-route
 #[route(GET)]
-async fn health() -> Result<Json<Health>> {
+async fn health(cx: &Cx) -> Result<Json<Health>> {
     Ok(Json(Health { status: "ok" }))
 }

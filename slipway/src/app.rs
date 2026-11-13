@@ -4,14 +4,14 @@ use axum::{Json, Router as AxumRouter, routing::get};
 use serde::Serialize;
 use topcoat::{
     asset::{AssetBundle, RouterBuilderAssetExt},
-    cookie::RouterBuilderCookieExt,
-    mail::{FileTransport, MailConfig, RouterBuilderMailExt},
+    cookie::CookieLayer,
+    mail::{FileTransport, Mailer},
     router::{
         Methods, RouterBuilderDiscoverExt,
         tower::{TowerLayer, TowerRoute},
     },
-    runtime::RouterBuilderRuntimeExt,
-    session::{RouterBuilderSessionExt, SessionConfig},
+    runtime::RuntimeLayer,
+    session::SessionLifetime,
 };
 use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 
@@ -40,18 +40,10 @@ pub fn router(state: AppState, assets: Option<AssetBundle>) -> topcoat::router::
 
     let builder = topcoat::router::module_router!()
         .discover()
-        .cookies()
-        .sessions(
-            SessionConfig::builder()
-                .lifetime(Duration::from_secs(3600))
-                .build(),
-        )
-        .mail(
-            MailConfig::builder()
-                .transport(FileTransport::new("mail"))
-                .build(),
-        )
-        .app_context(state)
+        .layer(CookieLayer::new())
+        .with(SessionLifetime(Duration::from_secs(3600)))
+        .with(Mailer::new(FileTransport::new("mail")))
+        .with(state)
         .route(TowerRoute::new(
             Methods::Any,
             "/api/v1/{*rest}",
@@ -59,7 +51,7 @@ pub fn router(state: AppState, assets: Option<AssetBundle>) -> topcoat::router::
         ))
         .layer(TowerLayer::new(CompressionLayer::new()).at("/api/v1"))
         .layer(TowerLayer::new(TraceLayer::new_for_http()).at("/api/v1"))
-        .runtime();
+        .layer(RuntimeLayer::new());
 
     match assets {
         Some(bundle) => builder.assets(bundle).build(),

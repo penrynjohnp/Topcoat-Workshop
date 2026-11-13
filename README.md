@@ -9,7 +9,7 @@ Thirteen labs build one application from a static page to a containerised deploy
 Container Apps. Every `solution/` is compiled and tested in CI against the pinned versions in
 [COMPATIBILITY.md](COMPATIBILITY.md) — Topcoat is pre-1.0 and its API changes between minor versions.
 
-The current target is **Topcoat and CLI 0.11.0**, with Toasty 0.10.0 and Rust 1.99.1.
+The current target is **Topcoat and CLI 0.12.1**, with Toasty 0.10.0 and Rust 1.99.1.
 The reactivity lessons cover records and tuples, UTF-8 byte lengths, safe runtime navigation,
 shared WebSocket runs, keyed identity, connected server push, and suspense wait mode. Owned UI
 lessons include accessible form-field composition.
@@ -51,7 +51,7 @@ skip one and copy the previous lab's `solution/`.
 | 02 | [The `view!` macro](labs/lab-02-view-macro/README.md) | 60 min |
 | 03 | [Components and composition](labs/lab-03-components/README.md) | 45 min |
 | 04 | [Manual routing, then module-based routing](labs/lab-04-routing/README.md) | 60 min |
-| 05 | [Cx, app context, and memoization](labs/lab-05-cx-memoize/README.md) | 60 min |
+| 05 | [Cx, context, and memoization](labs/lab-05-cx-memoize/README.md) | 60 min |
 | 06 | [Cookies, sessions, and functions—not middleware](labs/lab-06-auth-sessions-mail/README.md) | 75 min |
 | 07 | [Signals and `$(...)` expressions](labs/lab-07-signals-expressions/README.md) | 60 min |
 | 08 | [Shards, procedures, and streaming](labs/lab-08-shards-procedures-streaming/README.md) | 90 min |

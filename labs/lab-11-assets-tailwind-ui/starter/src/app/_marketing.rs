@@ -13,7 +13,7 @@ use crate::{
 };
 use topcoat::{
     Result,
-    context::{Cx, app_context},
+    context::{Cx, context},
     router::{Slot, layout, page, request::uri},
     runtime::{procedure, signal},
     view::{View, component, view},
@@ -22,7 +22,7 @@ use topcoat::{
 // ANCHOR: runtime-script
 #[layout]
 async fn root_layout(cx: &Cx, slot: Slot<'_>) -> Result<impl View> {
-    let state: &AppState = app_context(cx);
+    let state: &AppState = context(cx);
     Ok(view! {
         <!DOCTYPE html>
         <html lang="en">
@@ -67,12 +67,12 @@ pub(crate) async fn mark_work_order_complete(cx: &Cx, id: u64) -> Result<bool> {
             std::io::Error::new(std::io::ErrorKind::InvalidInput, "unknown work order").into(),
         );
     }
-    let mut db = app_context::<AppState>(cx).db.clone();
+    let mut db = context::<AppState>(cx).db.clone();
     let mut order = WorkOrder::get_by_id(&mut db, &id).await?;
     toasty::update!(order { completed: true })
         .exec(&mut db)
         .await?;
-    app_context::<AppState>(cx).updates.send(()).ok();
+    context::<AppState>(cx).updates.send(()).ok();
     Ok(true)
 }
 // ANCHOR_END: complete-work-order-procedure
@@ -141,7 +141,7 @@ async fn work_orders(cx: &Cx) -> Result<impl View> {
 
 #[page]
 #[rustfmt::skip]
-async fn home() -> Result<impl View> {
+async fn home(cx: &Cx) -> Result<impl View> {
     Ok(
         view! {
             <p>"Berths, vessels and work orders for a small marina."</p>

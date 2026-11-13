@@ -33,7 +33,7 @@ async fn root_layout(cx: &Cx, slot: Slot<'_>) -> Result<impl View> {
 
 #[page]
 #[rustfmt::skip]
-async fn home() -> Result<impl View> {
+async fn home(cx: &Cx) -> Result<impl View> {
     Ok(
         view! {
             <p>"Berths, vessels and work orders for a small marina."</p>

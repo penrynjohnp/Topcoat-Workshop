@@ -6,6 +6,7 @@
 
 use topcoat::{
     Result,
+    context::Cx,
     router::page,
     view::{Attributes, Child, View, ViewExt, attributes, class, component, view},
 };
@@ -81,7 +82,12 @@ pub fn find_berth(slug: &str) -> Option<Berth> {
 /// The whole HTML document. Pages pass their own markup as child content, so
 /// the shell lives in exactly one place.
 #[component]
-async fn layout(title: &str, current_path: &str, #[default] child: Child<'_>) -> Result<impl View> {
+async fn layout(
+    cx: &Cx,
+    title: &str,
+    current_path: &str,
+    #[default] child: Child<'_>,
+) -> Result<impl View> {
     Ok(view! {
         <!DOCTYPE html>
         <html lang="en">
@@ -131,7 +137,7 @@ async fn site_nav(current_path: &str) -> Result<impl View> {
 
 /// The site footer.
 #[component]
-async fn site_footer() -> Result<impl View> {
+async fn site_footer(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <footer class="footer"><p>"Slipway Marina · Built with Topcoat"</p></footer>
     })
@@ -169,6 +175,7 @@ async fn status_badge(status: &Status) -> Result<impl View> {
 /// and `child` gives it an optional footer slot.
 #[component]
 async fn berth_card(
+    cx: &Cx,
     slug: &str,
     #[default] attrs: Attributes,
     #[default] child: Child<'_>,
@@ -252,7 +259,7 @@ async fn home() -> Result<impl View> {
 }
 
 #[page("/berths")]
-async fn berths_page() -> Result<impl View> {
+async fn berths_page(cx: &Cx) -> Result<impl View> {
     // ANCHOR: cheatsheet-child-content
     Ok(view! { layout(title: "Berths", current_path: "/berths", berth_list()) })
     // ANCHOR_END: cheatsheet-child-content

@@ -8,7 +8,7 @@
 - Write your first `#[page]` and `#[component]`
 
 ## Concepts (read first, 5 min)
-Topcoat renders everything on the server. A **page** is an `async fn` bound to a URL; a **component** is an `async fn` that returns `Result<impl View>` — usually `Ok(view! { ... })`. `Router::builder().discover()` finds every `#[page]` in the binary so you don't register routes by hand. `topcoat::dev::script()` injects a tiny script that reloads the browser when `topcoat dev` finishes a rebuild.
+Topcoat renders everything on the server. A **page** is an `async fn` bound to a URL; a **component** is an `async fn` that returns `Result<impl View>` — usually `Ok(view! { ... })`. Every page and component takes `cx: &Cx` (the request context) as its first parameter, even when it does not use it yet; Topcoat supplies it for you. `Router::builder().discover()` finds every `#[page]` in the binary so you don't register routes by hand. `topcoat::dev::script()` injects a tiny script that reloads the browser when `topcoat dev` finishes a rebuild.
 
 ## Steps
 
@@ -42,13 +42,13 @@ Save. Change the `<h1>` text and save again.
 Below `home`, add:
 ```rust
 #[component]
-async fn hello(name: &str) -> Result<impl View> {
+async fn hello(cx: &Cx, name: &str) -> Result<impl View> {
     Ok(view! {
         <h1>"Hello, " (name) "!"</h1>
     })
 }
 ```
-Then in `home`, replace the `<h1>` with `hello(name: "Topcoat")`. Components are invoked like functions, with named arguments, directly inside `view!`; `(name)` interpolates a Rust expression. Pages and components return `Result<impl View>` — the `Ok(...)` around `view!` is what lets a component bail out with an error (a 404, a redirect) instead of markup, which Lab 06 relies on.
+Then in `home`, replace the `<h1>` with `hello(name: "Topcoat")`. Components are invoked like functions, with named arguments, directly inside `view!`; you never pass `cx` yourself — the call inside `view!` hands the surrounding `cx` along. `(name)` interpolates a Rust expression. `(name)` interpolates a Rust expression. Pages and components return `Result<impl View>` — the `Ok(...)` around `view!` is what lets a component bail out with an error (a 404, a redirect) instead of markup, which Lab 06 relies on.
 > [!NOTE]
 > **Checkpoint:** page shows **Hello, Topcoat!** Compare with `../solution/src/lib.rs`.
 
@@ -64,7 +64,7 @@ HOST=0.0.0.0 PORT=8080 topcoat dev
 - Run `topcoat fmt` after deliberately mangling the indentation inside `view!`.
 
 ## Troubleshooting
-- `topcoat: command not found` → `cargo install topcoat-cli --version 0.11.0 --locked` and check `~/.cargo/bin` is on `PATH`.
+- `topcoat: command not found` → `cargo install topcoat-cli --version 0.12.1 --locked` and check `~/.cargo/bin` is on `PATH`.
 - Compile error mentioning a missing import → compare the `use topcoat::{...}` block against the solution; the facade crate re-exports through feature-gated modules.
 
 ## What's next

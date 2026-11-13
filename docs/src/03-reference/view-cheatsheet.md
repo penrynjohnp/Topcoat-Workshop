@@ -1,10 +1,10 @@
 # `view!` cheat sheet
 
 Use this page when you know what markup you want and need the Topcoat syntax. Every example comes
-from the compiled solutions for Labs 02–03 and targets Topcoat 0.11.0.
+from the compiled solutions for Labs 02–03 and targets Topcoat 0.12.1.
 
-The syntax follows the pinned v0.11.0 [`view!`
-guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/view/view.md).
+The syntax follows the pinned v0.12.1 [`view!`
+guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/view/view.md).
 
 ## Syntax at a glance
 
@@ -90,8 +90,9 @@ to the receiving component; they are not ordinary positional Rust arguments.
 - Bare words are Rust expressions. Quote literal text.
 - HTML void elements such as `<img>` and `<input>` have no closing tag.
 - Run both `cargo fmt` and `topcoat fmt`; `rustfmt` does not format the inside of `view!`.
-- In a plain function, provide the request context explicitly with `view! { cx => ... }`. Pages,
-  layouts, components, and shards receive it implicitly.
+- `view!` captures the variable named `cx` from the surrounding scope. Pages, layouts, components,
+  and shards declare `cx: &Cx` first; a plain function needs a `cx` parameter too. Topcoat 0.12
+  removed `view! { cx => ... }`: to add context values, shadow it first with `let cx = cx.with(value);`.
 - Spreading `Attributes` consumes the value.
 - A `view!` value captures referenced variables like an `async move` block.
 

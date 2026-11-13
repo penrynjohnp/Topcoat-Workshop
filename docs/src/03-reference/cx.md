@@ -1,15 +1,16 @@
 # `Cx` API summary
 
-`Cx` is Topcoat's handle for the current request. Pass `&Cx` to small request functions, or declare it
-on a page, layout, component, route, shard, or procedure that needs request-scoped information.
+`Cx` is Topcoat's handle for the current request. Every page, route, layout, layer, component, shard,
+procedure, and memoized function takes `cx: &Cx` as its first parameter, even when it does not use it.
+Pass the same `cx` explicitly to ordinary helper functions.
 
-The helpers in this page are the ones used across Labs 05–08. They follow Topcoat v0.11.0's
-[context guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/context.md)
-and [router guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/router.md).
+The helpers in this page are the ones used across Labs 05–08. They follow Topcoat v0.12.1's
+[context guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/context.md)
+and [router guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/router.md).
 
 > [!NOTE]
-> `Cx` is request-scoped. Values registered as app context outlive requests, but the `&Cx` used to
-> reach them belongs only to the current request.
+> `Cx` is request-scoped. Values added to the router with `.with(value)` outlive requests, but the
+> `&Cx` used to reach them belongs only to the current request.
 
 ## Signals
 
@@ -22,8 +23,8 @@ must not make the body depend on the signal. Validate every signal value read on
 input. See [How `$(...)` reaches the browser](../01-concepts/dual-expressions.md) for the dual
 expression model.
 
-*Guide basis: the v0.11.0 runtime guide's [Signals](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/runtime.md#signals)
-and [Reading signals on the server](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/runtime.md#reading-signals-on-the-server) sections.*
+*Guide basis: the v0.12.1 runtime guide's [Signals](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/runtime.md#signals)
+and [Reading signals on the server](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/runtime.md#reading-signals-on-the-server) sections.*
 
 ## Request
 
@@ -34,9 +35,9 @@ Use request helpers to read the URI and values produced by route matching.
 | `request::uri(cx)` | `&Uri` | Read the current path or raw query string. |
 | `uri(cx).path()` | `&str` | Highlight navigation for the current route. |
 | `uri(cx).query()` | `Option<&str>` | Read the raw query string before parsing application values. |
-| `path_param::<Id>(cx)` | The declared parameter type | Read a dynamic segment declared with `module_param!(id)` or `path_param!(id)`. |
+| `id(cx)` | `&str`, or the declared type as a `Result` | Read a dynamic segment through the accessor that `module_param!(id)` or `path_param!(id: u64 else bad_request)` generates. |
 
-Lab 05 reads a typed path parameter and returns a not-found error before composing the detail page:
+Lab 05 reads the `id` path parameter through its generated accessor and returns a not-found error before composing the detail page:
 
 ```rust
 {{#include ../../../labs/lab-05-cx-memoize/solution/src/app/_marketing/berths/id.rs:request-values}}
@@ -52,7 +53,7 @@ request value.
 
 ## Cookies
 
-Enable cookie handling on the router with `.cookies()`. Then call `cookies(cx)` to obtain a cookie
+Enable cookie handling on the router with `.layer(CookieLayer::new())`. Then call `cookies(cx)` to obtain a cookie
 view for the current request and response.
 
 | API | Purpose |
@@ -79,12 +80,12 @@ Callers use the configured view instead of repeating security attributes:
 ```
 
 The lab disables `Secure` only because its integration tests use plain HTTP. Production HTTPS
-cookies should remain secure. Keep signing and encryption keys in app context or another server-side
+cookies should remain secure. Keep signing and encryption keys in context or another server-side
 secret source; never expose them to the browser.
 
 ## Session
 
-Enable sessions with `.sessions(SessionConfig)`. The session helpers use `Cx` to read or update the
+Sessions need the `CookieLayer`. Set their lifetime with `.with(SessionLifetime(duration))`; without it, sessions last 30 days. The session helpers use `Cx` to read or update the
 session cookie while your application owns the record associated with the token hash.
 
 | API | Result | Meaning |
@@ -102,7 +103,7 @@ Lab 06 keeps the browser cookie and its in-memory session store synchronized:
 ```
 
 `session::token_hash(cx)` is fallible and async. Lab 06's memoized `current_user` treats a missing or
-invalid session as signed out, then looks up the email in app context. `require_auth` turns that
+invalid session as signed out, then looks up the email in the shared state read with `context(cx)`. `require_auth` turns that
 optional identity into a redirect for private behaviour.
 
 Labs 07–08 carry the same server-side session pattern forward. Signals and `$(...)` do not move a
@@ -113,7 +114,7 @@ A connected render can outlive its initial authorization result.
 Read the current server-side session record before each private emission.
 Do not reuse a memoized initial user for this check or mutate response cookies after streaming starts.
 
-*Guide basis: the v0.11.0 [live connection lifecycle](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/view/live.md#long-lived-connections).*
+*Guide basis: the v0.12.1 [live connection lifecycle](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/view/live.md#long-lived-connections).*
 
 ## Identity
 
@@ -122,18 +123,19 @@ Their signals and live regions keep the same identity when the item moves.
 An unkeyed loop is ambiguous when a component consumes that identity.
 For ordinary Rust helpers, derive a distinct context with `cx.keyed(item.id)`.
 
-*Guide basis: the v0.11.0 [`view!` identity guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/view/view.md#keys).*
+*Guide basis: the v0.12.1 [`view!` identity guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/view/view.md#keys).*
 
-## App context
+## Shared context
 
-App context holds values that are shared by all requests handled by a router: a database pool,
-configuration, an HTTP client, or the Lab 05 state used to count loads.
+Since Topcoat 0.12 there is one context. Values added to the router with `.with(value)` are shared by
+all requests handled by that router: a database pool, configuration, an HTTP client, or the Lab 05
+state used to count loads.
 
 | API | Result | Notes |
 |---|---|---|
-| `.app_context(value)` | Router builder | Register one value under its concrete Rust type. |
-| `app_context::<T>(cx)` | `&T` | Borrow the registered value; panics when that exact type was not registered. |
-| `try_app_context::<T>(cx)` | `Option<&T>` | Use only when the registration is intentionally optional. |
+| `.with(value)` | Router builder | Add one value under its concrete Rust type. |
+| `context::<T>(cx)` | `&T` | Borrow the closest value of that type; panics when the context has none. |
+| `try_context::<T>(cx)` | `Option<&T>` | Use only when the value is intentionally optional. |
 | `#[memoize]` on an async `cx` function | Request-local cached result | Deduplicate identical work during one request. |
 | `#[memoize(as_ref)]` | Borrowed cached result | Store an owned result while returning references to callers. |
 
@@ -149,13 +151,18 @@ The loader borrows it through `Cx` and memoizes the lookup:
 {{#include ../../../labs/lab-05-cx-memoize/solution/src/shared.rs:memoized-loader}}
 ```
 
-App context is keyed by `TypeId`. Registering two values of the same concrete type or requesting an
-unregistered type is a configuration error. Use newtypes when you need two values with the same
-underlying type.
+Context values are keyed by their Rust type. Adding a second value of the same type no longer panics:
+the closest value wins, and a request value wins over a router value. Requesting a type the context
+does not hold with `context` is a configuration error. Use newtypes when you need two values with the
+same underlying type.
 
 Memoization has a different lifetime. It belongs to the current request, so one visitor never
-receives another visitor's cached page data. Components may call the same memoized helper without
-threading the value through every intermediate component.
+receives another visitor's cached page data. A memoized call is reused only while the context values
+it read still match. Callers pass `cx` explicitly. Components may call the same memoized helper
+without threading the value through every intermediate component.
+
+*Guide basis: the v0.12.1 [context guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/context.md)
+and [memoize guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/context/memoize.md).*
 
 ## Errors and responses
 
@@ -188,25 +195,25 @@ Do not treat a redirect or status as authorization by itself. Validate caller-co
 query, shard, and procedure arguments, then check the current identity before reading or changing
 private data.
 
-Topcoat 0.11.0's `Error` is cheaply cloneable and does not wrap `anyhow::Error`.
+Topcoat 0.12.1's `Error` is cheaply cloneable and does not wrap `anyhow::Error`.
 Use `Error::from_anyhow` with the optional `anyhow` feature only when that conversion is needed.
 Owned or mutable downcasts require unique ownership; use `downcast_cloned` when sharing is expected.
 
-*Guide basis: the v0.11.0 [error source](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/crates/topcoat-core/src/error.rs).*
+*Guide basis: the v0.12.1 [error source](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/crates/topcoat-core/src/error.rs).*
 
 ## Quick choice
 
 - Need the current path or a route value? Use a **request helper**.
 - Need browser state carried by HTTP? Use **cookies**.
 - Need a revocable login lifecycle? Use **session helpers** plus your server-side store.
-- Need a long-lived service or configuration value? Use **app context**.
+- Need a long-lived service or configuration value? Use **shared context** added with `.with(value)`.
 - Need to stop rendering or redirect? Return a **router error** through `topcoat::Result`.
 
 Prefer a small `async fn f(cx: &Cx)` when more than one component needs the same request-scoped
 meaning. That keeps the dependency visible where it is used and lets `#[memoize]` remove repeated
 expensive work.
 
-**See also:** [Lab 05 — Cx, app context, and memoization](../02-labs/lab-05.md),
+**See also:** [Lab 05 — Cx, context, and memoization](../02-labs/lab-05.md),
 [Lab 06 — Cookies, sessions, and mail](../02-labs/lab-06.md),
 [Lab 07 — Signals and expressions](../02-labs/lab-07.md),
 [Lab 08 — Shards, procedures, and streaming](../02-labs/lab-08.md),

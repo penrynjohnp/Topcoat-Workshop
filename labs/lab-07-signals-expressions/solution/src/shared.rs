@@ -3,14 +3,10 @@ use std::sync::atomic::Ordering;
 use crate::auth::AppState;
 use topcoat::{
     Result,
-    context::{app_context, memoize},
+    context::{Cx, context, memoize},
     runtime::{PrefetchMode, link, link_attrs, signal},
     view::{Attributes, Child, View, ViewExt, attributes, class, component, view},
 };
-
-// The memoize macro requires the parameter type to be spelled `Cx` but consumes the import.
-#[allow(unused_imports)]
-use topcoat::context::Cx;
 
 pub const FEATURED: &str = "a1";
 pub const NAV: [(&str, &str); 2] = [("/", "Home"), ("/berths", "Berths")];
@@ -81,7 +77,7 @@ pub fn find_berth(slug: &str) -> Option<Berth> {
 // ANCHOR: memoized-loader
 #[memoize(as_ref)]
 pub async fn load_berth(cx: &Cx, slug: &str) -> Option<Berth> {
-    let state: &AppState = app_context(cx);
+    let state: &AppState = context(cx);
     state.load_count.fetch_add(1, Ordering::Relaxed);
     find_berth(slug)
 }
@@ -131,14 +127,14 @@ pub(crate) async fn nav(cx: &Cx, current_path: &str) -> Result<impl View> {
 // ANCHOR_END: runtime-navigation
 
 #[component]
-pub(crate) async fn site_footer() -> Result<impl View> {
+pub(crate) async fn site_footer(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <footer class="footer"><p>"Slipway Marina · Built with Topcoat"</p></footer>
     })
 }
 
 #[component]
-pub(crate) async fn status_badge(status: &Status) -> Result<impl View> {
+pub(crate) async fn status_badge(cx: &Cx, status: &Status) -> Result<impl View> {
     Ok(view! {
         match status {
             Status::Vacant => {
@@ -160,6 +156,7 @@ pub(crate) async fn status_badge(status: &Status) -> Result<impl View> {
 #[component]
 #[rustfmt::skip]
 pub(crate) async fn berth_card(
+    cx: &Cx,
     slug: &str,
     #[default] attrs: Attributes,
     #[default] child: Child<'_>,
@@ -202,7 +199,7 @@ pub(crate) async fn berth_card(
 
 #[component]
 #[rustfmt::skip]
-pub(crate) async fn berth_list() -> Result<impl View> {
+pub(crate) async fn berth_list(cx: &Cx) -> Result<impl View> {
     let data = berths();
     Ok(
         view! {

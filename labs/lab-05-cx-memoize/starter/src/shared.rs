@@ -1,5 +1,6 @@
 use topcoat::{
     Result,
+    context::Cx,
     view::{Attributes, Child, View, ViewExt, class, component, view},
 };
 
@@ -64,7 +65,7 @@ pub fn find_berth(slug: &str) -> Option<Berth> {
 // helper that increments the app-scoped counter before calling find_berth.
 
 #[component]
-pub(crate) async fn nav(current_path: &str) -> Result<impl View> {
+pub(crate) async fn nav(cx: &Cx, current_path: &str) -> Result<impl View> {
     Ok(view! {
         <nav aria-label="Main">
             <ul class="nav">
@@ -85,14 +86,14 @@ pub(crate) async fn nav(current_path: &str) -> Result<impl View> {
 }
 
 #[component]
-pub(crate) async fn site_footer() -> Result<impl View> {
+pub(crate) async fn site_footer(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <footer class="footer"><p>"Slipway Marina · Built with Topcoat"</p></footer>
     })
 }
 
 #[component]
-pub(crate) async fn status_badge(status: &Status) -> Result<impl View> {
+pub(crate) async fn status_badge(cx: &Cx, status: &Status) -> Result<impl View> {
     Ok(view! {
         match status {
             Status::Vacant => {
@@ -114,6 +115,7 @@ pub(crate) async fn status_badge(status: &Status) -> Result<impl View> {
 #[component]
 #[rustfmt::skip]
 pub(crate) async fn berth_card(
+    cx: &Cx,
     slug: &str,
     #[default] attrs: Attributes,
     #[default] child: Child<'_>,
@@ -156,7 +158,7 @@ pub(crate) async fn berth_card(
 
 #[component]
 #[rustfmt::skip]
-pub(crate) async fn berth_list() -> Result<impl View> {
+pub(crate) async fn berth_list(cx: &Cx) -> Result<impl View> {
     let data = berths();
     Ok(
         view! {

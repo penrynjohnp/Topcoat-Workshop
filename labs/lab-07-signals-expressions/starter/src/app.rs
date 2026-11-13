@@ -2,9 +2,9 @@ use std::time::Duration;
 
 use topcoat::{
     asset::{AssetBundle, RouterBuilderAssetExt},
-    cookie::RouterBuilderCookieExt,
-    mail::{FileTransport, MailConfig, RouterBuilderMailExt},
-    session::{RouterBuilderSessionExt, SessionConfig},
+    cookie::CookieLayer,
+    mail::{FileTransport, Mailer},
+    session::SessionLifetime,
 };
 
 use crate::auth::AppState;
@@ -21,21 +21,14 @@ pub fn router(state: AppState, assets: Option<AssetBundle>) -> topcoat::router::
     };
     let _ = &assets;
 
-    // TODO(lab-07): import `RouterBuilderRuntimeExt` and call `.runtime()` so
+    // TODO(lab-07): import `topcoat::runtime::RuntimeLayer` and add
+    // `.layer(RuntimeLayer::new())` after the cookie layer so
     // tracked server-side signal reads can request a page re-run.
     let builder = topcoat::router::module_router!()
-        .cookies()
-        .sessions(
-            SessionConfig::builder()
-                .lifetime(Duration::from_secs(3600))
-                .build(),
-        )
-        .mail(
-            MailConfig::builder()
-                .transport(FileTransport::new("mail"))
-                .build(),
-        )
-        .app_context(state);
+        .layer(CookieLayer::new())
+        .with(SessionLifetime(Duration::from_secs(3600)))
+        .with(Mailer::new(FileTransport::new("mail")))
+        .with(state);
 
     match assets {
         Some(bundle) => builder.assets(bundle).build(),

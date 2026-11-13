@@ -40,7 +40,7 @@ Verify locally:
 - logs use `tracing` and do not print secrets;
 - the image starts without a development watcher.
 
-The builder installs Topcoat CLI 0.11.0, matching the application dependency family.
+The builder installs Topcoat CLI 0.12.1, matching the application dependency family.
 Bundle `slipway` and `slipway-capstone` separately and keep each binary with its own catalog.
 
 A successful local release is a prerequisite, not an optional polish step.
@@ -118,7 +118,7 @@ The Tower bridge lets one application use both boundaries:
 - Topcoat owns server-rendered pages and application UI;
 - Axum owns a JSON API subtree;
 - Tower layers add cross-cutting HTTP behaviour;
-- app context shares the database pool.
+- `.with(state)` shares the database pool through context.
 
 Use the tool that matches the endpoint. You do not need to choose one framework for every path.
 

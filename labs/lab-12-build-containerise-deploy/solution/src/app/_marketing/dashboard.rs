@@ -4,12 +4,13 @@ mod work_orders;
 use super::work_orders as work_orders_component;
 use topcoat::{
     Result,
+    context::Cx,
     router::page,
     view::{View, view},
 };
 
 #[page]
-async fn dashboard() -> Result<impl View> {
+async fn dashboard(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <p class="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-700">
             "Operations"

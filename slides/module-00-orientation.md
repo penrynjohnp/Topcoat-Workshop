@@ -60,7 +60,7 @@ The server remains the source of truth. The browser enhances the HTML it receive
 
 1. The router matches method and path.
 2. Topcoat creates the request-scoped `Cx`.
-3. Layouts and components read request and app context.
+3. Layouts and components read request data and shared values from `Cx`.
 4. Async components fetch the data they render.
 5. `view!` describes the HTML response.
 6. The browser receives a document, then optional runtime behaviour.

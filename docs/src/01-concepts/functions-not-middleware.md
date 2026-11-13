@@ -7,7 +7,7 @@ Topcoat recommends a different default for request-scoped application policy: wr
 That is **locality of behaviour**. The authorization check, the data it unlocks, and the markup that
 uses that data stay visible in one place.
 
-This page follows the v0.11.0 [context guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/context.md),
+This page follows the v0.12.1 [context guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/context.md),
 which describes how handlers and components access request-scoped values.
 
 ```mermaid
@@ -64,7 +64,7 @@ Do not replace one large middleware stack with one large request function. Separ
 - build `require_admin` or `require_tenant_member` on top.
 
 Public UI can ask for an optional user and render a signed-out state. Private UI can call
-`require_auth(cx).await?` and fail closed. The helpers share request context without forcing every
+`require_auth(cx).await?` and fail closed. The helpers share one `Cx` without forcing every
 layout and component between them to accept and forward a user parameter.
 
 This works naturally because Topcoat components are async Rust functions. `Cx` is available wherever
@@ -134,7 +134,7 @@ A useful boundary is:
 Topcoat's guidance is not “middleware is bad.” It is “do not move a component's request-scoped
 requirements away from the component merely because middleware is familiar.”
 
-**See also:** [Lab 05 — Cx, app context, and memoization](../02-labs/lab-05.md),
+**See also:** [Lab 05 — Cx, context, and memoization](../02-labs/lab-05.md),
 [Lab 06 — Cookies, sessions, and mail](../02-labs/lab-06.md),
 [Lab 08 — Shards, procedures, and streaming](../02-labs/lab-08.md),
 [Request lifecycle](request-lifecycle.md), and

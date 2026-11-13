@@ -1,16 +1,16 @@
-# Lab 05 — Cx, app context, and memoization
+# Lab 05 — Cx, context, and memoization
 
 **Time:** 60 min · **Module:** 2 · **Prerequisites:** Lab 04 complete (or copy `labs/lab-04-routing/solution`)
 
 ## What you'll learn
 - Read request-scoped data from `Cx`
-- Register long-lived app state with `app_context(cx)`
+- Register long-lived app state on the router with `.with(state)` and read it with `context(cx)`
 - Deduplicate repeated data loads with `#[memoize]`
 
 ## Concepts (read first, 5 min)
-Read [Routing and the request](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/docs/src/01-concepts/routing-and-the-request.md) and the pinned [Topcoat context guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/context.md). This lab builds on the same Slipway app from Lab 04. The key distinction is that `Cx` is request-scoped and short-lived, while app context is created once at router startup and shared across every request. A page can ask for the current path, the matched slug, and an app-scoped database or config object without threading those values through every component manually.
+Read [Routing and the request](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/docs/src/01-concepts/routing-and-the-request.md) and the pinned [Topcoat context guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/context.md). This lab builds on the same Slipway app from Lab 04. The key distinction is that `Cx` is request-scoped and short-lived, while a value registered on the router is created once at startup and shared across every request. Since Topcoat 0.12 there is one context: router values, route values and request values are all read with the same `context::<T>(cx)` lookup. A page can ask for the current path, the matched slug, and an app-scoped database or config object without threading those values through every component manually.
 
-Memoization is the next step: when multiple components need the same data during one request, `#[memoize]` ensures the underlying async fetch runs once and the result is reused. This keeps request helpers composable and avoids hidden repeated work. In Topcoat, the cache is intentionally tied to a single request, so no value leaks across users or across unrelated requests.
+Memoization is the next step: when multiple components need the same data during one request, `#[memoize]` ensures the underlying async fetch runs once and the result is reused. This keeps request helpers composable and avoids hidden repeated work. In Topcoat, the cache is intentionally tied to a single request, so no value leaks across users or across unrelated requests. Since 0.12, a memoized result is also keyed by the context values it read: a call made under a `cx` that shadows one of those values with `cx.with(...)` computes afresh instead of reusing a stale result.
 
 ## Steps
 ### Step 1 — Add long-lived app state
@@ -26,7 +26,7 @@ Register it once on the router so every handler sees the same state:
 {{#include solution/src/app.rs:app-context-router}}
 ```
 
-The key idea is that app context is keyed by type, so `app_context::<AppState>(cx)` is the stable lookup point for shared values such as config, pools, or instrumentation.
+The key idea is that context is keyed by type, so `context::<AppState>(cx)` is the stable lookup point for shared values such as config, pools, or instrumentation.
 > [!NOTE]
 > **Checkpoint:** the app still renders `/`, `/berths`, and `/berths/a1` successfully after the router starts with `AppState::new()`.
 
@@ -64,13 +64,14 @@ The test is the proof, not the behavior of a mock. It hits the real router, rend
 > **Checkpoint:** `cargo test -p lab05-solution --test pages` passes and the assertion reads `1`.
 
 ## Stretch goals
-- Move the counter into a second app-context value and log the request path in the same loader.
-- Add a second slug (`/berths/a2`) to the same page and confirm the memoization key is the slug + request context.
+- Move the counter into a second context value and log the request path in the same loader.
+- Add a second slug (`/berths/a2`) to the same page and confirm the memoization key is the slug plus the context values the loader read.
 - Replace the plain `AtomicUsize` with a tiny `Db`-like app state and sketch how a real database pool would be accessed from the same pattern.
 
 ## Troubleshooting
-- **`app_context` panics** → the value was not registered on the router with `.app_context(...)`. The type must match exactly.
-- **The load counter is greater than 1** → the `#[memoize]` call is being re-entered with a different key or the same function is invoked outside the same request.
+- **`context` panics** → the value was not registered on the router with `.with(...)`. The type must match exactly. Use `try_context` when the value is optional.
+- **`cannot find function app_context`** → Topcoat 0.12 merged app and request context. Use `context(cx)`, and register with `.with(state)` instead of `.app_context(state)`.
+- **The load counter is greater than 1** → the `#[memoize]` call is being re-entered with a different key, a `cx` that shadows a value the loader read, or outside the same request.
 - **The page still compiles but rerenders too much** → all copies of the same berth request need to share the same `cx` and the same slug value.
 - **The test cannot see the count** → hold a clone of `AppState` outside the router and read it after the request completes.
 

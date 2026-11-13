@@ -4,10 +4,11 @@
 **Subject:** [Topcoat](https://github.com/tokio-rs/topcoat) — tokio-rs's server-rendered, full-stack Rust web framework (announced 22 July 2026)
 **Original plan date:** 8 September 2026 · **Original pins:** topcoat 0.8.0, topcoat-cli 0.8.0, toasty 0.10.0, Rust stable
 
-**Current target:** topcoat 0.11.0, topcoat-cli 0.11.0, topcoat-asset 0.11.0, toasty 0.10.0, Rust 1.99.1.
-The 0.11.0 upgrade keeps Labs 01-13 and raises the Rust pin to the 1.99 minimum required by Topcoat 0.11.0. It refreshes
-CLI guidance, documentation, slides, and deployment tooling for localization, `topcoat new`, `element_id`, popovers,
-and preserved edits in rerendered inputs. Acceptance results are recorded in
+**Current target:** topcoat 0.12.1, topcoat-cli 0.12.1, topcoat-asset 0.12.1, toasty 0.10.0, Rust 1.99.1.
+The 0.12.1 upgrade keeps Labs 01-13. Every Topcoat macro function now takes `cx: &Cx` first, one context
+replaces the app/request split, router features become layers or `.with(...)` values, `mail!` gives way to
+`Mail::builder()`, and `module_param!` generates its own accessor. OpenAPI is offered as optional further
+learning rather than a lab step. Acceptance results are recorded in
 `COMPATIBILITY.md` only after verification.
 
 **Upgrade status (12 September 2026):** Labs 01–13, the Slipway capstone, the workspace, and the mdBook pass on the 0.8.0 pins.
@@ -121,8 +122,8 @@ HTML-faithful templating; `(expr)` interpolation; `for`/`if`/`match` inside mark
 **Lab 04 — Manual routing, then module-based routing** (60 min)
 Start with explicit `Router::builder()` pages and layouts. Then switch to `.discover()` and restructure `src/` into the module tree convention (`app.rs`, `app/about.rs`, `_marketing.rs` layouts, `posts/id.rs` → `/posts/{post_id}`, `api/health.rs`). Path parameters, nested layouts, an API route returning JSON. Checkpoint: `/berths/{id}` and `GET /api/health` both work with no manual router entries.
 
-**Lab 05 — `Cx`, app context, and memoization** (60 min)
-The request context `Cx` as the thing everything reads from; app context for long-lived state keyed by type (a config struct, a DB pool); `#[memoize]` to dedupe fan-out — prove it by adding a counter to `load_berth` and rendering the same berth in three components on one page. Checkpoint: counter reads 1.
+**Lab 05 — `Cx`, context, and memoization** (60 min)
+The context `Cx` as the thing everything reads from; shared values added with `.with(...)` and read with `context(cx)`, keyed by type (a config struct, a DB pool); `#[memoize]` to dedupe fan-out — prove it by adding a counter to `load_berth` and rendering the same berth in three components on one page. Checkpoint: counter reads 1.
 
 **Lab 06 — Cookies, sessions, and "functions, not middleware"** (75 min)
 Signed and encrypted cookies; the session API with bring-your-own storage (start with an in-memory map, swap to SQLite in Module 4); login/logout lifecycle, sliding expiry, token rotation. Send a "magic link" login email with `mail!` using the file transport locally. Implement `require_auth(cx)` exactly as the announcement shows it — a plain async fn that returns a redirect error — and use it inside components rather than as router middleware. Discussion page: why this composes better than middleware, and what you give up. Checkpoint: `/admin` redirects to `/login` unauthenticated; the work-orders component protects itself even when embedded on a public page.
@@ -154,7 +155,7 @@ Use content-hashed assets, self-hosted fonts, checked icons, and standalone Tail
 Release build; multi-stage Dockerfile; asset bundling in the image; env-based config; health endpoint from Lab 04; structured logging with `tracing`. Then `azd init` → `azd up` to **Azure Container Apps** using Bicep-only IaC, managed identity for ACR pull, Log Analytics, and a PostgreSQL Flexible Server swap for SQLite. Full design in **§10**. A second, shorter path for Fly.io or a plain VM so the material isn't Azure-only. Checkpoint: `azd up` prints a public URL that serves Slipway; `azd monitor --logs` streams `tracing` output.
 
 **Optional Lab 13 — Topcoat + Axum via the tower bridge** (45 min)
-Use `TowerRoute` to mount an Axum router for a JSON API under `/api/v1` inside the Topcoat router, and `TowerLayer` to apply `tower-http` compression and tracing, sharing the DB pool via app context. Demonstrates the "you'll use both" guidance from the announcement.
+Use `TowerRoute` to mount an Axum router for a JSON API under `/api/v1` inside the Topcoat router, and `TowerLayer` to apply `tower-http` compression and tracing, sharing the DB pool via context. Demonstrates the "you'll use both" guidance from the announcement.
 
 ---
 

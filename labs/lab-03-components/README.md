@@ -10,13 +10,13 @@
 ## Concepts (read first, 5 min)
 Read [Components and composition](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/docs/src/01-concepts/components-and-composition.md).
 
-A Topcoat component is an ordinary `async fn` with `#[component]` on it, returning
-`Result<impl View>`. There is no component base class, no props object, no lifecycle: parameters are
-function parameters, and calling one inside `view!` uses named-argument syntax —
-`berth_card(slug: "a1")`. A parameter called `child` of type
-`Child<'_>` receives whatever extra nodes the caller wrote inside the call, which is how a component
-wraps content it knows nothing about. Topcoat 0.11.0 uses keyed loops for repeated component identity,
-not a special `key:` argument on a component call.
+A Topcoat component is an ordinary `async fn` with `#[component]` on it, taking `cx: &Cx` first and
+returning `Result<impl View>`. There is no component base class, no props object, no lifecycle: the
+remaining parameters are function parameters, and calling one inside `view!` uses named-argument
+syntax — `berth_card(slug: "a1")`. The caller never passes `cx`; `view!` supplies it. A parameter
+called `child` of type `Child<'_>` receives whatever extra nodes the caller wrote inside the call,
+which is how a component wraps content it knows nothing about. Topcoat 0.12.1 uses keyed loops for
+repeated component identity, not a special `key:` argument on a component call.
 
 Because a component is an `async fn` running on the server, it can *fetch what it renders*. That is
 "locality of behaviour": instead of a page loading data and threading it down through three layers of
@@ -51,7 +51,12 @@ Add a component that owns the document and takes the page's own markup as its ch
 
 ```rust
 #[component]
-async fn layout(title: &str, current_path: &str, #[default] child: Child<'_>) -> Result<impl View> {
+async fn layout(
+    cx: &Cx,
+    title: &str,
+    current_path: &str,
+    #[default] child: Child<'_>,
+) -> Result<impl View> {
     Ok(view! {
         <!DOCTYPE html>
         <html lang="en">
@@ -78,7 +83,7 @@ a component call become the `child` argument:
 
 ```rust
 #[page("/")]
-async fn home() -> Result<impl View> {
+async fn home(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         layout(
             title: "Slipway",
@@ -90,8 +95,8 @@ async fn home() -> Result<impl View> {
 ```
 
 `#[default]` is what makes `child` optional; without it, every caller would have to pass children.
-Note that `current_path` is still a prop threaded through `layout` into `site_nav` — Lab 05 replaces
-that with a `cx: &Cx` parameter and `uri(cx).path()`.
+Note that `current_path` is still a prop threaded through `layout` into `site_nav`, even though every
+component already receives `cx` — Lab 05 replaces the prop with `uri(cx).path()`.
 > [!NOTE]
 > **Checkpoint:** `grep -c "<!DOCTYPE html>" src/main.rs` now prints `1`, and both pages still
 > render with nav and footer.
@@ -101,7 +106,7 @@ Lift the `<article>` out of `berth_list` into its own component:
 
 ```rust
 #[component]
-async fn berth_card(berth: &Berth) -> Result<impl View> {
+async fn berth_card(cx: &Cx, berth: &Berth) -> Result<impl View> {
     Ok(view! {
         <article class="berth-card" data-berth=(berth.slug) data-length=(berth.length_m.to_string())>
             <h2>
@@ -132,7 +137,7 @@ and change the card to take a slug instead of a `Berth`:
 
 ```rust
 #[component]
-async fn berth_card(slug: &str) -> Result<impl View> {
+async fn berth_card(cx: &Cx, slug: &str) -> Result<impl View> {
     let Some(berth) = find_berth(slug) else {
         return Ok(view! {
             <article class="berth-card berth-card-missing">
@@ -163,7 +168,7 @@ Add a detail page and call the card from it exactly as the home page does:
 
 ```rust
 #[page("/berths/featured")]
-async fn featured_berth_page() -> Result<impl View> {
+async fn featured_berth_page(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         layout(title: "Featured berth", current_path: "/berths", berth_card(slug: FEATURED))
     })
@@ -183,7 +188,7 @@ parameter and spread it:
 
 ```rust
 #[component]
-async fn berth_card(slug: &str, #[default] attrs: Attributes) -> Result<impl View> {
+async fn berth_card(cx: &Cx, slug: &str, #[default] attrs: Attributes) -> Result<impl View> {
     let mut attrs = attrs;
     let caller_class = attrs.remove("class");
     // ...
@@ -208,6 +213,7 @@ Give the card child content so a page can add to it without editing it:
 ```rust
 #[component]
 async fn berth_card(
+    cx: &Cx,
     slug: &str,
     #[default] attrs: Attributes,
     #[default] child: Child<'_>,
@@ -236,7 +242,7 @@ Try the remaining parameter attributes on `berth_card`:
 - `#[into]` — callers may pass anything that converts via `Into`, converted outside the function body
   so the component is not monomorphised per caller.
 
-Read the pinned [`view!` keys guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/view/view.md#keys).
+Read the pinned [`view!` keys guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/view/view.md#keys).
 Repeated stateful components use `#[key(item.id)]` on their enclosing loop.
 Lab 08 applies this to a work-order row's signal. An HTML `id` identifies the DOM node, not the
 component context. Ordinary repeated Rust helpers use `cx.keyed(item.id)` when they need distinct identity.
@@ -264,13 +270,14 @@ component context. Ordinary repeated Rust helpers use `cx.keyed(item.id)` when t
   twice.
 - **Attribute order changes between renders** — expected. Spreading an `Attributes` value routes that
   element's attributes through a map, and the [`Attributes`
-  type](https://docs.rs/topcoat/0.11.0/topcoat/view/struct.Attributes.html) is documented as map-like:
+  type](https://docs.rs/topcoat/0.12.1/topcoat/view/struct.Attributes.html) is documented as map-like:
   each key appears at most once, and you must not rely on render order. Note that this caveat comes
   from `Attributes`, not from `view!` generally — the `view!` guide says rendered markup follows
   source order, and it is *component body execution* order that is unspecified. Assert on the set of
   attributes, not on a byte-for-byte string, as the solution's test does.
-- **`cannot find value cx`** — components only get the request context if they declare `cx: &Cx`.
-  That is Lab 05.
+- **`expected `cx` as first parameter`** — since Topcoat 0.12, every `#[component]` and `#[page]`
+  takes `cx: &Cx` first, named exactly `cx`. Add it even if the body does not use it yet; Lab 05
+  puts it to work.
 
 ## What's next
 Lab 04 gets rid of the hard-coded `/berths/featured` route: explicit routing first, then module-based

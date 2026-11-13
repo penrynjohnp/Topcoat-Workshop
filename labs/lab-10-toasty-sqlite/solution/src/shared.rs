@@ -6,7 +6,7 @@ use crate::{
 };
 use topcoat::{
     Result,
-    context::{Cx, app_context, memoize},
+    context::{Cx, context, memoize},
     runtime::{PrefetchMode, link, link_attrs, signal},
     view::{Attributes, Child, View, ViewExt, attributes, class, component, view},
 };
@@ -21,7 +21,7 @@ pub const NAV: [(&str, &str); 4] = [
 pub const MAX_QUERY_LEN: usize = 80;
 
 fn db(cx: &Cx) -> toasty::Db {
-    app_context::<AppState>(cx).db.clone()
+    context::<AppState>(cx).db.clone()
 }
 
 // ANCHOR: toasty-queries
@@ -70,7 +70,7 @@ pub async fn work_order_exists(cx: &Cx, id: u64) -> Result<bool> {
 
 #[memoize(as_ref)]
 pub async fn load_berth(cx: &Cx, slug: &str) -> Option<Berth> {
-    let state: &AppState = app_context(cx);
+    let state: &AppState = context(cx);
     state.load_count.fetch_add(1, Ordering::Relaxed);
     let mut db = state.db.clone();
     Berth::filter_by_slug(slug)
@@ -151,14 +151,14 @@ pub(crate) async fn nav(cx: &Cx, current_path: &str) -> Result<impl View> {
 }
 
 #[component]
-pub(crate) async fn site_footer() -> Result<impl View> {
+pub(crate) async fn site_footer(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <footer class="footer"><p>"Slipway Marina · Built with Topcoat"</p></footer>
     })
 }
 
 #[component]
-pub(crate) async fn status_badge(status: &str, vessel: Option<&str>) -> Result<impl View> {
+pub(crate) async fn status_badge(cx: &Cx, status: &str, vessel: Option<&str>) -> Result<impl View> {
     Ok(view! {
         if status == "vacant" {
             <span class=(class!("badge", "badge-vacant"))>"Vacant"</span>

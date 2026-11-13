@@ -6,6 +6,7 @@
 
 use topcoat::{
     Result,
+    context::Cx,
     router::{Router, RouterBuilderDiscoverExt, page},
     view::{View, attributes, class, component, view},
 };
@@ -79,7 +80,7 @@ pub fn berths() -> Vec<Berth> {
 /// The site navigation. `current_path` is passed in by the page; Lab 05
 /// reads it from `Cx` instead.
 #[component]
-async fn site_nav(current_path: &str) -> Result<impl View> {
+async fn site_nav(cx: &Cx, current_path: &str) -> Result<impl View> {
     Ok(view! {
         <nav aria-label="Main">
             <ul class="nav">
@@ -101,7 +102,7 @@ async fn site_nav(current_path: &str) -> Result<impl View> {
 
 /// The site footer.
 #[component]
-async fn site_footer() -> Result<impl View> {
+async fn site_footer(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <footer class="footer"><p>"Slipway Marina · Built with Topcoat"</p></footer>
     })
@@ -114,7 +115,7 @@ async fn site_footer() -> Result<impl View> {
 
 /// A status badge. `match` chooses both the label and the class list.
 #[component]
-async fn status_badge(status: &Status) -> Result<impl View> {
+async fn status_badge(cx: &Cx, status: &Status) -> Result<impl View> {
     Ok(view! {
         match status {
             Status::Vacant => {
@@ -147,7 +148,7 @@ async fn status_badge(status: &Status) -> Result<impl View> {
 /// The berth list. `if` handles the empty case, `for` renders the rest, and
 /// `attributes!` builds each card's attributes as ordinary Rust data.
 #[component]
-async fn berth_list(berths: Vec<Berth>) -> Result<impl View> {
+async fn berth_list(cx: &Cx, berths: Vec<Berth>) -> Result<impl View> {
     Ok(view! {
         if berths.is_empty() {
             <p class="empty">"No berths yet."</p>
@@ -182,7 +183,7 @@ async fn berth_list(berths: Vec<Berth>) -> Result<impl View> {
 }
 
 #[page("/")]
-async fn home() -> Result<impl View> {
+async fn home(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <!DOCTYPE html>
         <html lang="en">
@@ -206,7 +207,7 @@ async fn home() -> Result<impl View> {
 }
 
 #[page("/berths")]
-async fn berths_page() -> Result<impl View> {
+async fn berths_page(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <!DOCTYPE html>
         <html lang="en">

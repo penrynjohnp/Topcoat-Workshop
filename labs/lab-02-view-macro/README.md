@@ -192,8 +192,9 @@ git diff
 ```
 
 `cargo fmt` leaves `view!` bodies alone — to rustfmt they are opaque token trees. `topcoat fmt` is
-the formatter that understands them, so run both. CLI 0.11.0 provides a non-mutating
-`topcoat fmt --check` mode; use it in CI and before committing.
+the formatter that understands them, so run both. Since CLI 0.12, `topcoat fmt` also formats the
+other Topcoat macros, including attributes such as `#[page(...)]`. Its non-mutating
+`topcoat fmt --check` mode is what to use in CI and before committing.
 > [!NOTE]
 > **Checkpoint:** `git diff` shows your markup restored to the canonical layout. Compare your file
 > with `../solution/src/lib.rs`, then run `../../../scripts/check-lab.sh 02` for the full build,
@@ -218,7 +219,7 @@ the formatter that understands them, so run both. CLI 0.11.0 provides a non-muta
   you need it again afterwards.
 - **The attribute renders as `aria-current=""` when you wanted it gone** — you passed `true`, not
   `Some(...)`/`None`. `true` renders a present, empty attribute; `false` and `None` remove it.
-- **`topcoat: command not found`** — `cargo install topcoat-cli --version 0.11.0 --locked`.
+- **`topcoat: command not found`** — `cargo install topcoat-cli --version 0.12.1 --locked`.
 
 ## What's next
 Lab 03 turns this one-file page into composed components — `layout`, `nav`, `berth_card` — with

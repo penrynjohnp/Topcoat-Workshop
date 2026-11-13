@@ -9,7 +9,7 @@ use topcoat::{
 
 // ANCHOR: vessel-results-shard
 #[shard]
-pub(crate) async fn vessel_results(query: Signal<String>) -> Result<impl View> {
+pub(crate) async fn vessel_results(cx: &Cx, query: Signal<String>) -> Result<impl View> {
     let query = query.get();
     let query = query.trim().to_owned();
     let too_long = query.len() > 80;

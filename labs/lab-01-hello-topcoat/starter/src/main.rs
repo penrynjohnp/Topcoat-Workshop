@@ -3,6 +3,7 @@
 
 use topcoat::{
     Result,
+    context::Cx,
     router::{Router, RouterBuilderDiscoverExt, page},
     view::{View, component, view},
 };
@@ -15,7 +16,7 @@ async fn main() {
 }
 
 #[page("/")]
-async fn home() -> Result<impl View> {
+async fn home(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <!DOCTYPE html>
         <html>
@@ -30,4 +31,4 @@ async fn home() -> Result<impl View> {
     })
 }
 
-// TODO(lab-01): write a `hello` component that takes `name: &str` and returns `Result<impl View>`, rendering <h1>Hello, {name}!</h1>
+// TODO(lab-01): write a `hello` component that takes `cx: &Cx, name: &str` and returns `Result<impl View>`, rendering <h1>Hello, {name}!</h1>

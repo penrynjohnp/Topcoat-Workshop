@@ -5,7 +5,7 @@ use crate::{
     models::{MagicLinkRecord, SessionRecord},
 };
 use topcoat::{
-    context::{Cx, app_context},
+    context::{Cx, context},
     cookie::{Cookie, Cookies, Key, SameSite, cookies},
     session,
 };
@@ -47,8 +47,8 @@ impl AppState {
 
 pub fn secure_cookies(cx: &Cx) -> impl Cookies {
     cookies(cx)
-        .private(&app_context::<AppState>(cx).cookie_key)
-        .signed(&app_context::<AppState>(cx).cookie_key)
+        .private(&context::<AppState>(cx).cookie_key)
+        .signed(&context::<AppState>(cx).cookie_key)
         .default_secure(false)
         .default_http_only(true)
         .default_same_site(SameSite::Lax)
@@ -144,7 +144,7 @@ pub async fn current_user(cx: &Cx) -> topcoat::Result<Option<String>> {
     let Some(hash) = session::token_hash(cx).await? else {
         return Ok(None);
     };
-    current_email_for_hash(app_context::<AppState>(cx), &hash).await
+    current_email_for_hash(context::<AppState>(cx), &hash).await
 }
 
 // ANCHOR: require-auth
@@ -158,12 +158,12 @@ pub async fn require_auth(cx: &Cx) -> topcoat::Result<String> {
 
 pub async fn begin_session(cx: &Cx, email: String) -> topcoat::Result<()> {
     let new_session = session::start(cx).await?;
-    record_session(app_context::<AppState>(cx), new_session, email).await
+    record_session(context::<AppState>(cx), new_session, email).await
 }
 
 pub async fn end_session(cx: &Cx) -> topcoat::Result<()> {
     if let Some(hash) = session::stop(cx).await? {
-        remove_session(app_context::<AppState>(cx), &hash).await?;
+        remove_session(context::<AppState>(cx), &hash).await?;
     }
     Ok(())
 }
@@ -171,7 +171,7 @@ pub async fn end_session(cx: &Cx) -> topcoat::Result<()> {
 pub async fn refresh_session(cx: &Cx) -> topcoat::Result<()> {
     if let Some(refreshed) = session::refresh(cx).await? {
         update_expiry(
-            app_context::<AppState>(cx),
+            context::<AppState>(cx),
             refreshed.token_hash,
             refreshed.expires_at,
         )
@@ -181,7 +181,7 @@ pub async fn refresh_session(cx: &Cx) -> topcoat::Result<()> {
 }
 
 pub async fn rotate_session(cx: &Cx) -> topcoat::Result<()> {
-    let state = app_context::<AppState>(cx);
+    let state = context::<AppState>(cx);
     if let Some(rotation) = session::rotate(cx).await? {
         let email = current_email_for_hash(state, &rotation.revoked)
             .await?

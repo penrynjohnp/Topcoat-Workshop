@@ -20,7 +20,7 @@
 - [02 The view! macro](02-labs/lab-02.md)
 - [03 Components](02-labs/lab-03.md)
 - [04 Routing](02-labs/lab-04.md)
-- [05 Cx, app context, memoize](02-labs/lab-05.md)
+- [05 Cx, context, memoize](02-labs/lab-05.md)
 - [06 Cookies, sessions, mail](02-labs/lab-06.md)
 - [07 Signals and expressions](02-labs/lab-07.md)
 - [08 Shards, procedures, live!](02-labs/lab-08.md)

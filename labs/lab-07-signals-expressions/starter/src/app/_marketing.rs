@@ -11,7 +11,7 @@ use crate::{
 };
 use topcoat::{
     Result,
-    context::{Cx, app_context},
+    context::{Cx, context},
     router::{Slot, layout, page, request::uri},
     // TODO(lab-07): import `runtime::signal` for the layout navigation counter.
     view::{View, component, view},
@@ -20,7 +20,7 @@ use topcoat::{
 // ANCHOR: runtime-script
 #[layout]
 async fn root_layout(cx: &Cx, slot: Slot<'_>) -> Result<impl View> {
-    let _state: &AppState = app_context(cx);
+    let _state: &AppState = context(cx);
     Ok(view! {
         <!DOCTYPE html>
         <html lang="en">
@@ -86,7 +86,7 @@ async fn server_read_demo(cx: &Cx) -> Result<impl View> {
 
 #[page]
 #[rustfmt::skip]
-async fn home() -> Result<impl View> {
+async fn home(cx: &Cx) -> Result<impl View> {
     Ok(
         view! {
             <p>"Berths, vessels and work orders for a small marina."</p>

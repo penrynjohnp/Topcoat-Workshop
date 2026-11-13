@@ -4,7 +4,7 @@
 
 ## What you'll learn
 - Register pages, layouts and API routes explicitly with `Router::builder()`
-- Read a string path parameter from `Cx` with `path_param!`
+- Read a string path parameter from `Cx` with the function `path_param!` generates
 - Derive routes from a Rust module tree with `module_router!`
 
 ## Concepts (read first, 5 min)
@@ -54,8 +54,8 @@ you want registration order and ownership to be obvious.
 
 ### Step 2 — Put request data in `Cx`
 
-A handler may declare `cx: &Cx`; Topcoat supplies it for the current request. Add it to a temporary
-page and render the request URI while you learn the API:
+Every handler takes `cx: &Cx` as its first parameter; Topcoat supplies it for the current request.
+Use it in a temporary page to render the request URI while you learn the API:
 
 ```rust
 #[page("/request-info")]
@@ -64,7 +64,7 @@ async fn request_info(cx: &Cx) -> Result<impl View> {
 }
 ```
 
-`Cx` is request-scoped, not global application state. Lab 05 goes deeper into app context and
+`Cx` is request-scoped, not global application state. Lab 05 goes deeper into shared context values and
 memoization; here it is simply how a handler reads values selected by the router.
 > [!NOTE]
 > **Checkpoint:** `/request-info` prints `/request-info`. Remove the temporary page after verifying
@@ -80,13 +80,17 @@ path_param!(id);
 
 #[page("/berths/{id}")]
 async fn detail(cx: &Cx) -> Result<impl View> {
-    let id = path_param::<Id>(cx);
+    let id = id(cx);
     // find_berth(id), then render berth_card(slug: id)
 }
 ```
 
+`path_param!(id)` generates a function named `id`. Without a type, `id(cx)` returns the
+percent-decoded segment as `&str` and cannot fail.
+
 For the final module form, the path string disappears. The file `app/berths/id.rs` is a dynamic
-module: `module_param!(id)` turns its segment into `{id}`, so its `#[page]` serves `/berths/{id}`. The
+module: `module_param!(id)` turns its segment into `{id}`, so its `#[page]` serves `/berths/{id}`, and
+the page reads it with the same `id(cx)` call. The
 parameter is a decoded `&str`, which fits Slipway's existing slugs (`a1`, `b7`). It is deliberately
 not a function argument; handler arguments are reserved for `Cx` and body extractors.
 > [!NOTE]
@@ -102,7 +106,7 @@ Create `app/api/health.rs`:
 struct Health { status: &'static str }
 
 #[route(GET)]
-async fn health() -> Result<Json<Health>> {
+async fn health(cx: &Cx) -> Result<Json<Health>> {
     Ok(Json(Health { status: "ok" }))
 }
 ```
@@ -208,19 +212,28 @@ unknown slug, and JSON health response. This is the checkpoint for the complete 
 ## Stretch goals
 - Add `app/_marketing/about.rs` and observe that a group module does not add `marketing` to the URL.
 - Add a nested `app/_marketing/berths/_admin.rs` group and a layout just for that logical subtree.
-- Add a typed parameter (`path_param!(id: u64, error = bad_request)`) in a scratch route and compare
-  its 400 response with the string slug's 404 lookup.
+- Add a typed parameter (`path_param!(id: u64 else bad_request)`, read with `id(cx)?`) in a scratch
+  route and compare its 400 response with the string slug's 404 lookup.
 - Add a `POST /api/health` route beside the GET route and confirm method matching with `curl -X POST`.
-- Use `href!` with a declared path parameter to build a URL without hand-writing `/berths/`.
+- Use `href!` with a declared path parameter (`href!(id::detail, id: "a1")`) to build a URL without
+  hand-writing `/berths/`.
+- Optional, new in Topcoat 0.12.1: read the pinned
+  [OpenAPI guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/openapi.md),
+  enable the `openapi` feature, and describe `/api/health` with
+  `#[route(GET, with(Operation::new().summary("Health check").response_with::<Json<Health>>(StatusCode::OK, "Service is up.")))]`
+  (derive `schemars::JsonSchema` on `Health`). Serve the document from a `/openapi.json` route.
+  Lab 13 returns to this for a real JSON API.
 
 ## Troubleshooting
 - **`module_router!()` finds nothing** → the route file is not reachable from a `mod` declaration. It
   does not scan the filesystem.
 - **`path parameter "id" was not found`** → the handler was called for a route that did not declare
   the matching parameter, or the declaration name and `{id}` placeholder differ.
-- **`/berths/a1` is 404** → confirm `path_param!(id)` is in `app/berths/id.rs`, `find_berth` uses the
-  decoded slug, and the module is declared. Under module routing, use
-  `module_param!(id)` to define the dynamic segment; `path_param!` alone only declares a parameter.
+- **`/berths/a1` is 404** → confirm `module_param!(id)` is in `app/berths/id.rs`, `find_berth` uses the
+  decoded slug from `id(cx)`, and the module is declared. Under module routing,
+  `module_param!(id)` defines the dynamic segment; `path_param!` alone only declares a parameter.
+- **`cannot find function path_param`** or **`cannot find type Id`** → Topcoat 0.12 removed the
+  generic `path_param::<Id>(cx)` reader and its wrapper type. Call the generated function, `id(cx)`.
 - **Health returns text instead of JSON** → return `Json(Health { ... })`, not a bare string; the
   wrapper controls serialization and the content type.
 - **The page shell appears twice** → do not keep the Lab 03 component document shell and the router
@@ -230,5 +243,5 @@ unknown slug, and JSON health response. This is the checkpoint for the complete 
   receive `child: Child<'_>`.
 
 ## What's next
-Lab 05 uses `Cx` for app context and `#[memoize]` to deduplicate repeated berth loads across composed
+Lab 05 uses `Cx` to read shared values added with `.with(...)` and `#[memoize]` to deduplicate repeated berth loads across composed
 components.

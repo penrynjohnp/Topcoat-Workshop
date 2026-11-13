@@ -8,7 +8,7 @@
 - Recognise unsupported Rust syntax and use deliberate escape hatches
 
 ## Concepts (read first, 5 min)
- Read the pinned Topcoat v0.11.0 [runtime guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/runtime.md) and expr! [vocabulary](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/runtime/expr.md). A `$(...)` block is a **runtime expression**: type-checked Rust that Topcoat compiles twice, once to server code that produces the initial HTML and once to JavaScript that ships with the page. Create a signal in the surrounding Rust body with `signal(cx, || initial)`, then capture it in as many runtime expressions as you need. The body needs `cx: &Cx` because Topcoat derives the signal's stable identity from the current page, layout, component, or shard render.
+ Read the pinned Topcoat v0.12.1 [runtime guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/runtime.md) and expr! [vocabulary](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/runtime/expr.md). A `$(...)` block is a **runtime expression**: type-checked Rust that Topcoat compiles twice, once to server code that produces the initial HTML and once to JavaScript that ships with the page. Create a signal in the surrounding Rust body with `signal(cx, || initial)`, then capture it in as many runtime expressions as you need. The body needs `cx: &Cx` because Topcoat derives the signal's stable identity from the current page, layout, component, or shard render.
 
 A signal is an ordinary, cheaply cloned handle. Pass it to a child component as `&Signal<T>`. A `.get()` inside `$(...)` is a browser-side reactive read and does not make the server body depend on the signal. A `.get()` in ordinary Rust is a tracked server-side read: changing that signal asks the server to run the page again and morph the returned HTML into place. Use `.get_untracked()` when the server needs the current value without subscribing the body to future changes.
 
@@ -16,13 +16,13 @@ The shared vocabulary includes all Rust integer types, `f64`, booleans, strings,
 
 ## Steps
 ### Step 1 — Load and route the runtime
-Interactive pages need the runtime's browser script, and that script is a Topcoat asset. Tracked server reads also need `.runtime()` on the router so the browser has an endpoint that can re-run the page. Rendering an asset that is not in the loaded bundle panics, and integration tests run from a binary with no bundle beside it, so the router takes the bundle as an `Option`:
+Interactive pages need the runtime's browser script, and that script is a Topcoat asset. Tracked server reads also need the runtime layer, `.layer(RuntimeLayer::new())`, on the router so the browser has an endpoint that can re-run the page. Rendering an asset that is not in the loaded bundle panics, and integration tests run from a binary with no bundle beside it, so the router takes the bundle as an `Option`:
 
 ```rust
 {{#include solution/src/app.rs:app-router}}
 ```
 
-Import `RouterBuilderRuntimeExt`, register application layers before `.runtime()`, and keep the asset bundle conditional. Page reruns POST to the page's own URL with `X-Topcoat-Runtime: true`; the runtime layer restores signals and rewrites them to GET before the inner layers run. `main.rs` passes `Some(AssetBundle::load()?)`; tests pass `None`. The layout renders the script tag only when it can be served:
+Import `RuntimeLayer`, add `.layer(RuntimeLayer::new())` after the application layers (the root layer registered last runs first), and keep the asset bundle conditional. Page reruns POST to the page's own URL with `X-Topcoat-Runtime: true`; the runtime layer restores signals and rewrites them to GET before the inner layers run. `main.rs` passes `Some(AssetBundle::load()?)`; tests pass `None`. The layout renders the script tag only when it can be served:
 
 ```rust
 {{#include solution/src/app/_marketing.rs:runtime-script}}
@@ -117,7 +117,7 @@ The vector is a render-time snapshot. Capturing an expression inside another exp
 its signal dependencies reactive. Integer overflow and division by zero panic in both build profiles.
 Call `inspection_status()` from the home page beside the featured berth.
 
-Topcoat v0.11.0 also supports `#[record]` values and tuple construction and field access in runtime
+Topcoat v0.12.1 also supports `#[record]` values and tuple construction and field access in runtime
 expressions. The example keeps its browser-visible record small and demonstrates that string
 `len()` returns the UTF-8 byte count as `usize`:
 
@@ -173,7 +173,7 @@ persistence after a document reload.
 
 ## Troubleshooting
 - **`expected view node` at `signal name = value;`** — that was the pre-0.8 syntax. Import `signal`, accept `cx: &Cx`, and create the signal before `view!` with `let name = signal(cx, || value);`.
-- **A tracked signal changes but no request appears** — add `.runtime()` to the router and confirm the runtime script and matching asset bundle are loaded.
+- **A tracked signal changes but no request appears** — add `.layer(RuntimeLayer::new())` to the router and confirm the runtime script and matching asset bundle are loaded.
 - **`error: unsupported operator` on `&&` or `||`** — `bool` has `!`, comparisons, `then` and `then_some`, but no logical operators. Use `if`/`else` with `let` bindings.
 - **`error: unsupported expression`** — `match` or multi-segment paths. `#[record]` enables supported named-field records; tuples support construction and field access. Restructure other expressions, or escape with `raw!`.
 - **Type errors around `1` or `2`** — unsuffixed integers are `usize`. Match the signal's type with a suffix such as `1u64`; use `1.0` for `f64` arithmetic.

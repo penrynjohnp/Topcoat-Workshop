@@ -12,7 +12,7 @@ use crate::{
 };
 use topcoat::{
     Result,
-    context::{Cx, app_context},
+    context::{Cx, context},
     router::{Slot, layout, page, request::uri},
     runtime::{procedure, signal},
     view::{View, component, view},
@@ -21,7 +21,7 @@ use topcoat::{
 // ANCHOR: runtime-script
 #[layout]
 async fn root_layout(cx: &Cx, slot: Slot<'_>) -> Result<impl View> {
-    let state: &AppState = app_context(cx);
+    let state: &AppState = context(cx);
     Ok(view! {
         <!DOCTYPE html>
         <html lang="en">
@@ -60,7 +60,7 @@ pub(crate) async fn mark_work_order_complete(cx: &Cx, id: String) -> Result<bool
             std::io::Error::new(std::io::ErrorKind::InvalidInput, "unknown work order").into(),
         );
     }
-    let state: &AppState = app_context(cx);
+    let state: &AppState = context(cx);
     state.complete_work_order(&id);
     Ok(true)
 }
@@ -68,7 +68,7 @@ pub(crate) async fn mark_work_order_complete(cx: &Cx, id: String) -> Result<bool
 
 #[component]
 async fn work_order_row(cx: &Cx, order: &WorkOrder) -> Result<impl View> {
-    let state: &AppState = app_context(cx);
+    let state: &AppState = context(cx);
     let id = order.id;
     let completed_initially = state.work_order_is_complete(order.id);
     let completed = signal(cx, || completed_initially);
@@ -129,7 +129,7 @@ async fn work_orders(cx: &Cx) -> Result<impl View> {
 
 #[page]
 #[rustfmt::skip]
-async fn home() -> Result<impl View> {
+async fn home(cx: &Cx) -> Result<impl View> {
     Ok(
         view! {
             <p>"Berths, vessels and work orders for a small marina."</p>

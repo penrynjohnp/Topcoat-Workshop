@@ -8,7 +8,7 @@ use topcoat::{
 };
 
 #[shard]
-pub(crate) async fn vessel_results(query: Signal<String>) -> Result<impl View> {
+pub(crate) async fn vessel_results(cx: &Cx, query: Signal<String>) -> Result<impl View> {
     // TODO(lab-08): validate the signal value, filter VESSELS on the server, and render
     // the matching rows plus the empty-query and no-results states. Give each result
     // a stable HTML `id` so morphing can follow an item if the list reorders.

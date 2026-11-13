@@ -7,7 +7,7 @@ use std::{
 };
 
 use topcoat::{
-    context::{Cx, app_context, memoize},
+    context::{Cx, context, memoize},
     cookie::{Cookie, Cookies, Key, SameSite, cookies},
     session,
 };
@@ -118,8 +118,8 @@ impl Default for AppState {
 
 pub fn secure_cookies(cx: &Cx) -> impl Cookies {
     cookies(cx)
-        .private(&app_context::<AppState>(cx).cookie_key)
-        .signed(&app_context::<AppState>(cx).cookie_key)
+        .private(&context::<AppState>(cx).cookie_key)
+        .signed(&context::<AppState>(cx).cookie_key)
         .default_secure(false)
         .default_http_only(true)
         .default_same_site(SameSite::Lax)
@@ -129,7 +129,7 @@ pub fn secure_cookies(cx: &Cx) -> impl Cookies {
 #[memoize(as_ref)]
 pub async fn current_user(cx: &Cx) -> Option<String> {
     let hash = session::token_hash(cx).await.ok().flatten()?;
-    app_context::<AppState>(cx).current_email(&hash)
+    context::<AppState>(cx).current_email(&hash)
 }
 
 // ANCHOR: require-auth
@@ -142,14 +142,14 @@ pub async fn require_auth(cx: &Cx) -> topcoat::Result<String> {
 // ANCHOR_END: require-auth
 
 pub async fn begin_session(cx: &Cx, email: String) -> topcoat::Result<()> {
-    let state = app_context::<AppState>(cx);
+    let state = context::<AppState>(cx);
     let new_session = session::start(cx).await?;
     state.record_session(new_session, email);
     Ok(())
 }
 
 pub async fn end_session(cx: &Cx) -> topcoat::Result<()> {
-    let state = app_context::<AppState>(cx);
+    let state = context::<AppState>(cx);
     if let Some(hash) = session::stop(cx).await? {
         state.remove_session(&hash);
     }
@@ -157,7 +157,7 @@ pub async fn end_session(cx: &Cx) -> topcoat::Result<()> {
 }
 
 pub async fn refresh_session(cx: &Cx) -> topcoat::Result<()> {
-    let state = app_context::<AppState>(cx);
+    let state = context::<AppState>(cx);
     if let Some(refreshed) = session::refresh(cx).await? {
         state.update_expiry(refreshed.token_hash, refreshed.expires_at);
     }
@@ -165,7 +165,7 @@ pub async fn refresh_session(cx: &Cx) -> topcoat::Result<()> {
 }
 
 pub async fn rotate_session(cx: &Cx) -> topcoat::Result<()> {
-    let state = app_context::<AppState>(cx);
+    let state = context::<AppState>(cx);
     if let Some(rotation) = session::rotate(cx).await? {
         let email = state.current_email(&rotation.revoked).unwrap_or_default();
         state.remove_session(&rotation.revoked);

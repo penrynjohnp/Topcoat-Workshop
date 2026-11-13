@@ -50,22 +50,22 @@ Through `&Cx`, a handler can reach:
 - request-local memoized work;
 - response and error helpers.
 
-`Cx` is request-scoped. App context is long-lived and typed.
+`Cx` is request-scoped. It also reaches long-lived, typed values added with `.with(...)`.
 
 ---
 
-# Request context versus app context
+# One context: request data and shared values
 
 ```mermaid
 flowchart LR
   Router --> RequestCx[request Cx]
-  Config[Config] --> AppContext[app context]
-  Pool[DB pool] --> AppContext
   RequestCx --> Handler[handler/component]
-  AppContext --> Handler
+  Config[Config] --> Shared[".with(value)"]
+  Pool[DB pool] --> Shared
+  Shared --> RequestCx
 ```
 
-The same `Cx` reaches shared app state without copying a pool or configuration through every function.
+`context(cx)` reads shared state from the same `Cx` without copying a pool or configuration through every function.
 
 ---
 
@@ -75,7 +75,7 @@ A page may render the same berth in a heading, card, and sidebar.
 
 `#[memoize]` gives identical calls one request-local result:
 
-- app context supplies the shared dependency;
+- `context(cx)` supplies the shared dependency;
 - the first call performs the work;
 - later calls reuse the value;
 - another request gets its own result.

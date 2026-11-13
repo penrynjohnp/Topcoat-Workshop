@@ -2,7 +2,7 @@
 
 Slipway is the finished Topcoat workshop application: the Lab 12 marina manager with Lab 13's Tower bridge. It keeps the server-rendered Topcoat UI, Toasty persistence, authentication, sessions, assets, production container, and Azure deployment, while mounting an Axum JSON API under `/api/v1` with compression and tracing middleware.
 
-It uses Topcoat and CLI 0.11.0 with Toasty 0.10.0 and Rust 1.99.1.
+It uses Topcoat and CLI 0.12.1 with Toasty 0.10.0 and Rust 1.99.1.
 
 ## Run locally
 

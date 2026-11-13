@@ -2,11 +2,11 @@ use std::time::Duration;
 
 use topcoat::{
     asset::{AssetBundle, RouterBuilderAssetExt},
-    cookie::RouterBuilderCookieExt,
-    mail::{FileTransport, MailConfig, RouterBuilderMailExt},
+    cookie::CookieLayer,
+    mail::{FileTransport, Mailer},
     router::RouterBuilderDiscoverExt,
-    runtime::RouterBuilderRuntimeExt,
-    session::{RouterBuilderSessionExt, SessionConfig},
+    runtime::RuntimeLayer,
+    session::SessionLifetime,
 };
 
 use crate::auth::AppState;
@@ -22,19 +22,11 @@ pub fn router(state: AppState, assets: Option<AssetBundle>) -> topcoat::router::
 
     let builder = topcoat::router::module_router!()
         .discover()
-        .cookies()
-        .sessions(
-            SessionConfig::builder()
-                .lifetime(Duration::from_secs(3600))
-                .build(),
-        )
-        .mail(
-            MailConfig::builder()
-                .transport(FileTransport::new("mail"))
-                .build(),
-        )
-        .app_context(state)
-        .runtime();
+        .layer(CookieLayer::new())
+        .with(SessionLifetime(Duration::from_secs(3600)))
+        .with(Mailer::new(FileTransport::new("mail")))
+        .with(state)
+        .layer(RuntimeLayer::new());
 
     match assets {
         Some(bundle) => builder.assets(bundle).build(),

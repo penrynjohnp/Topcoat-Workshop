@@ -6,7 +6,7 @@ use crate::{
 use serde::Deserialize;
 use topcoat::{
     Result,
-    context::{Cx, app_context},
+    context::{Cx, context},
     router::{HeaderValue, StatusCode, content::Form, header, page},
     view::{View, component, view},
 };
@@ -34,6 +34,7 @@ impl ValidationErrors {
 // ANCHOR: work-order-form
 #[component]
 async fn work_order_form(
+    cx: &Cx,
     input: &WorkOrderInput,
     errors: &ValidationErrors,
     berths: &Vec<Berth>,
@@ -116,7 +117,7 @@ async fn create(cx: &Cx, Form(mut input): Form<WorkOrderInput>) -> Result<impl V
 
     let created = !errors.any();
     if let Some(berth) = berth.filter(|_| created) {
-        let mut db = app_context::<AppState>(cx).db.clone();
+        let mut db = context::<AppState>(cx).db.clone();
         toasty::create!(in berth.work_orders() {
             title: input.title.as_str(),
             completed: false,

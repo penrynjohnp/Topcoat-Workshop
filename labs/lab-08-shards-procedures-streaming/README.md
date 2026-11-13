@@ -8,17 +8,17 @@
 - Stream progress, recover from errors, receive connected updates, and compare `Stream` with `Wait`
 
 ## Concepts (read first, 5 min)
-Read the pinned [Topcoat runtime guide](https://docs.rs/topcoat/0.11.0/topcoat/runtime/index.html) and [`live!` guide](https://docs.rs/topcoat/0.11.0/topcoat/view/macro.live.html). Lab 07 introduced browser expressions and a whole-page tracked re-run. A shard narrows that server work to one region: the browser sends the current signal to a shard endpoint, the server recomputes just that fragment, and the result is morphed into place. A procedure crosses back for data or an action: an async event handler awaits an ordinary Rust server function and uses its result locally.
+Read the pinned [Topcoat runtime guide](https://docs.rs/topcoat/0.12.1/topcoat/runtime/index.html) and [`live!` guide](https://docs.rs/topcoat/0.12.1/topcoat/view/macro.live.html). Lab 07 introduced browser expressions and a whole-page tracked re-run. A shard narrows that server work to one region: the browser sends the current signal to a shard endpoint, the server recomputes just that fragment, and the result is morphed into place. A procedure crosses back for data or an action: an async event handler awaits an ordinary Rust server function and uses its result locally.
 
-Both are public HTTP endpoints. Arguments are spoofable, page and layout guards do not protect them, and every endpoint must validate input and repeat authorization where needed. Shard input events may produce request storms: Topcoat 0.11.0 coalesces changes in one tick, aborts stale in-flight requests, and lets the latest result win, but it does not debounce pauses between keystrokes. Streaming solves a different problem—time to first content. `suspense` and `error_boundary` are convenience components built from the general `live!`/`emit!` replacement-region primitives.
+Both are public HTTP endpoints. Arguments are spoofable, page and layout guards do not protect them, and every endpoint must validate input and repeat authorization where needed. Shard input events may produce request storms: Topcoat 0.12.1 coalesces changes in one tick, aborts stale in-flight requests, and lets the latest result win, but it does not debounce pauses between keystrokes. Streaming solves a different problem—time to first content. `suspense` and `error_boundary` are convenience components built from the general `live!`/`emit!` replacement-region primitives.
 
 The solution carries forward Lab 07's runtime links for safe page navigation. Keep action-like and protected destinations on ordinary anchors, and preserve the `href` fallback.
 
 ## Steps
 ### Step 1 — Register server runtime endpoints
 `.discover()` registers annotated application handlers, including shards and procedures.
-`.runtime()` adds `RuntimeLayer` for page reruns and WebSocket connections.
-Register application layers before `.runtime()` so they see reruns rewritten to GET:
+`.layer(RuntimeLayer::new())` adds the runtime layer for page reruns and WebSocket connections.
+Add it after the application layers; the root layer registered last runs first, so the application layers see reruns rewritten to GET:
 
 ```rust
 {{#include solution/src/app.rs:app-router}}
@@ -29,7 +29,7 @@ The runtime script and asset-bundle arrangement from Lab 07 remains unchanged.
 > **Checkpoint:** `cargo check -p lab08-solution` succeeds and `/vessels` still renders.
 
 ### Step 2 — Search vessels with a shard
-The page owns the query signal so the input stays outside the shard. In Topcoat 0.11.0, the caller creates the signal with `signal(cx, String::new)`, then hands the live signal handle to the shard as `Signal<String>` with `query: $(query)`. The handle itself is stable. The shard's `.get()` is a tracked server read, so changing the signal re-runs only that shard. The shard validates the value, filters server-owned vessel data, and returns only the result region:
+The page owns the query signal so the input stays outside the shard. In Topcoat 0.12.1, the caller creates the signal with `signal(cx, String::new)`, then hands the live signal handle to the shard as `Signal<String>` with `query: $(query)`. The handle itself is stable. The shard's `.get()` is a tracked server read, so changing the signal re-runs only that shard. The shard validates the value, filters server-owned vessel data, and returns only the result region:
 
 ```rust
 {{#include solution/src/app/_marketing/vessels.rs:vessel-results-shard}}
@@ -162,8 +162,8 @@ The notification channel is process-local. It is not a durable event log or cros
 - Add a sort signal and reverse the vessel results, then confirm the stable row IDs let the morph move existing nodes.
 
 ## Troubleshooting
-- **Shard route returns 404** → confirm `.runtime()` is on the router and the shard is reachable from compiled code so `.discover()` can register it.
-- **Procedure route returns 404** → confirm `.runtime()` is on the router and the procedure is reachable from compiled code so `.discover()` can register it.
+- **Shard route returns 404** → confirm `.layer(RuntimeLayer::new())` is on the router and the shard is reachable from compiled code so `.discover()` can register it.
+- **Procedure route returns 404** → confirm `.layer(RuntimeLayer::new())` is on the router and the procedure is reachable from compiled code so `.discover()` can register it.
 - **Shard POST returns 415/400** → send `Content-Type: application/json`, the `x-topcoat-identity` header, and the runtime envelope containing the `Signal` surrogate shown in the test.
 - **The whole page re-runs while searching** → check for a tracked `.get()` in ordinary page Rust. Reads inside `$(...)` are client-reactive rather than whole-page dependencies.
 - **A `Signal<String>` argument has a type error** → pass the handle as `$(query)`, not its string value as `$(query.get())`.

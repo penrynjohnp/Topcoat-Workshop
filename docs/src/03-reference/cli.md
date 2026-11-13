@@ -1,8 +1,9 @@
 # CLI commands
 
-This page records the `--help` surface of **Topcoat CLI 0.11.0**, the version pinned by this
+This page records the `--help` surface of **Topcoat CLI 0.12.1**, the version pinned by this
 workshop. The CLI has six commands or command groups: `new`, `dev`, `fmt`, `asset`, `l10n`, and `ui`.
-The command tables are checked against the installed 0.11.0 binary. Version 0.11.0 adds `new` and `l10n`.
+The command tables were checked against the installed 0.11.0 binary and re-checked against the
+v0.12.1 CLI source: 0.12 adds no commands or flags. Version 0.11.0 added `new` and `l10n`.
 
 > [!WARNING]
 > `topcoat --version` and `topcoat -V` print the CLI version. Since 0.11.0, every command warns when
@@ -10,7 +11,7 @@ The command tables are checked against the installed 0.11.0 binary. Version 0.11
 > `cargo install topcoat-cli@... --locked`. Set `TOPCOAT_NO_VERSION_CHECK` to silence the warning.
 
 > [!NOTE]
-> There is no `topcoat build` command in 0.11.0. `topcoat build` fails with
+> There is no `topcoat build` command in 0.12.1. `topcoat build` fails with
 > `error: unrecognized subcommand 'build'` and suggests `ui`, which is unrelated. Use Cargo to build
 > the binary, then use `topcoat asset bundle` with the same package, binary, and profile selection.
 
@@ -74,6 +75,8 @@ Since 0.10.0, the CLI honors Cargo's `default-run`, works again through `cargo t
 environment settings, and streams development reloads without losing current form state.
 Since 0.11.0, `dev` also restarts the app when only bundled assets change, rebuilds when a new `.ftl`
 file appears, and runs the translation check after each build.
+Since 0.12.0, `topcoat l10n check`, `topcoat asset list`, and the other commands that build respect
+`default-run` in packages with several binaries.
 
 `--release` and `--profile` both select a profile. Use one profile consistently when the application
 loads a generated asset bundle.
@@ -92,6 +95,8 @@ Usage is `topcoat fmt [OPTIONS] [FILES]...`.
 | `-h`, `--help` | — | Print help. |
 | `-V`, `--version` | — | Print the formatter version. |
 
+Since 0.12.0, `topcoat fmt` formats every Topcoat macro, including attribute macros such as
+`#[page(...)]` and macros such as `href!`, `asset!`, and `path_param!`.
 Without `[FILES]`, `topcoat fmt` skips files ignored by Git and Cargo's `target` directory since 0.11.0.
 Pass paths explicitly to format ignored files. The workshop CI passes the tracked lab and Slipway files.
 
@@ -248,9 +253,9 @@ Usage is `topcoat ui remove [OPTIONS] <COMPONENTS>...`.
 The normal `--help` form is available on every working command listed above. `topcoat --version`
 prints the CLI release.
 
-## Missing commands and flags in 0.11.0
+## Missing commands and flags in 0.12.1
 
-The `Result` column quotes the 0.11.0 binary verbatim.
+The `Result` column quotes the 0.11.0 binary verbatim; the 0.12.1 source defines the same subcommands.
 
 | Attempt | Result | Use instead |
 |---|---|---|

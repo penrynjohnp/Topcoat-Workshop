@@ -5,7 +5,7 @@ use crate::{
 use std::time::Duration;
 use topcoat::{
     Result,
-    context::{Cx, app_context},
+    context::{Cx, context},
     router::{page, request::uri},
     runtime::{connected, shard},
     view::{SuspenseMode, View, component, emit, error_boundary, live, suspense, view},
@@ -16,7 +16,7 @@ use topcoat::{
 async fn work_order_status(cx: &Cx) -> Result<impl View> {
     require_auth(cx).await?;
     Ok(live! {
-        let state: &AppState = app_context(cx);
+        let state: &AppState = context(cx);
         let mut updates = state.updates.subscribe();
         loop {
             let mut db = state.db.clone();
@@ -53,7 +53,7 @@ async fn work_order_status(cx: &Cx) -> Result<impl View> {
 
 // ANCHOR: live-progress
 #[component]
-async fn loading_progress() -> Result<impl View> {
+async fn loading_progress(cx: &Cx) -> Result<impl View> {
     Ok(live! {
         emit! { <p data-progress="starting">"Opening the history log…"</p> }?;
         tokio::time::sleep(Duration::from_millis(10)).await;
@@ -70,7 +70,7 @@ async fn work_order_history(cx: &Cx, fail: bool) -> Result<impl View> {
     if fail {
         return Err(std::io::Error::other("history store unavailable").into());
     }
-    let mut db = app_context::<AppState>(cx).db.clone();
+    let mut db = context::<AppState>(cx).db.clone();
     let orders = WorkOrder::filter(WorkOrder::fields().completed().eq(true))
         .include(WorkOrder::fields().berth())
         .exec(&mut db)

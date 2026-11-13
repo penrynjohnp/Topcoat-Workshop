@@ -2,7 +2,7 @@
 
 FROM docker.io/library/rust:1.99.1-bookworm AS builder
 WORKDIR /workspace
-RUN cargo install topcoat-cli --version 0.11.0 --locked
+RUN cargo install topcoat-cli --version 0.12.1 --locked
 COPY . .
 # TODO(lab-12): Build the release binary and bundle assets from that same build.
 RUN cargo build --release -p lab12-starter && \

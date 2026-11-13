@@ -3,6 +3,7 @@
 
 use topcoat::{
     Result,
+    context::Cx,
     router::page,
     view::{View, component, view},
 };
@@ -12,7 +13,7 @@ use topcoat::{
 pub const NAME: &str = "Topcoat";
 
 #[page("/")]
-async fn home() -> Result<impl View> {
+async fn home(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <!DOCTYPE html>
         <html>
@@ -26,7 +27,7 @@ async fn home() -> Result<impl View> {
 }
 
 #[component]
-async fn hello(name: &str) -> Result<impl View> {
+async fn hello(cx: &Cx, name: &str) -> Result<impl View> {
     Ok(view! {
         <h1>
             "Hello, "

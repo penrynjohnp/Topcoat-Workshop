@@ -2,7 +2,7 @@ use crate::shared::{self, load_berth};
 use topcoat::{
     Result,
     context::Cx,
-    router::{module_param, page, path_param},
+    router::{module_param, page},
     view::{View, component, view},
 };
 
@@ -59,7 +59,7 @@ async fn berth_note(cx: &Cx, slug: &str) -> Result<impl View> {
 // ANCHOR: request-values
 #[page]
 async fn detail(cx: &Cx) -> Result<impl View> {
-    let id = path_param::<Id>(cx);
+    let id = id(cx);
     if shared::find_berth(id).is_none() {
         return Err(topcoat::router::error::not_found().into());
     }

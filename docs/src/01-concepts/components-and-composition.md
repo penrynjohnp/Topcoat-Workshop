@@ -24,7 +24,7 @@ Give repeated stateful components stable identity with `#[key(item.id)]` on thei
 Since 0.9.0, Topcoat no longer treats a component's `key:` argument as an identity key.
 For repeated ordinary Rust helpers, pass a derived context with `cx.keyed(item.id)`.
 
-*Guide basis: the v0.11.0 [`view!` keys guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/view/view.md#keys).*
+*Guide basis: the v0.12.1 [`view!` keys guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/view/view.md#keys).*
 
 ## Child content is a parameter too
 

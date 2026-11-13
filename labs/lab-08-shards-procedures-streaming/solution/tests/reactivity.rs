@@ -7,7 +7,7 @@ use topcoat::{
         request::{Request, uri},
         to_bytes,
     },
-    runtime::{RouterBuilderRuntimeExt, Surrogated, signal},
+    runtime::{RuntimeLayer, Surrogated, signal},
     view::{View, component, view},
 };
 
@@ -41,7 +41,10 @@ async fn identity_fixture(cx: &Cx) -> Result<impl View> {
 
 #[tokio::test]
 async fn keyed_rows_keep_signal_identity_when_reordered() {
-    let router = Router::builder().page(identity_fixture).runtime().build();
+    let router = Router::builder()
+        .page(identity_fixture)
+        .layer(RuntimeLayer::new())
+        .build();
     let mut rendered = Vec::new();
     for path in ["/identity", "/identity?reverse=true"] {
         let response = router

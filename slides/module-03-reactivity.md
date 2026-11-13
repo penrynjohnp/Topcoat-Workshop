@@ -58,7 +58,7 @@ flowchart LR
 
 The expression vocabulary is deliberately smaller than all of Rust. The compiler tells you when you leave it.
 
-Topcoat 0.11.0 supports records and tuples in runtime expressions, as well as all Rust integer types,
+Topcoat 0.12.1 supports records and tuples in runtime expressions, as well as all Rust integer types,
 vectors, arrays and slices. String lengths are UTF-8 byte counts with type `usize`.
 Unsuffixed integers are `usize`; database IDs remain `u64` without an `f64` conversion.
 Composed expressions retain signal dependencies. Captured collections remain render-time snapshots.

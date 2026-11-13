@@ -2,7 +2,7 @@
 
 Set up the pinned Rust and Topcoat toolchain before Lab 01. You can work directly on Linux or macOS, use Windows through WSL, or open the repository in a devcontainer or GitHub Codespace.
 
-The workshop currently targets Topcoat and Topcoat CLI 0.11.0, Toasty 0.10.0, Rust 1.99.1, and the versions recorded in [`COMPATIBILITY.md`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/COMPATIBILITY.md). Topcoat is pre-1.0, so keep the repository checkout and its pins together. Topcoat 0.11.0 requires Rust 1.99 or newer; `rust-toolchain.toml` selects 1.99.1 automatically through rustup.
+The workshop currently targets Topcoat and Topcoat CLI 0.12.1, Toasty 0.10.0, Rust 1.99.1, and the versions recorded in [`COMPATIBILITY.md`](https://github.com/penrynjohnp/Topcoat-Workshop/blob/main/COMPATIBILITY.md). Topcoat is pre-1.0, so keep the repository checkout and its pins together. Topcoat 0.12.1 requires Rust 1.99 or newer; `rust-toolchain.toml` selects 1.99.1 automatically through rustup.
 
 ## The setup script
 
@@ -12,7 +12,7 @@ From the repository root, run:
 ./scripts/setup.sh
 ```
 
-The script checks for `rustup`, reports the active toolchain, installs or refreshes `topcoat-cli` 0.11.0 with `--locked`, notes whether the `sqlite3` command is available, and builds Lab 01's solution as a smoke test:
+The script checks for `rustup`, reports the active toolchain, installs or refreshes `topcoat-cli` 0.12.1 with `--locked`, notes whether the `sqlite3` command is available, and builds Lab 01's solution as a smoke test:
 
 ```bash
 {{#include ../../../scripts/setup.sh}}
@@ -103,7 +103,7 @@ Run the Azure CLI and `azd` in the same environment as the deployment commands. 
 
 The repository includes a `.devcontainer/devcontainer.json`. Open the repository in VS Code with the Dev Containers extension, choose **Reopen in Container**, and wait for `postCreateCommand` to finish.
 
-The container provides Rust, Node.js LTS, Azure CLI, `azd`, and Docker-in-Docker. Its post-create command installs Chromium for Marp slide export, `sqlite3`, Topcoat CLI 0.11.0, mdBook 0.5.4, mdbook-mermaid 0.17.1, and mdbook-linkcheck2 0.13.0:
+The container provides Rust, Node.js LTS, Azure CLI, `azd`, and Docker-in-Docker. Its post-create command installs Chromium for Marp slide export, `sqlite3`, Topcoat CLI 0.12.1, mdBook 0.5.4, mdbook-mermaid 0.17.1, and mdbook-linkcheck2 0.13.0:
 
 ```json
 {{#include ../../../.devcontainer/devcontainer.json}}

@@ -4,12 +4,12 @@ A Topcoat request stays on the server from routing through HTML generation. You 
 short chain: the router selects a page, Topcoat creates a request context, layouts and components
 compose the response, and `view!` describes the HTML sent to the browser.
 
-The routing and view descriptions here follow the pinned v0.11.0 [getting started
-guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/getting_started.md)
-and the release README. The request-context and app-context sections follow the v0.11.0 [app context
-guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/context.md)
+The routing and view descriptions here follow the pinned v0.12.1 [getting started
+guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/getting_started.md)
+and the release README. The context and memoization sections follow the v0.12.1 [context
+guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/context.md)
 and [functions, not middlewares
-guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.11.0/docs/router.md).
+guide](https://raw.githubusercontent.com/tokio-rs/topcoat/v0.12.1/docs/router.md).
 
 ```mermaid
 flowchart LR
@@ -19,7 +19,7 @@ flowchart LR
     Page --> Cx[Request context Cx]
     Cx --> Layout[Matching layouts]
     Layout --> Components[Page and child components]
-    Components -->|async data, app context, request helpers| Components
+    Components -->|async data, shared context values, request helpers| Components
     Components --> View[view! view description]
     View --> Response[HTML response]
     Response --> BrowserRuntime[Browser and Topcoat runtime]
@@ -50,19 +50,22 @@ At this point Topcoat knows which handler owns the request. It has not rendered 
 
 ## 2. `Cx` carries the request
 
-Topcoat passes a request-scoped `&Cx` to handlers and components that declare it. `Cx` is where code
-reads values selected by the current request: the URI, path parameters, headers, cookies, sessions,
-and other request facilities. You pass the same context into request helpers instead of copying
-request data through every component parameter.
+Every page, route, layout, layer, component, shard, procedure, and memoized function takes
+`cx: &Cx` as its first parameter. Topcoat supplies it. `Cx` is where code reads values selected by the
+current request: the URI, path parameters, headers, cookies, sessions, and other request facilities.
+You pass the same context into ordinary helpers instead of copying request data through every
+component parameter.
 
-Keep the lifetime distinction clear:
+Since Topcoat 0.12 there is one context, read with `context(cx)` or `try_context(cx)`. Keep the
+lifetime distinction clear anyway:
 
-- **Request context** belongs to one request. It is the right place for the current URI, matched
-  parameters, and request-scoped helpers.
-- **App context** is registered when you build the router. It holds long-lived values such as a
-  database pool, configuration, or HTTP client, and is read through the current `Cx`.
+- **Request values** belong to one request: the current URI, matched parameters, and values a layer
+  adds for the rest of that request.
+- **Shared values** are added with `.with(value)` when you build the router. They hold long-lived
+  values such as a database pool, configuration, or HTTP client. If both exist for one type, the
+  request value wins.
 
-Lab 05 registers an app-scoped value once on the router:
+Lab 05 registers a shared value once on the router:
 
 ```rust
 {{#include ../../../labs/lab-05-cx-memoize/solution/src/app.rs:app-context-router}}
@@ -110,7 +113,7 @@ page content in the locations where the layout and components placed it.
 ## 5. Request context and memoization meet in the component tree
 
 A composed page may ask for the same record more than once. Passing `Cx` to a helper lets every
-component reach the request and app context, while `#[memoize]` prevents identical work from running
+component reach request data and shared context values, while `#[memoize]` prevents identical work from running
 again during that request.
 
 Lab 05's loader increments a counter before it performs the lookup:
@@ -125,7 +128,7 @@ belongs to the individual request. A value from one request does not become anot
 page data.
 
 This is the point where the lifecycle becomes composable: routing chooses the page, `Cx` supplies
-request and app state, components ask for the work they need, and memoization keeps repeated work
+request data and shared state, components ask for the work they need, and memoization keeps repeated work
 bounded without making the page coordinate every lookup itself.
 
 ## 6. The browser is the delivery boundary
@@ -141,5 +144,5 @@ htmx](reactivity-options.md) for those next steps. The important boundary remain
 server owns page data and the browser enhances the HTML it receives.
 
 **See also:** [Lab 03 — Components and composition](../02-labs/lab-03.md),
-[Lab 04 — Routing](../02-labs/lab-04.md), [Lab 05 — Cx, app context, and memoization](../02-labs/lab-05.md),
+[Lab 04 — Routing](../02-labs/lab-04.md), [Lab 05 — Cx, context, and memoization](../02-labs/lab-05.md),
 [Views and markup](views-and-markup.md), and [How `$(...)` reaches the browser](dual-expressions.md).

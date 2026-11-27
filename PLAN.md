@@ -11,7 +11,7 @@ replaces the app/request split, router features become layers or `.with(...)` va
 learning rather than a lab step. Acceptance results are recorded in
 `COMPATIBILITY.md` only after verification.
 
-**Upgrade status (12 September 2026):** Labs 01–13, the Slipway capstone, the workspace, and the mdBook pass on the 0.8.0 pins.
+**Upgrade status (13 November 2026):** Labs 01–13, the Slipway capstone, the workspace, and the mdBook pass on the 0.12.1 pins. See `COMPATIBILITY.md` for the complete verified matrix.
 
 ---
 

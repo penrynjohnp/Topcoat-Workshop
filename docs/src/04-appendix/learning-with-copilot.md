@@ -32,7 +32,7 @@ For example, Lab 07 deliberately keeps an unsupported runtime expression as a co
 
 Use a prompt like this:
 
-> Explain this Topcoat 0.12.1 `view!` compiler error as if I am a Rust web developer who knows HTML but not Topcoat's runtime-expression vocabulary. First identify whether the error comes from ordinary server-side Rust or from `$(...)` cross-compilation. Then point to the exact unsupported syntax, explain why the expression must work in both Rust and JavaScript, and propose two v0.11.0-compatible rewrites. Do not invent an API. Check the release-tagged `expr!` guide. End with the smallest code change and the command I should run to verify it.
+> Explain this Topcoat 0.12.1 `view!` compiler error as if I am a Rust web developer who knows HTML but not Topcoat's runtime-expression vocabulary. First identify whether the error comes from ordinary server-side Rust or from `$(...)` cross-compilation. Then point to the exact unsupported syntax, explain why the expression must work in both Rust and JavaScript, and propose two v0.12.1-compatible rewrites. Do not invent an API. Check the release-tagged `expr!` guide. End with the smallest code change and the command I should run to verify it.
 
 A good answer distinguishes these cases:
 
@@ -98,7 +98,7 @@ Ask for a diff rather than a rewrite when the lab already has working code:
 
 When generated code does not compile, give the tool the new evidence instead of asking it to guess again:
 
-> This suggestion fails against Topcoat 0.12.1. Here is the exact compiler output: `<paste compiler output>`. Here is the source at `<path>`. Compare the suggestion with the release-tagged v0.12.1 guide and identify the first incorrect assumption. Do not switch to a newer API or change the dependency version. Return either a minimal patch or state that the requested behaviour is unavailable in v0.11.0.
+> This suggestion fails against Topcoat 0.12.1. Here is the exact compiler output: `<paste compiler output>`. Here is the source at `<path>`. Compare the suggestion with the release-tagged v0.12.1 guide and identify the first incorrect assumption. Do not switch to a newer API or change the dependency version. Return either a minimal patch or state that the requested behaviour is unavailable in v0.12.1.
 
 That last sentence matters. “Unavailable in this version” is a useful result; an invented compatibility layer is not.
 

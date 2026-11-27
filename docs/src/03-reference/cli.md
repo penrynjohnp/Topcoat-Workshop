@@ -2,8 +2,8 @@
 
 This page records the `--help` surface of **Topcoat CLI 0.12.1**, the version pinned by this
 workshop. The CLI has six commands or command groups: `new`, `dev`, `fmt`, `asset`, `l10n`, and `ui`.
-The command tables were checked against the installed 0.11.0 binary and re-checked against the
-v0.12.1 CLI source: 0.12 adds no commands or flags. Version 0.11.0 added `new` and `l10n`.
+The command tables were checked directly against the CLI 0.12.1 binary. Version 0.11.0 added `new`
+and `l10n`; version 0.12.1 preserves that command surface.
 
 > [!WARNING]
 > `topcoat --version` and `topcoat -V` print the CLI version. Since 0.11.0, every command warns when
